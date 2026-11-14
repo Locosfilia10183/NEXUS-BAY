@@ -10,3 +10,4 @@ spawn:
   z: 0.5
 islands: {}
 players: {}
+quests: {}
