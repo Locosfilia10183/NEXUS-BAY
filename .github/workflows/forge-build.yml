@@ -32,6 +32,9 @@ jobs:
         with:
           gradle-version: "8.8"
 
+      - name: Validate One Piece worldgen data
+        run: python3 tools/validate_one_piece_worldgen.py
+
       - name: Build Forge mod
         run: gradle -p forge-mod clean build --no-daemon
 
