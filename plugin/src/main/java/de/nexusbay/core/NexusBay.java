@@ -10,19 +10,22 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
     private IslandService islands;
     private PlayerData data;
     private AdminMenu adminMenu;
+    private QuestService quests;
 
     @Override public void onEnable() {
         saveDefaultConfig();
         data = new PlayerData(this);
         islands = new IslandService(this);
         adminMenu = new AdminMenu(this);
-        for (String command : new String[]{"bayadmin","bayisland","bayprofile","baypay","bayinv"}) {
+        quests = new QuestService(this);
+        for (String command : new String[]{"bayadmin","bayisland","bayprofile","baypay","bayinv","bayquest"}) {
             PluginCommand cmd = getCommand(command);
             if (cmd != null) cmd.setExecutor(this);
         }
         getServer().getPluginManager().registerEvents(adminMenu, this);
         getServer().getPluginManager().registerEvents(data, this);
-        getLogger().info("NEXUS-BAY Core enabled. RPG, islands and admin tools ready.");
+        getServer().getPluginManager().registerEvents(quests, this);
+        getLogger().info("NEXUS-BAY Core enabled. RPG, islands, bounty quests and admin tools ready.");
     }
 
     @Override public void onDisable() { if (data != null) data.save(); }
@@ -32,6 +35,10 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         if (name.equals("bayadmin")) {
             if (!(sender instanceof Player p) || !p.hasPermission("nexusbay.admin")) { sender.sendMessage("§cNur Admins können das Panel öffnen."); return true; }
             adminMenu.open(p); return true;
+        }
+        if (name.equals("bayquest")) {
+            if (!(sender instanceof Player p)) { sender.sendMessage("§cDieser Befehl ist nur im Spiel verfügbar."); return true; }
+            return quests.handle(p, args);
         }
         if (name.equals("bayisland")) {
             if (args.length == 2 && args[0].equalsIgnoreCase("visit") && sender instanceof Player player) {
