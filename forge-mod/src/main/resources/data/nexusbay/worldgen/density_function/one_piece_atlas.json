@@ -238,6 +238,48 @@
       "z": 18000,
       "radius": 800,
       "maxHeight": 96
+    },
+    {
+      "id": "tequila_wolf",
+      "x": -20500,
+      "z": -1000,
+      "radius": 1050,
+      "maxHeight": 92
+    },
+    {
+      "id": "spider_miles",
+      "x": 19500,
+      "z": -9000,
+      "radius": 1000,
+      "maxHeight": 110
+    },
+    {
+      "id": "minion_island",
+      "x": -10500,
+      "z": -9000,
+      "radius": 950,
+      "maxHeight": 118
+    },
+    {
+      "id": "torino_kingdom",
+      "x": -10500,
+      "z": 9000,
+      "radius": 1050,
+      "maxHeight": 132
+    },
+    {
+      "id": "kuraigana",
+      "x": 9000,
+      "z": -15500,
+      "radius": 1200,
+      "maxHeight": 158
+    },
+    {
+      "id": "elbaf",
+      "x": 23500,
+      "z": 13000,
+      "radius": 1600,
+      "maxHeight": 230
     }
   ]
 }
