@@ -1,9 +1,9 @@
 name: NexusBay
-version: 1.0.0
+version: 1.1.0
 main: de.nexusbay.core.NexusBay
 api-version: '26.2'
 authors: [NEXUS-BAY]
-description: Core RPG, islands and administration systems for NEXUS-BAY
+description: Core RPG, islands, bounty quests and administration systems for NEXUS-BAY
 commands:
   bayadmin:
     description: Opens the NEXUS-BAY administration panel
@@ -21,6 +21,9 @@ commands:
     description: Opens a read-only player inventory inspection
     usage: /bayinv <player>
     permission: nexusbay.admin
+  bayquest:
+    description: Accepts and tracks pirate bounty contracts
+    usage: /bayquest [status|accept|abandon]
 permissions:
   nexusbay.admin:
     description: Full NEXUS-BAY administration access
