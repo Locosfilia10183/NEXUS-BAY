@@ -1,8 +1,8 @@
 package de.nexusbay.forge.registry;
 
 import de.nexusbay.forge.NexusBayForge;
+import de.nexusbay.forge.item.SantoryuItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -18,7 +18,7 @@ public final class ModItems {
      * Wado Ichimonji, Enma and Sandai Kitetsu.
      */
     public static final RegistryObject<Item> SANTORYU = ITEMS.register("santoryu",
-            () -> new SwordItem(Tiers.NETHERITE, 8, -2.4F, new Item.Properties().stacksTo(1)));
+            () -> new SantoryuItem(Tiers.NETHERITE, 8, -2.4F, new Item.Properties().stacksTo(1)));
 
     private ModItems() {}
 
