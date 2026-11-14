@@ -51,8 +51,8 @@
       "id": "grand_line",
       "name": "Grand Line",
       "bounds": {
-        "minX": -5000,
-        "maxX": 5000,
+        "minX": -7000,
+        "maxX": 12000,
         "minZ": -22000,
         "maxZ": 22000
       },
