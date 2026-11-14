@@ -95,8 +95,27 @@ public final class IslandService {
         return out.toString();
     }
 
+    private record IslandTheme(Material surface, Material filler, Material accent, Material trunk, Material leaves,
+                               boolean desert, boolean snowy, boolean jungle) {}
+
+    private IslandTheme themeFor(String name) {
+        String n=name.toLowerCase(Locale.ROOT);
+        if (n.contains("alabasta") || n.contains("whiskey") || n.contains("arabasta"))
+            return new IslandTheme(Material.SAND,Material.SANDSTONE,Material.CUT_SANDSTONE,Material.DEAD_BUSH,Material.DEAD_BUSH,true,false,false);
+        if (n.contains("drum") || n.contains("punk hazard"))
+            return new IslandTheme(Material.SNOW_BLOCK,Material.PACKED_ICE,Material.BLUE_ICE,Material.SPRUCE_LOG,Material.SPRUCE_LEAVES,false,true,false);
+        if (n.contains("little garden") || n.contains("amazon") || n.contains("zou") || n.contains("foosha"))
+            return new IslandTheme(Material.GRASS_BLOCK,Material.DIRT,Material.MOSS_BLOCK,Material.JUNGLE_LOG,Material.JUNGLE_LEAVES,false,false,true);
+        if (n.contains("wano") || n.contains("onigashima"))
+            return new IslandTheme(Material.GRASS_BLOCK,Material.DIRT,Material.POLISHED_DEEPSLATE,Material.DARK_OAK_LOG,Material.DARK_OAK_LEAVES,false,false,true);
+        if (n.contains("marineford") || n.contains("enies lobby") || n.contains("impel down"))
+            return new IslandTheme(Material.STONE_BRICKS,Material.STONE,Material.QUARTZ_BLOCK,Material.STONE_BRICKS,Material.IRON_BARS,false,false,false);
+        return new IslandTheme(Material.GRASS_BLOCK,Material.DIRT,Material.COBBLESTONE,Material.OAK_LOG,Material.OAK_LEAVES,false,false,false);
+    }
+
     private void buildIsland(World w,int cx,int cy,int cz,String name) {
         int radius=plugin.getConfig().getInt("settings.island-radius",42);
+        IslandTheme theme=themeFor(name);
         for(int x=-radius;x<=radius;x++) for(int z=-radius;z<=radius;z++) {
             double dist=Math.sqrt(x*x+z*z);
             double edge=radius*(0.82 + 0.10*Math.sin((x+cz)*0.19) + 0.08*Math.cos((z+cx)*0.17));
@@ -104,11 +123,15 @@ public final class IslandService {
             int top=cy+(int)(Math.sin(x*0.16)*2+Math.cos(z*0.13)*2+Math.sin((x+z)*0.08)*2);
             int depth=Math.max(3,(int)((1-dist/radius)*9)+3);
             for(int d=0;d<=depth;d++) {
-                Material mat=d==0 ? Material.GRASS_BLOCK : d<depth-1 ? Material.DIRT : Material.STONE;
+                Material mat=d==0 ? theme.surface() : d<depth-1 ? theme.filler() : Material.STONE;
                 Block b=w.getBlockAt(cx+x,top-d,cz+z); b.setType(mat,false);
             }
-            if(dist<radius*0.76 && Math.floorMod(x*31+z*17,47)==0) w.getBlockAt(cx+x,top+1,cz+z).setType(Material.SHORT_GRASS,false);
-            if(dist<radius*0.7 && Math.floorMod(x*13-z*29,173)==0) w.getBlockAt(cx+x,top+1,cz+z).setType(Material.OAK_LEAVES,false);
+            if (!theme.desert() && !theme.snowy() && dist<radius*0.76 && Math.floorMod(x*31+z*17,47)==0)
+                w.getBlockAt(cx+x,top+1,cz+z).setType(Material.SHORT_GRASS,false);
+            if (theme.snowy() && dist<radius*0.76 && Math.floorMod(x*31+z*17,31)==0)
+                w.getBlockAt(cx+x,top+1,cz+z).setType(Material.SNOW_BLOCK,false);
+            if (theme.desert() && dist<radius*0.76 && Math.floorMod(x*13-z*29,173)==0)
+                w.getBlockAt(cx+x,top+1,cz+z).setType(Material.CACTUS,false);
         }
         int sea=cy-10;
         for(int x=-(radius+24);x<=radius+24;x++) for(int z=-(radius+24);z<=radius+24;z++) {
@@ -120,12 +143,41 @@ public final class IslandService {
         for(int x=-5;x<=5;x+=5) for(int z=0;z<12;z+=3) w.getBlockAt(cx+x,cy,dockZ+z).setType(Material.OAK_FENCE,false);
         int lx=cx-radius/3, lz=cz-radius/3;
         for(int y=cy;y<cy+13;y++) {
-            Material m=(y==cy+12)?Material.SEA_LANTERN:Material.COBBLESTONE;
+            Material m=(y==cy+12)?Material.SEA_LANTERN:(y%4==0?theme.accent():Material.COBBLESTONE);
             w.getBlockAt(lx,y,lz).setType(m,false);
             if(y<cy+11) { w.getBlockAt(lx+1,y,lz).setType(m,false); w.getBlockAt(lx-1,y,lz).setType(m,false); w.getBlockAt(lx,y,lz+1).setType(m,false); w.getBlockAt(lx,y,lz-1).setType(m,false); }
         }
         w.getBlockAt(cx,cy+1,cz).setType(Material.CHEST,false);
         w.getBlockAt(cx+1,cy+1,cz).setType(Material.BARREL,false);
         w.getBlockAt(cx,cy+2,cz).setType(Material.OAK_SIGN,false);
+        // Each island receives a small, deterministic grove so regeneration stays consistent.
+        if (!theme.desert()) {
+            for (int i=0;i<6;i++) {
+                double angle=(Math.PI*2*i)/6.0;
+                int tx=cx+(int)(Math.cos(angle)*radius*0.48);
+                int tz=cz+(int)(Math.sin(angle)*radius*0.48);
+                int ground=cy+(int)(Math.sin((tx-cx)*0.16)*2+Math.cos((tz-cz)*0.13)*2
+                        +Math.sin(((tx-cx)+(tz-cz))*0.08)*2);
+                buildTree(w,tx,ground+1,tz,theme.trunk(),theme.leaves(),theme.snowy());
+            }
+        }
+        // A visible island landmark at the center helps players recognize the destination.
+        for (int y=cy+1;y<cy+7;y++) {
+            w.getBlockAt(cx+radius/5,y,cz-radius/5).setType(theme.accent(),false);
+        }
+        w.getBlockAt(cx+radius/5,cy+7,cz-radius/5).setType(Material.SEA_LANTERN,false);
+    }
+
+    private void buildTree(World world,int x,int y,int z,Material trunk,Material leaves,boolean snowy) {
+        if (trunk==Material.DEAD_BUSH || leaves==Material.DEAD_BUSH) return;
+        int height=snowy?5:6;
+        for(int dy=0;dy<height;dy++) world.getBlockAt(x,y+dy,z).setType(trunk,false);
+        for(int dx=-2;dx<=2;dx++) for(int dy=height-3;dy<=height;dy++)
+            for(int dz=-2;dz<=2;dz++) {
+                if(Math.abs(dx)+Math.abs(dz)+(dy==height?1:0)>4) continue;
+                Block block=world.getBlockAt(x+dx,y+dy,z+dz);
+                if(block.getType().isAir()) block.setType(leaves,false);
+            }
+        if(snowy) world.getBlockAt(x,y+height,z).setType(Material.SNOW_BLOCK,false);
     }
 }
