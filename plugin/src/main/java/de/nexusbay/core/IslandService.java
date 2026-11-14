@@ -232,7 +232,7 @@ public final class IslandService {
         int outer=23, inner=17;
         for(int y=cy+1;y<cy+5;y++) for(int x=-outer;x<=outer;x++) for(int z=-outer;z<=outer;z++) {
             double d=Math.sqrt(x*x+z*z);
-            if(d>=inner && d<=outer) w.getBlockAt(cx+x,y,cz+z).setType(Material.POLISHED_DEEPSLATE_BRICKS,false);
+            if(d>=inner && d<=outer) w.getBlockAt(cx+x,y,cz+z).setType(Material.DEEPSLATE_BRICKS,false);
         }
         for(int x=-inner;x<=inner;x++) for(int z=-inner;z<=inner;z++) {
             if(x*x+z*z<=inner*inner) w.getBlockAt(cx+x,cy,cz+z).setType(Material.BLACKSTONE,false);
