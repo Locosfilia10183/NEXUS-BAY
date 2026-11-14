@@ -15,6 +15,14 @@ public final class IslandProgression {
     private IslandProgression() {}
     private static String key(String name) { return name.toLowerCase(Locale.ROOT).replace('_',' ').replace('-',' ').trim(); }
     public static int requiredLevel(String name) { return LEVELS.getOrDefault(key(name), 1); }
+    public static int slot(String name) {
+        int index = 0;
+        for (String island : LEVELS.keySet()) {
+            if (key(island).equals(key(name))) return index;
+            index++;
+        }
+        return -1;
+    }
     public static boolean isKnown(String name) { return LEVELS.containsKey(key(name)); }
     public static Map<String, Integer> all() { return Map.copyOf(LEVELS); }
 }
