@@ -17,6 +17,10 @@ commands:
   baypay:
     description: Sends bay coins to another player
     usage: /baypay <player> <amount>
+  bayinv:
+    description: Opens a read-only player inventory inspection
+    usage: /bayinv <player>
+    permission: nexusbay.admin
 permissions:
   nexusbay.admin:
     description: Full NEXUS-BAY administration access
