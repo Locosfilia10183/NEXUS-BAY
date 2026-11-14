@@ -1,48 +1,44 @@
-# NEXUS-BAY – Aktueller Stand
+# NEXUS-BAY – Status
 
 **Branch:** `network-foundation`  
-**Stand:** Foundation abgeschlossen (Phase 0)
+**Plugin:** `1.2.0-phase2`
 
-## Was fertig ist
+## Erledigt im Repository
 
-### Infrastruktur
-- Velocity Proxy + Lobby + Survival Server-Layout
-- Geyser + Floodgate (Java + Bedrock Crossplay)
+### Infrastruktur (Phase 0)
+- Velocity / Lobby / Survival / Geyser+Floodgate Layout
 - MariaDB Schema (players, islands, economy_log, crews, skill_progress, quests)
-- Systemd Units (proxy, lobby, survival)
-- `install.sh` (idempotent, sicher)
-- Management-Skripte: start / stop / restart / status / backup / restore / update / healthcheck
-- LuckPerms Rang-Gruppen Beispiel + Dokumentation
+- Systemd + install.sh + Backup/Restore/Update/Healthcheck
 
-### Core-Plugin (1.1.0-foundation)
-- Spielerprofile (Level, XP, Bay-Coins)
-- Coin-Transfers (`/baypay`)
-- Insel-System (`/bayisland create|visit|list`)
-- Admin-GUI (`/bayadmin`) + Inventar-Inspektion (`/bayinv`)
-- DatabaseService (HikariCP) vorbereitet – aktivierbar über `config.yml`
-- YAML-Fallback solange `database.enabled = false`
+### Plugin-Systeme (Phase 1 + 2 Code)
+- **PlayerData** mit MariaDB-Persistenz und YAML-Fallback
+- **CrewService**: create / invite / accept / leave / info / deposit
+- **SkillService**: swords, pistols, harpoons, crew – list + unlock
+- **QuestService**: Seed-Quests, list, accept, Progress-API
+- DatabaseService (HikariCP)
+- Admin-GUI, Inseln, Economy-Transfers + Ledger
 
-### Dokumentation
-- THEME.md – Pirate Bay / Cursed Bay Vision
-- INSPIRATION.md – Builds & Systeme aus den Referenzen
-- ROADMAP.md – Phase 0 bis 5
-- ARCHITECTURE.md, INSTALLATION.md, RANKS.md, COMMANDS.md
+### Docs
+THEME, INSPIRATION, ARCHITECTURE, INSTALLATION, RANKS, COMMANDS, ROADMAP
 
-## Was bewusst noch nicht fertig ist (nächste Phasen)
+## Bewusst offen (braucht VPS + Assets)
+- LuckPerms live konfigurieren
+- Lobby-Map + Server-Selector-GUI
+- Combat-Effekte für Skills
+- Weltgenerator / große Pirate-Builds (Leuchttürme, Tavernen, …)
+- Dungeons, Marktplatz, weitere Spielmodi
+- Echte End-to-End-Tests auf deinem Server
 
-- Volle MariaDB-Persistenz im Plugin (Profile + Islands live auf DB)
-- Crew-System (UI + Befehle)
-- Skill-Trees (Waffen + Crew)
-- Quest- / Logbuch-System
-- Server-Selector / Lobby-Menü
-- Große vorgefertigte Maps (Leuchttürme, Tavernen, Schatzkammern usw.)
-- Custom Models / erweiterte Combat-Systeme
+## So testen
+```bash
+git clone -b network-foundation https://github.com/Locosfilia10183/NEXUS-BAY.git
+cd NEXUS-BAY
+sudo bash install.sh
+# eula=true setzen, dann:
+sudo systemctl start nexus-bay-proxy nexus-bay-lobby nexus-bay-survival
+```
+In `plugins/NEXUS-BAY-Core/config.yml`: `database.enabled: true` + Passwort aus `secrets.env`.
 
-## Nächster empfohlener Schritt
-1. Branch `network-foundation` nach `main` mergen (oder PR reviewen)
-2. Auf dem VPS testen: `git clone -b network-foundation ...` → `sudo bash install.sh`
-3. Phase 1 starten: `database.enabled: true` + echte Persistenz im Plugin
-
-## Wichtig
-Dieses Repository ist die **technische Foundation** für ein Pirate-Bay-Netzwerk.  
-Das fertige Spielerlebnis (Crews, Skilltrees, Dungeons, große Builds) kommt in den folgenden Phasen.
+## Ehrliche Grenze
+Ein vollständiges öffentliches Pirate-RPG mit Maps, Custom Models und allen Spielmodi ist kein reines Repo-Projekt.  
+**Was hier fertig ist:** installierbare Netzwerk-Foundation + lauffähige Kernsysteme (Profile, Economy, Crews, Skills, Quests) im Code.

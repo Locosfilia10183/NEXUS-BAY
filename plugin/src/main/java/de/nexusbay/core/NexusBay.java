@@ -12,6 +12,9 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
     private PlayerData data;
     private AdminMenu adminMenu;
     private DatabaseService database;
+    private CrewService crews;
+    private SkillService skills;
+    private QuestService quests;
 
     @Override
     public void onEnable() {
@@ -23,8 +26,15 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         data = new PlayerData(this);
         islands = new IslandService(this);
         adminMenu = new AdminMenu(this);
+        crews = new CrewService(this);
+        skills = new SkillService(this);
+        quests = new QuestService(this);
 
-        for (String command : new String[]{"bayadmin", "bayisland", "bayprofile", "baypay", "bayinv"}) {
+        if (dbOk) quests.ensureSeed();
+
+        for (String command : new String[]{
+                "bayadmin", "bayisland", "bayprofile", "baypay", "bayinv",
+                "baycrew", "bayskill", "bayquest"}) {
             PluginCommand cmd = getCommand(command);
             if (cmd != null) cmd.setExecutor(this);
         }
@@ -32,7 +42,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(adminMenu, this);
         getServer().getPluginManager().registerEvents(data, this);
 
-        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB)" : " (YAML storage)"));
+        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB + Crews/Skills/Quests)" : " (YAML storage)"));
     }
 
     @Override
@@ -70,7 +80,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
                 return true;
             }
             if (args.length < 2 || !args[0].equalsIgnoreCase("create")) {
-                sender.sendMessage("§e/bayisland create <name> | /bayisland visit <name> | /bayisland list");
+                sender.sendMessage("§e/bayisland create <name> | visit <name> | list");
                 return true;
             }
             String islandName = args[1].replaceAll("[^a-zA-Z0-9_-]", "");
@@ -113,9 +123,9 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
                 return true;
             }
             Player target = Bukkit.getPlayerExact(args[0]);
-            int amount;
+            long amount;
             try {
-                amount = Integer.parseInt(args[1]);
+                amount = Long.parseLong(args[1]);
             } catch (NumberFormatException ex) {
                 sender.sendMessage("§cBetrag muss eine Zahl sein.");
                 return true;
@@ -133,12 +143,87 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
             return true;
         }
 
+        if (name.equals("baycrew")) {
+            if (!(sender instanceof Player p)) return true;
+            if (args.length == 0) {
+                for (String line : crews.info(p)) sender.sendMessage(line);
+                return true;
+            }
+            String sub = args[0].toLowerCase();
+            if (sub.equals("create") && args.length >= 2) {
+                sender.sendMessage(crews.create(p, args[1]));
+                return true;
+            }
+            if (sub.equals("invite") && args.length >= 2) {
+                sender.sendMessage(crews.invite(p, args[1]));
+                return true;
+            }
+            if (sub.equals("accept")) {
+                sender.sendMessage(crews.accept(p));
+                return true;
+            }
+            if (sub.equals("leave")) {
+                sender.sendMessage(crews.leave(p));
+                return true;
+            }
+            if (sub.equals("deposit") && args.length >= 2) {
+                try {
+                    sender.sendMessage(crews.deposit(p, Long.parseLong(args[1])));
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("§cBetrag ungültig.");
+                }
+                return true;
+            }
+            if (sub.equals("info")) {
+                for (String line : crews.info(p)) sender.sendMessage(line);
+                return true;
+            }
+            sender.sendMessage("§e/baycrew <create|invite|accept|leave|deposit|info>");
+            return true;
+        }
+
+        if (name.equals("bayskill")) {
+            if (!(sender instanceof Player p)) return true;
+            if (args.length == 0) {
+                sender.sendMessage("§e/bayskill list <tree> | unlock <tree> <node>");
+                sender.sendMessage("§7Trees: §f" + String.join(", ", SkillService.TREES.keySet()));
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("list") && args.length >= 2) {
+                for (String line : skills.list(p, args[1].toLowerCase())) sender.sendMessage(line);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("unlock") && args.length >= 3) {
+                sender.sendMessage(skills.unlock(p, args[1].toLowerCase(), args[2].toLowerCase()));
+                return true;
+            }
+            sender.sendMessage("§e/bayskill list <tree> | unlock <tree> <node>");
+            return true;
+        }
+
+        if (name.equals("bayquest")) {
+            if (!(sender instanceof Player p)) return true;
+            if (args.length == 0 || args[0].equalsIgnoreCase("list")) {
+                for (String line : quests.listActive(p)) sender.sendMessage(line);
+                return true;
+            }
+            if (args[0].equalsIgnoreCase("accept") && args.length >= 2) {
+                sender.sendMessage(quests.accept(p, args[1].toLowerCase()));
+                return true;
+            }
+            sender.sendMessage("§e/bayquest [list] | accept <code>");
+            return true;
+        }
+
         return false;
     }
 
     public IslandService islands() { return islands; }
     public PlayerData data() { return data; }
     public DatabaseService database() { return database; }
+    public CrewService crews() { return crews; }
+    public SkillService skills() { return skills; }
+    public QuestService quests() { return quests; }
 
     public void broadcast(String message) {
         Bukkit.broadcastMessage("§6§lNEXUS-BAY §8» §f" + ChatColor.translateAlternateColorCodes('&', message));

@@ -1,50 +1,29 @@
-# NEXUS-BAY – Wichtige Befehle
+# NEXUS-BAY Befehle
 
-## System-Verwaltung (Linux)
+## Spieler
+| Befehl | Beschreibung |
+|--------|--------------|
+| `/bayprofile` | Level, XP, Bay-Coins |
+| `/baypay <spieler> <betrag>` | Coins senden |
+| `/baycrew` | Crew-Info |
+| `/baycrew create <name>` | Crew gründen |
+| `/baycrew invite <spieler>` | Einladen |
+| `/baycrew accept` | Einladung annehmen |
+| `/baycrew leave` | Crew verlassen |
+| `/baycrew deposit <betrag>` | In Crew-Bank einzahlen |
+| `/bayskill list <tree>` | Skillbaum anzeigen (swords, pistols, harpoons, crew) |
+| `/bayskill unlock <tree> <node>` | Skill freischalten |
+| `/bayquest` / `/bayquest list` | Logbuch |
+| `/bayquest accept <code>` | Quest annehmen |
+| `/bayisland visit <name>` | Insel besuchen |
+| `/bayisland list` | Inseln auflisten |
 
-```bash
-# Status aller Dienste
-sudo bash /opt/nexus-bay/scripts/status.sh
+## Admin
+| Befehl | Permission |
+|--------|------------|
+| `/bayadmin` | `nexusbay.admin` |
+| `/bayinv <spieler>` | `nexusbay.admin` |
+| `/bayisland create <name>` | `nexusbay.admin` |
 
-# Start / Stop / Restart
-sudo bash /opt/nexus-bay/scripts/start.sh
-sudo bash /opt/nexus-bay/scripts/stop.sh
-sudo bash /opt/nexus-bay/scripts/restart.sh
-
-# Backup & Restore
-sudo bash /opt/nexus-bay/scripts/backup.sh
-sudo bash /opt/nexus-bay/scripts/restore.sh <backup-datei.tar.gz>
-
-# Healthcheck
-sudo bash /opt/nexus-bay/scripts/healthcheck.sh
-
-# Logs
-sudo journalctl -u nexus-bay-proxy -f
-sudo journalctl -u nexus-bay-lobby -f
-sudo journalctl -u nexus-bay-survival -f
-```
-
-## Core-Plugin (Ingame)
-
-| Befehl | Permission | Beschreibung |
-|--------|------------|--------------|
-| `/bayadmin` | `nexusbay.admin` | Admin-Kontrollpanel |
-| `/bayprofile` | – | Eigenes Level, XP, Coins |
-| `/baypay <spieler> <betrag>` | – | Bay-Coins überweisen |
-| `/bayisland create <name>` | `nexusbay.admin` | Insel erstellen |
-| `/bayisland visit <name>` | – | Insel besuchen |
-| `/bayisland list` | – | Inseln auflisten |
-| `/bayinv <spieler>` | `nexusbay.admin` | Inventar einsehen (read-only) |
-
-## Velocity (Proxy)
-
-Spieler können später mit einem Server-Selector oder Befehl zwischen Lobby und Survival wechseln.
-Aktuell leitet der Proxy standardmäßig in die Lobby.
-
-## LuckPerms (nach Installation)
-
-```text
-/lp user <name> parent set admin
-/lp user <name> parent settemp vip 30d
-/lp group list
-```
+## Hinweis
+Crews, Skills und Quests benötigen `database.enabled: true` und eine laufende MariaDB.

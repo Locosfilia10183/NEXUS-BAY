@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.nexusbay</groupId>
   <artifactId>nexusbay-core</artifactId>
-  <version>1.1.0-foundation</version>
+  <version>1.2.0-phase2</version>
   <name>NEXUS-BAY Core</name>
   <description>Core plugin for the NEXUS-BAY pirate network</description>
 
@@ -27,7 +27,6 @@
       <version>1.21.4-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Ready for Phase 1 MariaDB -->
     <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
@@ -66,7 +65,6 @@
                   <shadedPattern>de.nexusbay.lib.hikari</shadedPattern>
                 </relocation>
               </relocations>
-              <minimizeJar>false</minimizeJar>
             </configuration>
           </execution>
         </executions>

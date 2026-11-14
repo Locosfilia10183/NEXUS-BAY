@@ -1,43 +1,43 @@
 # NEXUS-BAY – Roadmap
 
-## Phase 0 – Network Foundation (current branch)
-- [x] Velocity proxy + Lobby + Survival layout
-- [x] Geyser / Floodgate (Java + Bedrock)
-- [x] MariaDB schema (players, islands, economy, crews, quests placeholders)
-- [x] Systemd units, install.sh, management scripts (start/stop/status/backup/restore/update/healthcheck)
-- [x] LuckPerms rank examples + documentation
-- [x] Theme & architecture docs
+## Phase 0 – Network Foundation ✅
+- [x] Velocity + Lobby + Survival + Geyser/Floodgate
+- [x] MariaDB Schema
+- [x] Systemd + install.sh + Management-Skripte
+- [x] Theme & Docs
 
-## Phase 1 – Core systems on the network
-- [ ] Core plugin: MariaDB connection (replace pure YAML persistence)
-- [ ] Shared player profile across Lobby + Survival (level, XP, Bay-Coins)
-- [ ] LuckPerms fully configured (ranks from Spieler → Owner)
-- [ ] Lobby spawn + basic server selector (Lobby ↔ Survival)
-- [ ] Basic /spawn, /hub and cross-server messaging
+## Phase 1 – Core systems on the network ✅ (Code)
+- [x] Core plugin: MariaDB-Anbindung (HikariCP) + YAML-Fallback
+- [x] Shared player profile (level, XP, Bay-Coins) mit DB-Persistenz
+- [x] Economy-Log bei Transfers
+- [ ] LuckPerms live auf dem VPS konfigurieren (Beispieldatei vorhanden)
+- [ ] Lobby-Spawn + Server-Selector (Plugin-seitig vorbereitet, Map/GUI später)
+- [ ] Cross-server messaging (Velocity-Plugin separat)
 
-## Phase 2 – Pirate progression & social
-- [ ] Crew system (create, invite, ranks, crew bank, crew skill tree)
-- [ ] Weapon mastery skill trees (Säbel, Büchsen, Pistolen, Harpunen)
-- [ ] Quest / Logbook framework (daily, weekly, crew, story)
-- [ ] Player classes / roles (simple first version)
+## Phase 2 – Pirate progression & social ✅ (Code-Grundlage)
+- [x] Crew-System: create, invite, accept, leave, info, bank deposit
+- [x] Skill-Trees: swords, pistols, harpoons, crew (Unlock-Logik, noch ohne Combat-Effekte)
+- [x] Quest/Logbuch: Seed-Quests, accept, list, Progress-API
+- [ ] Klassen / Rollen (nächster Feinschliff)
+- [ ] Combat-Effekte an freigeschaltete Skills koppeln
 
-## Phase 3 – World & content
-- [ ] Improved island / archipelago generator (tropical + cursed/ash themes)
-- [ ] Structure templates: Lighthouse, Tavern, Treasure chamber, Pirate portal, Shipwreck dock
-- [ ] First dungeon / boss instance
-- [ ] Treasure and key system
+## Phase 3 – World & content (offen)
+- [ ] Erweiterter Insel-/Archipel-Generator
+- [ ] Struktur-Templates (Leuchtturm, Taverne, Schatzkammer, Portal, Schiffwrack)
+- [ ] Erstes Dungeon / Boss
+- [ ] Schatz- und Schlüssel-System
 
-## Phase 4 – Economy & quality
-- [ ] Player market / auction house
-- [ ] Shops + taxes + anti-dupe ledger
-- [ ] Tab, scoreboard, holograms, better chat formatting
-- [ ] Performance & anti-cheat baseline
+## Phase 4 – Economy & quality (offen)
+- [ ] Spielermarkt / Auktionshaus
+- [ ] Shops, Steuern, Anti-Dupe (Ledger-Tabelle existiert)
+- [ ] Tab, Scoreboard, Hologramme, Chat-Format
+- [ ] Performance- und Anti-Cheat-Baseline
 
-## Phase 5 – Polish & scale
-- [ ] Additional game modes (BedWars / SkyWars placeholders already in layout)
-- [ ] More biomes and large builds
-- [ ] Public release preparation, rules, Discord integration
+## Phase 5 – Polish & scale (offen)
+- [ ] Weitere Spielmodi (BedWars/SkyWars Layout-Slots)
+- [ ] Große Builds & Biome
+- [ ] Public-Release-Vorbereitung
 
-## Design notes
-Theme: Pirate Bay / Cursed Bay (see `docs/THEME.md`).  
-All custom combat systems stay Paper-plugin compatible so Java + Bedrock players can play together.
+## Hinweis
+Phase 1–2 sind im **Repository als lauffähiger Plugin-Code** umgesetzt.  
+Phase 3–5 brauchen Maps, Assets, Live-Tests auf dem VPS und können nicht rein aus dem GitHub-Repo „fertig“ sein.
