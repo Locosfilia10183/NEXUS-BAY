@@ -1,0 +1,11 @@
+{
+  "id": "mera_mera",
+  "display_name": "Mera Mera no Mi",
+  "type": "DEVIL_FRUIT",
+  "skills": [
+    {"id":"fire_fist","display_name":"Feuerfaust","required_level":1,"mastery_xp_cost":0,"cooldown_ticks":60,"animation_id":"mera_fire_fist"},
+    {"id":"fire_pillar","display_name":"Flammensäule","required_level":8,"mastery_xp_cost":600,"cooldown_ticks":180,"animation_id":"mera_fire_pillar"},
+    {"id":"firefly","display_name":"Feuerfliegen","required_level":18,"mastery_xp_cost":1800,"cooldown_ticks":240,"animation_id":"mera_firefly"},
+    {"id":"flame_emperor","display_name":"Flammenkaiser","required_level":40,"mastery_xp_cost":6500,"cooldown_ticks":900,"animation_id":"mera_flame_emperor"}
+  ]
+}
