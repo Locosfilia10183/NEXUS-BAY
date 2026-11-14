@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
 public final class BossHomeSpawner {
     private static final int CHECK_INTERVAL_TICKS = 100;
-    private static final BlockPos KAIDO_HOME = new BlockPos(2752, 101, 1472);
+    private static final BlockPos KAIDO_HOME = new BlockPos(36500, 90, 14000);
     private static final double HOME_RADIUS = 48.0D;
     private static long lastCheck = 0L;
 
