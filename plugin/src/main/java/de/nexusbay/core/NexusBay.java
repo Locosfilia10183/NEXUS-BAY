@@ -43,8 +43,11 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(data, this);
         getServer().getPluginManager().registerEvents(quests, this);
 
+        // Auto-build harbor after worlds are ready (1 tick delay)
+        Bukkit.getScheduler().runTaskLater(this, () -> harbor.tryAutoBuild(), 40L);
+
         getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB)" : " (YAML)")
-                + " | Harbor + Admin-GUI + Quests");
+                + " | Auto-Harbor + Admin-GUI + Quests");
     }
 
     @Override
@@ -59,7 +62,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
 
         if (name.equals("bayadmin")) {
             if (!(sender instanceof Player p) || !p.hasPermission("nexusbay.admin")) {
-                sender.sendMessage("§cNur Admins (Java-Menü). Permission: nexusbay.admin");
+                sender.sendMessage("§cNur Admins. Permission: nexusbay.admin");
                 return true;
             }
             adminMenu.open(p);
@@ -72,10 +75,20 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
                 return true;
             }
             if (args.length >= 1 && args[0].equalsIgnoreCase("build")) {
+                // force rebuild
+                pluginConfigUnsetBuilt();
                 harbor.buildAt(p);
                 return true;
             }
-            sender.sendMessage("§e/bayspawn build §7– großen Hafen-Spawn an deiner Position bauen");
+            if (args.length >= 1 && args[0].equalsIgnoreCase("rebuild")) {
+                getConfig().set("spawn.built", false);
+                saveConfig();
+                harbor.tryAutoBuild();
+                sender.sendMessage("§aAuto-Rebuild am konfigurierten Punkt gestartet.");
+                return true;
+            }
+            sender.sendMessage("§e/bayspawn build §7– an deiner Position");
+            sender.sendMessage("§e/bayspawn rebuild §7– erneut an Config-Koordinaten (0,100,0)");
             return true;
         }
 
@@ -241,6 +254,11 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         }
 
         return false;
+    }
+
+    private void pluginConfigUnsetBuilt() {
+        getConfig().set("spawn.built", false);
+        saveConfig();
     }
 
     public IslandService islands() { return islands; }
