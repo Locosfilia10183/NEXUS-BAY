@@ -35,6 +35,7 @@ public final class BossHomeSpawner {
         ServerLevel level = event.getServer().overworld();
         // Do not load or force-load a remote island chunk just to create a boss.
         if (!level.hasChunkAt(KAIDO_HOME)) return;
+        if (!BossHomeData.get(level).canSpawnKaido(gameTime)) return;
 
         AABB homeArea = new AABB(
                 KAIDO_HOME.getX() - HOME_RADIUS, KAIDO_HOME.getY() - 32.0D,
