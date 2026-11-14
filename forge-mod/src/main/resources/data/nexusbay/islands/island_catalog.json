@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 1,
+  "worldPreset": "nexusbay:one_piece_ocean",
+  "mapScale": "coordinates are planned block positions for the separate One Piece save; they are not generated land yet",
+  "regions": [
+    {
+      "id": "east_blue",
+      "name": "East Blue",
+      "bounds": {
+        "minX": -22000,
+        "maxX": -5000,
+        "minZ": -12000,
+        "maxZ": 12000
+      },
+      "theme": "temperate_ocean"
+    },
+    {
+      "id": "west_blue",
+      "name": "West Blue",
+      "bounds": {
+        "minX": 5000,
+        "maxX": 22000,
+        "minZ": -12000,
+        "maxZ": 12000
+      },
+      "theme": "temperate_ocean"
+    },
+    {
+      "id": "north_blue",
+      "name": "North Blue",
+      "bounds": {
+        "minX": -12000,
+        "maxX": 12000,
+        "minZ": -22000,
+        "maxZ": -5000
+      },
+      "theme": "cold_ocean"
+    },
+    {
+      "id": "south_blue",
+      "name": "South Blue",
+      "bounds": {
+        "minX": -12000,
+        "maxX": 12000,
+        "minZ": 5000,
+        "maxZ": 22000
+      },
+      "theme": "warm_ocean"
+    },
+    {
+      "id": "grand_line",
+      "name": "Grand Line",
+      "bounds": {
+        "minX": -5000,
+        "maxX": 5000,
+        "minZ": -22000,
+        "maxZ": 22000
+      },
+      "theme": "dangerous_current"
+    },
+    {
+      "id": "new_world",
+      "name": "New World",
+      "bounds": {
+        "minX": 22000,
+        "maxX": 42000,
+        "minZ": -18000,
+        "maxZ": 18000
+      },
+      "theme": "extreme_weather"
+    }
+  ],
+  "islands": [
+    {
+      "id": "foosha_village",
+      "name": "Foosha Village",
+      "region": "east_blue",
+      "requiredLevel": 1,
+      "center": {
+        "x": -18000,
+        "y": 64,
+        "z": -9000
+      },
+      "theme": "tropical",
+      "radius": 700
+    },
+    {
+      "id": "shells_town",
+      "name": "Shells Town",
+      "region": "east_blue",
+      "requiredLevel": 5,
+      "center": {
+        "x": -14000,
+        "y": 64,
+        "z": -4000
+      },
+      "theme": "temperate",
+      "radius": 650
+    },
+    {
+      "id": "orange_town",
+      "name": "Orange Town",
+      "region": "east_blue",
+      "requiredLevel": 8,
+      "center": {
+        "x": -9000,
+        "y": 64,
+        "z": -11000
+      },
+      "theme": "temperate",
+      "radius": 600
+    },
+    {
+      "id": "syrup_village",
+      "name": "Syrup Village",
+      "region": "east_blue",
+      "requiredLevel": 12,
+      "center": {
+        "x": -6500,
+        "y": 64,
+        "z": -3000
+      },
+      "theme": "temperate_forest",
+      "radius": 700
+    },
+    {
+      "id": "baratie",
+      "name": "Baratie",
+      "region": "east_blue",
+      "requiredLevel": 16,
+      "center": {
+        "x": -11000,
+        "y": 64,
+        "z": 2000
+      },
+      "theme": "ocean_platform",
+      "radius": 180
+    },
+    {
+      "id": "arlong_park",
+      "name": "Arlong Park",
+      "region": "east_blue",
+      "requiredLevel": 20,
+      "center": {
+        "x": -18000,
+        "y": 64,
+        "z": 7000
+      },
+      "theme": "tropical_reef",
+      "radius": 650
+    },
+    {
+      "id": "loguetown",
+      "name": "Loguetown",
+      "region": "east_blue",
+      "requiredLevel": 25,
+      "center": {
+        "x": -7000,
+        "y": 64,
+        "z": 9000
+      },
+      "theme": "temperate",
+      "radius": 850
+    },
+    {
+      "id": "reverse_mountain",
+      "name": "Reverse Mountain",
+      "region": "grand_line",
+      "requiredLevel": 30,
+      "center": {
+        "x": 0,
+        "y": 64,
+        "z": -16000
+      },
+      "theme": "mountain_pass",
+      "radius": 1100
+    },
+    {
+      "id": "whiskey_peak",
+      "name": "Whiskey Peak",
+      "region": "grand_line",
+      "requiredLevel": 34,
+      "center": {
+        "x": 1500,
+        "y": 64,
+        "z": -11000
+      },
+      "theme": "desert",
+      "radius": 700
+    },
+    {
+      "id": "little_garden",
+      "name": "Little Garden",
+      "region": "grand_line",
+      "requiredLevel": 38,
+      "center": {
+        "x": -1800,
+        "y": 64,
+        "z": -7000
+      },
+      "theme": "prehistoric_jungle",
+      "radius": 1000
+    },
+    {
+      "id": "drum_island",
+      "name": "Drum Island",
+      "region": "grand_line",
+      "requiredLevel": 42,
+      "center": {
+        "x": -2500,
+        "y": 64,
+        "z": -2500
+      },
+      "theme": "snowy_mountain",
+      "radius": 900
+    },
+    {
+      "id": "alabasta",
+      "name": "Alabasta",
+      "region": "grand_line",
+      "requiredLevel": 48,
+      "center": {
+        "x": 2500,
+        "y": 64,
+        "z": -1000
+      },
+      "theme": "desert",
+      "radius": 1800
+    },
+    {
+      "id": "jaya",
+      "name": "Jaya",
+      "region": "grand_line",
+      "requiredLevel": 55,
+      "center": {
+        "x": -2200,
+        "y": 64,
+        "z": 3500
+      },
+      "theme": "jungle",
+      "radius": 850
+    },
+    {
+      "id": "skypiea",
+      "name": "Skypiea",
+      "region": "grand_line",
+      "requiredLevel": 62,
+      "center": {
+        "x": 0,
+        "y": 64,
+        "z": 5000
+      },
+      "theme": "sky_island",
+      "radius": 900
+    },
+    {
+      "id": "water_7",
+      "name": "Water 7",
+      "region": "grand_line",
+      "requiredLevel": 68,
+      "center": {
+        "x": 2500,
+        "y": 64,
+        "z": 8500
+      },
+      "theme": "canal_city",
+      "radius": 850
+    },
+    {
+      "id": "enies_lobby",
+      "name": "Enies Lobby",
+      "region": "grand_line",
+      "requiredLevel": 72,
+      "center": {
+        "x": -2500,
+        "y": 64,
+        "z": 11000
+      },
+      "theme": "fortress",
+      "radius": 900
+    },
+    {
+      "id": "thriller_bark",
+      "name": "Thriller Bark",
+      "region": "grand_line",
+      "requiredLevel": 78,
+      "center": {
+        "x": 6000,
+        "y": 64,
+        "z": -5000
+      },
+      "theme": "haunted_forest",
+      "radius": 1100
+    },
+    {
+      "id": "sabaody_archipelago",
+      "name": "Sabaody Archipelago",
+      "region": "grand_line",
+      "requiredLevel": 82,
+      "center": {
+        "x": 1000,
+        "y": 64,
+        "z": 14500
+      },
+      "theme": "mangrove",
+      "radius": 1000
+    },
+    {
+      "id": "amazon_lily",
+      "name": "Amazon Lily",
+      "region": "grand_line",
+      "requiredLevel": 85,
+      "center": {
+        "x": -6500,
+        "y": 64,
+        "z": 15500
+      },
+      "theme": "jungle",
+      "radius": 850
+    },
+    {
+      "id": "impel_down",
+      "name": "Impel Down",
+      "region": "grand_line",
+      "requiredLevel": 88,
+      "center": {
+        "x": 7000,
+        "y": 64,
+        "z": 15000
+      },
+      "theme": "underwater_fortress",
+      "radius": 600
+    },
+    {
+      "id": "marineford",
+      "name": "Marineford",
+      "region": "grand_line",
+      "requiredLevel": 92,
+      "center": {
+        "x": 11000,
+        "y": 64,
+        "z": 9000
+      },
+      "theme": "fortress",
+      "radius": 1100
+    },
+    {
+      "id": "fish_man_island",
+      "name": "Fish-Man Island",
+      "region": "grand_line",
+      "requiredLevel": 95,
+      "center": {
+        "x": 0,
+        "y": 64,
+        "z": 19000
+      },
+      "theme": "underwater",
+      "radius": 900
+    },
+    {
+      "id": "punk_hazard",
+      "name": "Punk Hazard",
+      "region": "new_world",
+      "requiredLevel": 98,
+      "center": {
+        "x": 25000,
+        "y": 64,
+        "z": -10000
+      },
+      "theme": "volcanic_ice",
+      "radius": 1000
+    },
+    {
+      "id": "dressrosa",
+      "name": "Dressrosa",
+      "region": "new_world",
+      "requiredLevel": 100,
+      "center": {
+        "x": 30000,
+        "y": 64,
+        "z": -4000
+      },
+      "theme": "mediterranean",
+      "radius": 1100
+    },
+    {
+      "id": "zou",
+      "name": "Zou",
+      "region": "new_world",
+      "requiredLevel": 105,
+      "center": {
+        "x": 36000,
+        "y": 64,
+        "z": 3000
+      },
+      "theme": "moving_forest",
+      "radius": 900
+    },
+    {
+      "id": "whole_cake_island",
+      "name": "Whole Cake Island",
+      "region": "new_world",
+      "requiredLevel": 110,
+      "center": {
+        "x": 28000,
+        "y": 64,
+        "z": 7000
+      },
+      "theme": "candy_fantasy",
+      "radius": 1200
+    },
+    {
+      "id": "wano_kuni",
+      "name": "Wano kuni",
+      "region": "new_world",
+      "requiredLevel": 120,
+      "center": {
+        "x": 34000,
+        "y": 64,
+        "z": 12000
+      },
+      "theme": "mountain_forest",
+      "radius": 1500
+    },
+    {
+      "id": "onigashima",
+      "name": "Onigashima",
+      "region": "new_world",
+      "requiredLevel": 125,
+      "center": {
+        "x": 2752,
+        "y": 64,
+        "z": 1472
+      },
+      "theme": "oni_fortress",
+      "radius": 650
+    }
+  ]
+}
