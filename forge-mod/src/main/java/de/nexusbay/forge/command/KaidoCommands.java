@@ -56,6 +56,9 @@ public final class KaidoCommands {
             return 0;
         }
         kaido.moveTo(x, y, z, level.random.nextFloat() * 360.0F, 0.0F);
+        if (Math.abs(x - ONIGASHIMA_X) < 1.0D && Math.abs(z - ONIGASHIMA_Z) < 1.0D) {
+            kaido.setArenaBounds(ONIGASHIMA_X, ONIGASHIMA_Z, 42.0D);
+        }
         if (!level.addFreshEntity(kaido)) {
             feedback.accept(() -> Component.literal("Kaido konnte nicht in die Welt gesetzt werden."), false);
             return 0;
