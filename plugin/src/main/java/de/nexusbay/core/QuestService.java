@@ -1,7 +1,5 @@
 package de.nexusbay.core;
 
-import java.util.UUID;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
