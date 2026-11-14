@@ -898,6 +898,42 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         return damaged;
     }
 
+    /**
+     * Server-side cinematic death burst. All effects are particles only:
+     * the island terrain is never modified by Kaido's death.
+     */
+    private void playDeathSequence() {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+
+        double height = getBbHeight();
+        double radius = getCurrentPhase() == 3 ? 8.0D : 4.5D;
+        serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                getX(), getY() + height * 0.45D, getZ(), 3,
+                radius * 0.25D, height * 0.2D, radius * 0.25D, 0.0D);
+        serverLevel.sendParticles(ParticleTypes.FLAME,
+                getX(), getY() + height * 0.4D, getZ(), 120,
+                radius * 0.55D, height * 0.35D, radius * 0.55D, 0.08D);
+        serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE,
+                getX(), getY() + height * 0.55D, getZ(), 90,
+                radius * 0.5D, height * 0.4D, radius * 0.5D, 0.035D);
+        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                getX(), getY() + height * 0.5D, getZ(), 100,
+                radius * 0.65D, height * 0.45D, radius * 0.65D, 0.12D);
+
+        // A broad, expanding-looking ring marks the defeat without block damage.
+        for (int point = 0; point < 64; point++) {
+            double angle = Math.PI * 2.0D * point / 64.0D;
+            double x = getX() + Math.cos(angle) * radius;
+            double z = getZ() + Math.sin(angle) * radius;
+            serverLevel.sendParticles(ParticleTypes.CLOUD,
+                    x, getY() + 0.15D, z, 4, 0.25D, 0.12D, 0.25D, 0.045D);
+            if (point % 2 == 0) {
+                serverLevel.sendParticles(ParticleTypes.CRIT,
+                        x, getY() + 0.7D, z, 3, 0.18D, 0.3D, 0.18D, 0.08D);
+            }
+        }
+    }
+
     @Override
     public void die(DamageSource source) {
         pendingAttack = NO_ATTACK;
@@ -905,7 +941,10 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         attackLockTicks = 0;
         dragonFlying = false;
         setNoGravity(false);
-        if (!level().isClientSide) triggerAnim("attack", "death");
+        if (!level().isClientSide) {
+            triggerAnim("attack", "death");
+            playDeathSequence();
+        }
         bossEvent.removeAllPlayers();
         super.die(source);
     }
