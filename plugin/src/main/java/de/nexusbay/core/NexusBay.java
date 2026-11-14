@@ -47,7 +47,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
             }
             if (args.length == 1 && args[0].equalsIgnoreCase("list")) {
                 var section=getConfig().getConfigurationSection("islands");
-                sender.sendMessage("§6NEXUS-BAY Inseln: §f"+(section==null ? "Noch keine" : String.join(", ",section.getKeys(false))));
+                sender.sendMessage("§6NEXUS-BAY Inseln: §f" + islands.describeIslands());
                 return true;
             }
             if (!sender.hasPermission("nexusbay.admin")) { sender.sendMessage("§cKeine Berechtigung."); return true; }
