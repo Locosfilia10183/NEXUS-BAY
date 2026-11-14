@@ -2,7 +2,6 @@ package de.nexusbay.core;
 
 import java.util.Locale;
 import org.bukkit.*;
-import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -54,7 +53,6 @@ public final class IslandService {
         }
         w.getBlockAt(cx,cy+1,cz).setType(Material.CHEST,false);
         w.getBlockAt(cx+1,cy+1,cz).setType(Material.BARREL,false);
-        w.setBiome(cx-radius,cy,cz-radius,cx+radius,cy+5,cz+radius,Biome.BEACH);
         w.getBlockAt(cx,cy+2,cz).setType(Material.OAK_SIGN,false);
     }
 }
