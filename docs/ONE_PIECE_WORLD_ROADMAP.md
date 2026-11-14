@@ -44,3 +44,13 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 - [ ] Ocean ratio and island spacing are checked across multiple seeds.
 - [ ] Ship can be boarded, piloted, turned, stopped, and dismounted in multiplayer.
 - [ ] Server restart preserves ship/world state without corruption.
+
+## Boss home-island rules
+- Bosses are world inhabitants, not admin-summoned encounters: no player-facing spawn command.
+- Each implemented boss has one canonical home island and home region.
+- Spawn a boss automatically when its home chunk is naturally loaded and no living instance is present.
+- Mark boss entities persistent so chunk unloads and server restarts do not despawn them.
+- Never force-load distant island chunks only to keep a boss active.
+- Keep boss respawn policy separate from initial spawning so defeat rewards cannot be farmed through instant respawns.
+- A boss is added to the active home-spawn roster only after its own entity, model, renderer, AI, and island anchor exist.
+- Initial active implementation: Kaido at Onigashima (anchor X=2752, Y=101, Z=1472). Other catalog entries remain planned until their individual boss implementations are ready.
