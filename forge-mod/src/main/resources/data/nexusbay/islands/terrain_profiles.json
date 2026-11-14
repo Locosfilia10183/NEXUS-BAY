@@ -387,6 +387,84 @@
         "kaido_keep",
         "harbor_gate"
       ]
+    },
+    {
+      "islandId": "ohara",
+      "shape": "scholar_forest",
+      "maxHeight": 112,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "tree_of_knowledge",
+        "archaeology_library",
+        "harbor_village"
+      ]
+    },
+    {
+      "islandId": "kano_country",
+      "shape": "mountain_fortress",
+      "maxHeight": 168,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "eight_treasures_mountain",
+        "royal_city",
+        "coastal_docks"
+      ]
+    },
+    {
+      "islandId": "flevance",
+      "shape": "white_city_ruins",
+      "maxHeight": 88,
+      "topBlock": "quartz",
+      "vegetation": "sparse",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "white_city",
+        "royal_palace_ruins",
+        "abandoned_harbor"
+      ]
+    },
+    {
+      "islandId": "germa_kingdom",
+      "shape": "mobile_kingdom",
+      "maxHeight": 104,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "germa_castle",
+        "clone_barracks",
+        "fleet_docks"
+      ]
+    },
+    {
+      "islandId": "baterilla",
+      "shape": "tropical_lowland",
+      "maxHeight": 82,
+      "topBlock": "grass",
+      "vegetation": "palm",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "coastal_village",
+        "palm_grove",
+        "quiet_bay"
+      ]
+    },
+    {
+      "islandId": "sorbet_kingdom",
+      "shape": "rolling_kingdom",
+      "maxHeight": 96,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "sorbet_town",
+        "royal_estate",
+        "southern_harbor"
+      ]
     }
   ]
 }
