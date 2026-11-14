@@ -51,7 +51,11 @@ if noise.get("firstOctave") != -4 or not noise.get("amplitudes"):
     errors.append("Island mass noise parameters are incomplete")
 
 islands = catalog.get("islands", [])
-regions = {item.get("id"): item for item in catalog.get("regions", [])}
+region_list = catalog.get("regions", [])
+region_ids = [item.get("id") for item in region_list]
+if len(region_ids) != len(set(region_ids)):
+    errors.append("Region catalog contains duplicate IDs")
+regions = {item.get("id"): item for item in region_list}
 profile_list = profiles.get("profiles", [])
 island_ids = [item.get("id") for item in islands]
 profile_ids = [item.get("islandId") for item in profile_list]
