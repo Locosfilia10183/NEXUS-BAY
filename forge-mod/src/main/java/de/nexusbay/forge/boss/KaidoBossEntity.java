@@ -239,6 +239,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         int nextPhase = healthPercent <= 30.0F ? 3 : healthPercent <= 65.0F ? 2 : 1;
         if (nextPhase != currentPhase) {
             currentPhase = nextPhase;
+            this.entityData.set(DATA_PHASE, nextPhase);
+            if (nextPhase == 2) triggerAnim("attack", "hybrid_transform");
+            else if (nextPhase == 3) triggerAnim("attack", "dragon_transform");
             String phaseName = switch (currentPhase) {
                 case 2 -> "HYBRIDFORM";
                 case 3 -> "DRACHENFORM";
