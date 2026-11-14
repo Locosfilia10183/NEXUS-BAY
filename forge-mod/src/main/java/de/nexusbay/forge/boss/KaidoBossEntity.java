@@ -89,6 +89,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
     private boolean dragonFlying = false;
+    private int aerialComboStep = 0;
 
     @Override
     protected void defineSynchedData() {
@@ -358,18 +359,35 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) return;
 
+        // Keep the boss facing its opponent before choosing a directional attack.
+        getLookControl().setLookAt(target, 30.0F, 30.0F);
         double distanceSqr = distanceToSqr(target);
-        if (currentPhase == 3 && isDragonFlying() && distanceSqr <= 256.0D
-                && dragonTwisterCooldown <= 0) {
-            startDragonTwisterAttack();
-            dragonTwisterCooldown = 420;
-            return;
-        }
-        if (currentPhase == 3 && isDragonFlying() && distanceSqr >= 49.0D
-                && distanceSqr <= 225.0D && skyfallCooldown <= 0) {
-            startDragonSkyfallAttack(target);
-            skyfallCooldown = 360;
-            return;
+
+        // In dragon form Kaido alternates his aerial finishers instead of
+        // repeatedly choosing the first available move in the same order.
+        if (currentPhase == 3 && isDragonFlying()
+                && distanceSqr >= 49.0D && distanceSqr <= 256.0D) {
+            boolean preferTwister = aerialComboStep % 2 == 0;
+            if ((preferTwister && dragonTwisterCooldown <= 0) || skyfallCooldown > 0) {
+                if (dragonTwisterCooldown <= 0) {
+                    startDragonTwisterAttack();
+                    dragonTwisterCooldown = 420;
+                    aerialComboStep++;
+                    return;
+                }
+            }
+            if (skyfallCooldown <= 0) {
+                startDragonSkyfallAttack(target);
+                skyfallCooldown = 360;
+                aerialComboStep++;
+                return;
+            }
+            if (dragonTwisterCooldown <= 0) {
+                startDragonTwisterAttack();
+                dragonTwisterCooldown = 420;
+                aerialComboStep++;
+                return;
+            }
         }
         if (currentPhase == 3 && distanceSqr >= 400.0D && distanceSqr <= 1600.0D
                 && blastBreathCooldown <= 0) {
