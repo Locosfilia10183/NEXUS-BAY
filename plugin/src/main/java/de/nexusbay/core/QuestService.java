@@ -65,24 +65,27 @@ public final class QuestService {
     public List<String> listActive(Player player) {
         List<String> lines = new ArrayList<>();
         if (!db()) {
-            lines.add("§cQuests benötigen die Datenbank.");
+            lines.add("§cQuests benötigen die Datenbank (database.enabled=true).");
             return lines;
         }
         ensureSeed();
-        lines.add("§6§lLogbuch §8» §fAktive Aufträge");
+        lines.add("§6§lLogbuch §8» §fAlle Aufträge");
         try (Connection c = plugin.database().getConnection();
              PreparedStatement ps = c.prepareStatement(
                      "SELECT q.code, q.title, q.type, q.reward_coins, q.reward_xp, " +
                              "COALESCE(pq.progress,0) AS progress, COALESCE(pq.target,1) AS target, " +
-                             "COALESCE(pq.completed,0) AS completed " +
+                             "COALESCE(pq.completed,0) AS completed, " +
+                             "(pq.player_uuid IS NOT NULL) AS accepted " +
                              "FROM quests q LEFT JOIN player_quests pq ON pq.quest_id = q.id AND pq.player_uuid = ? " +
                              "WHERE q.active = 1 ORDER BY q.id")) {
             ps.setString(1, player.getUniqueId().toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     boolean done = rs.getInt("completed") == 1;
-                    lines.add((done ? "§a✔ " : "§e○ ") + rs.getString("title") +
-                            " §8[" + rs.getString("type") + "] " +
+                    boolean accepted = rs.getInt("accepted") == 1;
+                    String mark = done ? "§a✔" : (accepted ? "§e●" : "§7○");
+                    lines.add(mark + " §f" + rs.getString("title") +
+                            " §8[" + rs.getString("type") + "|" + rs.getString("code") + "] " +
                             "§7" + rs.getInt("progress") + "/" + rs.getInt("target") +
                             " §8| §6" + rs.getInt("reward_coins") + "c §b" + rs.getInt("reward_xp") + "xp");
                 }
@@ -90,7 +93,38 @@ public final class QuestService {
         } catch (Exception e) {
             lines.add("§cFehler beim Laden der Quests.");
         }
-        lines.add("§7Annehmen: §f/bayquest accept <code>");
+        lines.add("§7/bayquest accept <code> §8| §7status §8| §7abandon <code>");
+        return lines;
+    }
+
+    public List<String> status(Player player) {
+        List<String> lines = new ArrayList<>();
+        if (!db()) {
+            lines.add("§cDatenbank erforderlich.");
+            return lines;
+        }
+        ensureSeed();
+        lines.add("§6§lLogbuch §8» §fDein Fortschritt");
+        try (Connection c = plugin.database().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                     "SELECT q.code, q.title, q.type, pq.progress, pq.target, pq.completed " +
+                             "FROM player_quests pq JOIN quests q ON q.id = pq.quest_id " +
+                             "WHERE pq.player_uuid = ? ORDER BY pq.completed, q.id")) {
+            ps.setString(1, player.getUniqueId().toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                boolean any = false;
+                while (rs.next()) {
+                    any = true;
+                    boolean done = rs.getInt("completed") == 1;
+                    lines.add((done ? "§a✔ " : "§e● ") + rs.getString("title") +
+                            " §8(" + rs.getString("code") + ") §7" +
+                            rs.getInt("progress") + "/" + rs.getInt("target"));
+                }
+                if (!any) lines.add("§7Keine angenommenen Quests. §f/bayquest list");
+            }
+        } catch (Exception e) {
+            lines.add("§cFehler beim Laden.");
+        }
         return lines;
     }
 
@@ -104,7 +138,7 @@ public final class QuestService {
                     "SELECT id FROM quests WHERE code = ? AND active = 1")) {
                 ps.setString(1, code);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) return "§cUnbekannter Quest-Code.";
+                    if (!rs.next()) return "§cUnbekannter Quest-Code. Nutze /bayquest list";
                     questId = rs.getInt("id");
                 }
             }
@@ -113,7 +147,10 @@ public final class QuestService {
                 check.setString(1, player.getUniqueId().toString());
                 check.setInt(2, questId);
                 try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next()) return "§eQuest bereits angenommen oder erledigt.";
+                    if (rs.next()) {
+                        if (rs.getInt("completed") == 1) return "§eQuest bereits erledigt.";
+                        return "§eQuest bereits angenommen. §f/bayquest status";
+                    }
                 }
             }
             try (PreparedStatement ins = c.prepareStatement(
@@ -123,13 +160,29 @@ public final class QuestService {
                 ins.setInt(3, target);
                 ins.executeUpdate();
             }
-            return "§aQuest angenommen: §f" + code;
+            return "§aQuest angenommen: §f" + code + " §7→ /bayquest status";
         } catch (Exception e) {
             return "§cAnnahme fehlgeschlagen.";
         }
     }
 
-    /** Call from combat listeners later to advance progress */
+    public String abandon(Player player, String code) {
+        if (!db()) return "§cDatenbank erforderlich.";
+        try (Connection c = plugin.database().getConnection();
+             PreparedStatement ps = c.prepareStatement(
+                     "DELETE pq FROM player_quests pq " +
+                             "JOIN quests q ON q.id = pq.quest_id " +
+                             "WHERE pq.player_uuid = ? AND q.code = ? AND pq.completed = 0")) {
+            ps.setString(1, player.getUniqueId().toString());
+            ps.setString(2, code);
+            int n = ps.executeUpdate();
+            if (n == 0) return "§cKeine offene Quest mit diesem Code.";
+            return "§eQuest abgebrochen: §f" + code;
+        } catch (Exception e) {
+            return "§cAbbruch fehlgeschlagen.";
+        }
+    }
+
     public void addProgress(Player player, String code, int amount) {
         if (!db() || amount <= 0) return;
         try (Connection c = plugin.database().getConnection()) {
@@ -142,7 +195,6 @@ public final class QuestService {
                 ps.setString(3, code);
                 ps.executeUpdate();
             }
-            // auto-complete
             try (PreparedStatement done = c.prepareStatement(
                     "UPDATE player_quests pq JOIN quests q ON q.id = pq.quest_id " +
                             "SET pq.completed = 1, pq.completed_at = CURRENT_TIMESTAMP " +

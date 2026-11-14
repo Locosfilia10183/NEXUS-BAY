@@ -1,5 +1,5 @@
 name: NexusBay
-version: '1.2.0-phase2'
+version: '1.2.1-quests'
 main: de.nexusbay.core.NexusBay
 api-version: '1.21'
 authors: [NEXUS-BAY]
@@ -29,7 +29,7 @@ commands:
     usage: /bayskill list <tree> | unlock <tree> <node>
   bayquest:
     description: Quests / logbook
-    usage: /bayquest [list] | accept <code>
+    usage: /bayquest list | status | accept <code> | abandon <code>
 
 permissions:
   nexusbay.admin:

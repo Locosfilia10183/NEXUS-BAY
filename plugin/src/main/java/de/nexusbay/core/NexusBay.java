@@ -207,11 +207,19 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
                 for (String line : quests.listActive(p)) sender.sendMessage(line);
                 return true;
             }
+            if (args[0].equalsIgnoreCase("status")) {
+                for (String line : quests.status(p)) sender.sendMessage(line);
+                return true;
+            }
             if (args[0].equalsIgnoreCase("accept") && args.length >= 2) {
                 sender.sendMessage(quests.accept(p, args[1].toLowerCase()));
                 return true;
             }
-            sender.sendMessage("§e/bayquest [list] | accept <code>");
+            if (args[0].equalsIgnoreCase("abandon") && args.length >= 2) {
+                sender.sendMessage(quests.abandon(p, args[1].toLowerCase()));
+                return true;
+            }
+            sender.sendMessage("§e/bayquest list | status | accept <code> | abandon <code>");
             return true;
         }
 
