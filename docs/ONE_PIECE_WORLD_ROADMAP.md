@@ -22,9 +22,18 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 3. [ ] Validate the noise-settings registry and density functions in an actual Forge 1.20.1 client/server. CI compilation alone does not validate datapack worldgen JSON.
 4. [ ] Tune island frequency and land ratio against multiple seeds until the large-map target is approximately 85-90% ocean. Current land ratio is NOT measured or guaranteed.
 5. [ ] Replace the temporary fixed Deep Ocean biome with climate/region-based ocean and island biomes, then add beaches, vegetation, and varied island surfaces.
-6. Add structure placement pools for ports, Marine bases, pirate outposts, and ruins.
-7. Add region progression and discovery/map metadata.
-8. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+6. [x] Define a canonical island atlas with planned coordinates, region, level gate, terrain theme, and island radius in `data/nexusbay/islands/island_catalog.json`; sync the client map markers to the atlas.
+7. [ ] Make the terrain generator produce landmasses at the atlas anchors and preserve large ocean gaps. The atlas currently describes planned locations; it does not itself create terrain.
+8. [ ] Add per-island terrain profiles and test the map in a fresh dedicated save.
+9. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
+10. Add region progression and discovery/map metadata.
+11. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+
+## Gameplay sequence after the world map
+- Finish and validate the world map, ocean, island landmasses, and island-specific terrain before adding gameplay loops.
+- Then add NPC placement and island-specific quest boards/dialogue, with quest chains, objectives, rewards, and level recommendations.
+- Quests must reference stable island/NPC IDs from the island catalog so later map and NPC changes do not break quest progress.
+- Boss encounters, faction reputation, shops, and island unlocks build on that foundation; do not start quest implementation before the islands exist.
 
 ## Ships gameplay goals
 - Large custom ship entity with visible hull, deck, mast, sails, wheel, and collision bounds.
