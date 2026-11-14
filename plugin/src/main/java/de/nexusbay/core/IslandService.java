@@ -14,7 +14,7 @@ public final class IslandService {
         ConfigurationSection all=plugin.getConfig().getConfigurationSection("islands");
         if (all == null) all=plugin.getConfig().createSection("islands");
         String key=name.toLowerCase(Locale.ROOT);
-        if (all.contains(key) || !IslandProgression.isKnown(name)) return false;
+        if (!IslandProgression.isKnown(name)) return false;
         World world=Bukkit.getWorld("world");
         if (world==null) return false;
         int spacing=plugin.getConfig().getInt("settings.island-spacing",320);
@@ -26,7 +26,7 @@ public final class IslandService {
         all.set(key+".x",x+0.5); all.set(key+".y",y+3); all.set(key+".z",z+0.5);
         all.set(key+".required-level",IslandProgression.requiredLevel(name));
         all.set(key+".slot",index);
-        all.set(key+".generated-version",1);
+        all.set(key+".generated-version",2);
         plugin.saveConfig();
         return true;
     }
@@ -46,7 +46,7 @@ public final class IslandService {
                 String key = islandName.toLowerCase(Locale.ROOT);
                 ConfigurationSection section = plugin.getConfig().getConfigurationSection("islands");
                 boolean current = section != null
-                        && section.getInt(key + ".generated-version", 0) >= 1
+                        && section.getInt(key + ".generated-version", 0) >= 2
                         && section.getInt(key + ".slot", -1) == slot;
                 if (!current) {
                     if (create(islandName)) {
@@ -166,6 +166,126 @@ public final class IslandService {
             w.getBlockAt(cx+radius/5,y,cz-radius/5).setType(theme.accent(),false);
         }
         w.getBlockAt(cx+radius/5,cy+7,cz-radius/5).setType(Material.SEA_LANTERN,false);
+        buildIslandBuildings(w,cx,cy,cz,name,theme,radius);
+    }
+
+    /** Distinct settlement silhouettes plus a dedicated raid arena for Onigashima. */
+    private void buildIslandBuildings(World world,int cx,int cy,int cz,String name,IslandTheme theme,int radius) {
+        String n=name.toLowerCase(Locale.ROOT);
+        if (n.contains("onigashima")) {
+            buildOnigashimaArena(world,cx,cy,cz,radius);
+            return;
+        }
+        if (n.contains("marineford") || n.contains("enies lobby") || n.contains("impel down")) {
+            buildFortress(world,cx,cy,cz,theme.accent());
+            return;
+        }
+        Material wall = theme.desert()?Material.SANDSTONE:theme.snowy()?Material.SPRUCE_PLANKS:
+                n.contains("wano")?Material.DARK_OAK_PLANKS:Material.OAK_PLANKS;
+        Material roof = theme.desert()?Material.CUT_SANDSTONE:theme.snowy()?Material.SPRUCE_STAIRS:
+                n.contains("wano")?Material.DARK_OAK_STAIRS:Material.OAK_STAIRS;
+        int[][] homes={{-13,-10},{13,-8},{-12,13},{13,12}};
+        for (int[] offset:homes) buildHouse(world,cx+offset[0],cy+1,cz+offset[1],wall,roof);
+        if (n.contains("baratie")) buildRestaurantDeck(world,cx,cy,cz);
+        if (n.contains("loguetown") || n.contains("shells town")) buildWatchTower(world,cx+19,cy+1,cz-18,theme.accent());
+        if (n.contains("alabasta")) buildPalace(world,cx,cy+1,cz-18,Material.SANDSTONE,Material.CUT_SANDSTONE);
+        if (n.contains("wano")) buildTorii(world,cx,cy+1,cz-22);
+    }
+
+    private void buildHouse(World w,int x,int y,int z,Material wall,Material roof) {
+        int width=9, depth=8, height=5;
+        for(int dx=0;dx<width;dx++) for(int dz=0;dz<depth;dz++) {
+            w.getBlockAt(x+dx,y-1,z+dz).setType(Material.OAK_PLANKS,false);
+            for(int dy=0;dy<height;dy++) {
+                boolean edge=dx==0||dx==width-1||dz==0||dz==depth-1;
+                if(edge) w.getBlockAt(x+dx,y+dy,z+dz).setType(dy==0?wall:wall,false);
+            }
+        }
+        for(int dx=-1;dx<=width;dx++) for(int dz=-1;dz<=depth;dz++) {
+            int edge=Math.min(Math.min(dx+1,width-dx),Math.min(dz+1,depth-dz));
+            if(edge>=0) w.getBlockAt(x+dx,y+height+(Math.min(edge,2)),z+dz).setType(roof,false);
+        }
+        w.getBlockAt(x+width/2,y,z).setType(Material.AIR,false);
+        w.getBlockAt(x+width/2,y+1,z).setType(Material.AIR,false);
+        w.getBlockAt(x+2,y+2,z).setType(Material.GLASS_PANE,false);
+        w.getBlockAt(x+width-3,y+2,z+depth-1).setType(Material.GLASS_PANE,false);
+        w.getBlockAt(x+width/2,y+1,z+depth/2).setType(Material.LANTERN,false);
+    }
+
+    private void buildFortress(World w,int cx,int cy,int cz,Material accent) {
+        int half=19;
+        for(int y=cy;y<cy+12;y++) for(int i=-half;i<=half;i++) {
+            w.getBlockAt(cx+i,y,cz-half).setType(Material.STONE_BRICKS,false);
+            w.getBlockAt(cx+i,y,cz+half).setType(Material.STONE_BRICKS,false);
+            w.getBlockAt(cx-half,y,cz+i).setType(Material.STONE_BRICKS,false);
+            w.getBlockAt(cx+half,y,cz+i).setType(Material.STONE_BRICKS,false);
+        }
+        for(int x=-half+2;x<half-1;x+=4) for(int z=-half+2;z<half-1;z+=4)
+            w.getBlockAt(cx+x,cy+1,cz+z).setType(accent,false);
+        for(int y=cy+1;y<cy+8;y++) for(int x=-2;x<=2;x++) {
+            w.getBlockAt(cx+x,y,cz-half).setType(Material.AIR,false);
+        }
+        buildWatchTower(w,cx,cy+1,cz,accent);
+    }
+
+    private void buildOnigashimaArena(World w,int cx,int cy,int cz,int radius) {
+        int outer=23, inner=17;
+        for(int y=cy+1;y<cy+5;y++) for(int x=-outer;x<=outer;x++) for(int z=-outer;z<=outer;z++) {
+            double d=Math.sqrt(x*x+z*z);
+            if(d>=inner && d<=outer) w.getBlockAt(cx+x,y,cz+z).setType(Material.POLISHED_DEEPSLATE_BRICKS,false);
+        }
+        for(int x=-inner;x<=inner;x++) for(int z=-inner;z<=inner;z++) {
+            if(x*x+z*z<=inner*inner) w.getBlockAt(cx+x,cy,cz+z).setType(Material.BLACKSTONE,false);
+        }
+        for(int i=0;i<8;i++) {
+            double a=Math.PI*2*i/8.0;
+            int px=cx+(int)(Math.cos(a)*outer), pz=cz+(int)(Math.sin(a)*outer);
+            for(int y=cy+5;y<cy+17;y++) w.getBlockAt(px,y,pz).setType(Material.POLISHED_BLACKSTONE_BRICKS,false);
+            w.getBlockAt(px,cy+17,pz).setType(Material.SOUL_LANTERN,false);
+        }
+        // Four monumental gates mark the arena entrances.
+        for(int side:new int[]{-1,1}) for(int x=-4;x<=4;x+=8) {
+            int gx=cx+x, gz=cz+side*outer;
+            for(int y=cy+1;y<cy+11;y++) w.getBlockAt(gx,y,gz).setType(Material.CRIMSON_STEM,false);
+            for(int dx=-4;dx<=4;dx++) w.getBlockAt(cx+dx,cy+11,gz).setType(Material.CRIMSON_PLANKS,false);
+        }
+        buildWatchTower(w,cx,cy+1,cz-outer-8,Material.REDSTONE_BLOCK);
+        w.getBlockAt(cx,cy+1,cz).setType(Material.BEACON,false);
+    }
+
+    private void buildWatchTower(World w,int x,int y,int z,Material accent) {
+        for(int dy=0;dy<15;dy++) {
+            w.getBlockAt(x,y+dy,z).setType(dy%5==0?accent:Material.STONE_BRICKS,false);
+            if(dy<12) {
+                w.getBlockAt(x+1,y+dy,z).setType(Material.STONE_BRICKS,false);
+                w.getBlockAt(x-1,y+dy,z).setType(Material.STONE_BRICKS,false);
+                w.getBlockAt(x,y+dy,z+1).setType(Material.STONE_BRICKS,false);
+                w.getBlockAt(x,y+dy,z-1).setType(Material.STONE_BRICKS,false);
+            }
+        }
+        w.getBlockAt(x,y+15,z).setType(Material.SEA_LANTERN,false);
+    }
+
+    private void buildPalace(World w,int cx,int y,int cz,Material wall,Material roof) {
+        for(int dx=-10;dx<=10;dx++) for(int dz=-8;dz<=8;dz++) {
+            boolean edge=Math.abs(dx)==10||Math.abs(dz)==8;
+            if(edge) for(int dy=0;dy<9;dy++) w.getBlockAt(cx+dx,y+dy,cz+dz).setType(wall,false);
+            if(!edge) w.getBlockAt(cx+dx,y-1,cz+dz).setType(Material.SMOOTH_SANDSTONE,false);
+        }
+        for(int dx=-11;dx<=11;dx++) for(int dz=-9;dz<=9;dz++)
+            if(Math.abs(dx)==11||Math.abs(dz)==9) w.getBlockAt(cx+dx,y+9,cz+dz).setType(roof,false);
+    }
+
+    private void buildRestaurantDeck(World w,int cx,int y,int cz) {
+        for(int x=-14;x<=14;x++) for(int z=-10;z<=10;z++)
+            if(Math.abs(x)>11||Math.abs(z)>7) w.getBlockAt(cx+x,y,cz+z).setType(Material.OAK_PLANKS,false);
+        for(int x=-12;x<=12;x+=4) w.getBlockAt(cx+x,y+1,cz-8).setType(Material.OAK_FENCE,false);
+    }
+
+    private void buildTorii(World w,int cx,int y,int cz) {
+        for(int x=-6;x<=6;x+=12) for(int dy=0;dy<10;dy++) w.getBlockAt(cx+x,y+dy,cz).setType(Material.RED_CONCRETE,false);
+        for(int x=-8;x<=8;x++) w.getBlockAt(cx+x,y+10,cz).setType(Material.RED_CONCRETE,false);
+        for(int x=-7;x<=7;x++) w.getBlockAt(cx+x,y+8,cz).setType(Material.BLACKSTONE,false);
     }
 
     private void buildTree(World world,int x,int y,int z,Material trunk,Material leaves,boolean snowy) {
