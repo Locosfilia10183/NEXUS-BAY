@@ -1,0 +1,201 @@
+{
+  "type": "nexusbay:island_atlas",
+  "islands": [
+    {
+      "id": "foosha_village",
+      "x": -18000,
+      "z": -9000,
+      "radius": 700,
+      "maxHeight": 78
+    },
+    {
+      "id": "shells_town",
+      "x": -14000,
+      "z": -4000,
+      "radius": 650,
+      "maxHeight": 92
+    },
+    {
+      "id": "orange_town",
+      "x": -9000,
+      "z": -11000,
+      "radius": 600,
+      "maxHeight": 76
+    },
+    {
+      "id": "syrup_village",
+      "x": -6500,
+      "z": -3000,
+      "radius": 700,
+      "maxHeight": 104
+    },
+    {
+      "id": "baratie",
+      "x": -11000,
+      "z": 2000,
+      "radius": 180,
+      "maxHeight": 70
+    },
+    {
+      "id": "arlong_park",
+      "x": -18000,
+      "z": 7000,
+      "radius": 650,
+      "maxHeight": 82
+    },
+    {
+      "id": "loguetown",
+      "x": -7000,
+      "z": 9000,
+      "radius": 850,
+      "maxHeight": 86
+    },
+    {
+      "id": "reverse_mountain",
+      "x": 0,
+      "z": -16000,
+      "radius": 1100,
+      "maxHeight": 220
+    },
+    {
+      "id": "whiskey_peak",
+      "x": 1500,
+      "z": -11000,
+      "radius": 700,
+      "maxHeight": 112
+    },
+    {
+      "id": "little_garden",
+      "x": -1800,
+      "z": -7000,
+      "radius": 1000,
+      "maxHeight": 148
+    },
+    {
+      "id": "drum_island",
+      "x": -2500,
+      "z": -2500,
+      "radius": 900,
+      "maxHeight": 240
+    },
+    {
+      "id": "alabasta",
+      "x": 2500,
+      "z": -1000,
+      "radius": 1800,
+      "maxHeight": 138
+    },
+    {
+      "id": "jaya",
+      "x": -2200,
+      "z": 3500,
+      "radius": 850,
+      "maxHeight": 128
+    },
+    {
+      "id": "skypiea",
+      "x": 0,
+      "z": 5000,
+      "radius": 900,
+      "maxHeight": 185
+    },
+    {
+      "id": "water_7",
+      "x": 2500,
+      "z": 8500,
+      "radius": 850,
+      "maxHeight": 94
+    },
+    {
+      "id": "enies_lobby",
+      "x": -2500,
+      "z": 11000,
+      "radius": 900,
+      "maxHeight": 118
+    },
+    {
+      "id": "thriller_bark",
+      "x": 6000,
+      "z": -5000,
+      "radius": 1100,
+      "maxHeight": 132
+    },
+    {
+      "id": "sabaody_archipelago",
+      "x": 1000,
+      "z": 14500,
+      "radius": 1000,
+      "maxHeight": 96
+    },
+    {
+      "id": "amazon_lily",
+      "x": -6500,
+      "z": 15500,
+      "radius": 850,
+      "maxHeight": 154
+    },
+    {
+      "id": "impel_down",
+      "x": 7000,
+      "z": 15000,
+      "radius": 600,
+      "maxHeight": 88
+    },
+    {
+      "id": "marineford",
+      "x": 11000,
+      "z": 9000,
+      "radius": 1100,
+      "maxHeight": 126
+    },
+    {
+      "id": "fish_man_island",
+      "x": 0,
+      "z": 19000,
+      "radius": 900,
+      "maxHeight": 82
+    },
+    {
+      "id": "punk_hazard",
+      "x": 25000,
+      "z": -10000,
+      "radius": 1000,
+      "maxHeight": 176
+    },
+    {
+      "id": "dressrosa",
+      "x": 30000,
+      "z": -4000,
+      "radius": 1100,
+      "maxHeight": 142
+    },
+    {
+      "id": "zou",
+      "x": 36000,
+      "z": 3000,
+      "radius": 900,
+      "maxHeight": 220
+    },
+    {
+      "id": "whole_cake_island",
+      "x": 28000,
+      "z": 7000,
+      "radius": 1200,
+      "maxHeight": 156
+    },
+    {
+      "id": "wano_kuni",
+      "x": 34000,
+      "z": 12000,
+      "radius": 1500,
+      "maxHeight": 210
+    },
+    {
+      "id": "onigashima",
+      "x": 36500,
+      "z": 14000,
+      "radius": 650,
+      "maxHeight": 190
+    }
+  ]
+}
