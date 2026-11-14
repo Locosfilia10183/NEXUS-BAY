@@ -428,9 +428,9 @@
       "region": "new_world",
       "requiredLevel": 125,
       "center": {
-        "x": 2752,
+        "x": 36500,
         "y": 64,
-        "z": 1472
+        "z": 14000
       },
       "theme": "oni_fortress",
       "radius": 650
