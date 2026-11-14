@@ -18,14 +18,48 @@ public final class IslandService {
         World world=Bukkit.getWorld("world");
         if (world==null) return false;
         int spacing=plugin.getConfig().getInt("settings.island-spacing",320);
-        int index=all.getKeys(false).size();
-        int x=(index%8)*spacing, z=(index/8)*spacing, y=100;
+        int index=IslandProgression.slot(name);
+        if (index < 0) return false;
+        int x=512+(index%8)*spacing, z=512+(index/8)*spacing, y=100;
         buildIsland(world,x,y,z,name);
         all.set(key+".name",name); all.set(key+".world",world.getName());
         all.set(key+".x",x+0.5); all.set(key+".y",y+3); all.set(key+".z",z+0.5);
         all.set(key+".required-level",IslandProgression.requiredLevel(name));
+        all.set(key+".slot",index);
+        all.set(key+".generated-version",1);
         plugin.saveConfig();
         return true;
+    }
+
+    /** Generates the complete canonical island chain automatically, without admin commands. */
+    public void generateWorld() {
+        org.bukkit.scheduler.BukkitRunnable task = new org.bukkit.scheduler.BukkitRunnable() {
+            private int slot = 0;
+            @Override public void run() {
+                if (slot >= IslandProgression.all().size()) {
+                    cancel();
+                    plugin.getLogger().info("Grand Line generation complete: " + slot + " islands.");
+                    return;
+                }
+                String islandName = IslandProgression.all().keySet().stream().skip(slot).findFirst().orElse(null);
+                if (islandName == null) { cancel(); return; }
+                String key = islandName.toLowerCase(Locale.ROOT);
+                ConfigurationSection section = plugin.getConfig().getConfigurationSection("islands");
+                boolean current = section != null
+                        && section.getInt(key + ".generated-version", 0) >= 1
+                        && section.getInt(key + ".slot", -1) == slot;
+                if (!current) {
+                    if (create(islandName)) {
+                        plugin.getLogger().info("Generated island " + (slot + 1) + "/" + IslandProgression.all().size() + ": " + islandName);
+                    } else {
+                        plugin.getLogger().warning("Could not generate island: " + islandName + " (world 'world' may not be loaded)");
+                        return;
+                    }
+                }
+                slot++;
+            }
+        };
+        task.runTaskTimer(plugin, 20L, 10L);
     }
 
     public boolean visit(Player player,String name) {
@@ -50,7 +84,7 @@ public final class IslandService {
 
     public String describeIslands() {
         ConfigurationSection section=plugin.getConfig().getConfigurationSection("islands");
-        if(section==null || section.getKeys(false).isEmpty()) return "Noch keine Inseln erstellt";
+        if(section==null || section.getKeys(false).isEmpty()) return "Inselwelt wird automatisch generiert";
         StringBuilder out=new StringBuilder();
         for(String key:section.getKeys(false)) {
             if(out.length()>0) out.append(" §8| ");
