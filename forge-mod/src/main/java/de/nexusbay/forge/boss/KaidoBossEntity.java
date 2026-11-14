@@ -88,6 +88,14 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         return this.entityData.get(DATA_PHASE);
     }
 
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        if (DATA_PHASE.equals(accessor)) {
+            refreshDimensions();
+        }
+    }
+
     public KaidoBossEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
         this.xpReward = 5000;
