@@ -2,7 +2,7 @@
 
 Independent pirate-themed Minecraft Java + Bedrock RPG server for an Ubuntu VPS. This project is separate from NEXUSCRAFT and does not modify it.
 
-## First core release
+## Current core release
 - Paper server with Geyser + Floodgate cross-play
 - NEXUS-BAY Core plugin: persistent player levels, XP, Bay-Coins and player transfers
 - Admin control GUI with world tools, status, broadcast and coin grant
@@ -10,6 +10,7 @@ Independent pirate-themed Minecraft Java + Bedrock RPG server for an Ubuntu VPS.
 - Procedural starter islands with terrain, dock, lighthouse and outpost
 - Island management: `/bayisland create <name>`, `/bayisland visit <name>`, `/bayisland list`
 - Player profile: `/bayprofile`; coin transfer: `/baypay <player> <amount>`
+- Pirate bounty contract: `/bayquest accept` starts a 10-monster contract; `/bayquest status` shows progress; `/bayquest abandon` cancels it. Completion grants 100 Bay-Coins and 50 XP. Progress persists across reconnects and restarts.
 - Dedicated Linux user, systemd service and backup script
 
 ## Requirements
@@ -38,17 +39,18 @@ sudo systemctl status nexus-bay
 ```
 
 ## Connect
-- Java: `YOUR_VPS_IP:25565`
-- Bedrock: `YOUR_VPS_IP`, port `19132`
+- Java: `YOUR_VPS_IP:25565` (or a DNS name pointing to the VPS)
+- Bedrock: DNS name or `YOUR_VPS_IP`, port `19132`
 
 ## Admin and player commands
 - `/bayadmin` – admin control panel (OP / nexusbay.admin)
 - `/bayinv <player>` – read-only online player inventory inspection
-- `/bayisland create <name>` – create a starter island
+- `/bayisland create <name>` – create a starter island (admin)
 - `/bayisland visit <name>` – teleport to an island
 - `/bayisland list` – list islands
 - `/bayprofile` – show RPG level, XP and coins
 - `/baypay <player> <amount>` – transfer Bay-Coins
+- `/bayquest accept|status|abandon` – take and track a repeatable pirate bounty contract
 
 ## Manage
 ```bash
@@ -60,4 +62,4 @@ sudo /opt/nexus-bay/backup.sh
 
 Open TCP 25565 and UDP 19132 in the VPS provider firewall. If UFW is already active, the installer adds both rules; it does not enable UFW or change SSH rules.
 
-See [network guide](docs/NETWORK.md) and [gameplay roadmap](docs/ROADMAP.md). The first core release is a foundation, not a finished One Piece clone: devil-fruit abilities, Haki combat, full questlines, crew wars, custom NPCs and a player marketplace remain future development systems. Paper plugins are used for cross-play; Forge/Fabric-only mods are not compatible with this Paper server.
+See [network guide](docs/NETWORK.md) and [gameplay roadmap](docs/ROADMAP.md). This is an evolving RPG foundation, not a finished One Piece clone: devil-fruit abilities, Haki combat, full questlines, crew wars, custom NPCs and a player marketplace remain future development systems. Paper plugins are used for cross-play; Forge/Fabric-only mods are not compatible with this Paper server.
