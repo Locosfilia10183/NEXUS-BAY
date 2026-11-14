@@ -3,14 +3,26 @@ set -Eeuo pipefail
 SERVICE="nexus-bay"
 DEFAULT_DIR="/opt/nexus-bay"
 RUN_USER="minecraft"
-PAPER_API="https://api.papermc.io/v2"
+PAPER_API="https://fill.papermc.io/v3"
 
 if [[ "$EUID" -ne 0 ]]; then echo "Bitte mit sudo ausführen: sudo bash install.sh"; exit 1; fi
-echo "=== NEXUS-BAY | Neuer Java + Bedrock Server ==="
-read -rp "Minecraft-Version (z.B. 1.21.4): " MC_VERSION
+echo "=== NEXUS-BAY | Java + Bedrock + RPG Core ==="
+read -rp "Minecraft-Version (leer = neueste stabile Paper-Version): " MC_VERSION
+if [[ -z "$MC_VERSION" ]]; then
+  PROJECT="$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0 (server installer)' "$PAPER_API/projects/paper")"
+  mapfile -t VERSIONS < <(echo "$PROJECT" | jq -r '.versions | to_entries[] | .value[]' | sort -Vru)
+  MC_VERSION=""
+  for candidate in "${VERSIONS[@]}"; do
+    response="$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0 (server installer)' "$PAPER_API/projects/paper/versions/$candidate/builds")" || continue
+    stable="$(echo "$response" | jq -r '[.[] | select(.channel == "STABLE")] | first | .id // empty')"
+    if [[ -n "$stable" ]]; then MC_VERSION="$candidate"; break; fi
+  done
+  [[ -n "$MC_VERSION" ]] || { echo "Keine stabile Paper-Version gefunden."; exit 1; }
+  echo "Neueste stabile Paper-Version: $MC_VERSION"
+fi
 [[ "$MC_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || { echo "Ungültige Version."; exit 1; }
-read -rp "RAM in GB [4]: " RAM_GB
-RAM_GB="${RAM_GB:-4}"
+read -rp "RAM in GB [6]: " RAM_GB
+RAM_GB="${RAM_GB:-6}"
 [[ "$RAM_GB" =~ ^[2-9][0-9]*$ ]] || { echo "Bitte mindestens 2 GB angeben."; exit 1; }
 read -rp "Installationsordner [$DEFAULT_DIR]: " INSTALL_DIR
 INSTALL_DIR="${INSTALL_DIR:-$DEFAULT_DIR}"
@@ -20,31 +32,37 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y curl jq ca-certificates openjdk-21-jre-headless
+apt-get install -y curl jq ca-certificates git maven openjdk-25-jdk-headless
 JAVA_BIN="$(command -v java)"
-VERSIONS="$(curl -fsSL "$PAPER_API/projects/paper/versions")"
-echo "$VERSIONS" | jq -e --arg v "$MC_VERSION" '.versions | index($v)' >/dev/null || { echo "Paper unterstützt diese Version nicht."; exit 1; }
-BUILDS="$(curl -fsSL "$PAPER_API/projects/paper/versions/$MC_VERSION/builds")"
-BUILD="$(echo "$BUILDS" | jq -r '[.builds[] | select(.channel == "STABLE")] | last | .build // empty')"
-[[ -n "$BUILD" ]] || { echo "Kein stabiler Paper-Build gefunden."; exit 1; }
-JAR="$(echo "$BUILDS" | jq -r --argjson b "$BUILD" '.builds[] | select(.build == $b) | .downloads.application.name')"
-[[ -n "$JAR" && "$JAR" != "null" ]] || { echo "Paper-Dateiname fehlt."; exit 1; }
+BUILDS="$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0 (server installer)' "$PAPER_API/projects/paper/versions/$MC_VERSION/builds")"
+BUILD="$(echo "$BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .id // empty')"
+PAPER_URL="$(echo "$BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .downloads["server:default"].url // empty')"
+[[ -n "$BUILD" && -n "$PAPER_URL" ]] || { echo "Für Paper $MC_VERSION gibt es keinen stabilen Build."; exit 1; }
 
 id "$RUN_USER" >/dev/null 2>&1 || useradd --system --create-home --home-dir "/home/$RUN_USER" --shell /usr/sbin/nologin "$RUN_USER"
 install -d -o "$RUN_USER" -g "$RUN_USER" "$INSTALL_DIR/plugins" "$INSTALL_DIR/backups"
-curl -fL "$PAPER_API/projects/paper/versions/$MC_VERSION/builds/$BUILD/downloads/$JAR" -o "$INSTALL_DIR/paper.jar"
+curl -fL "$PAPER_URL" -o "$INSTALL_DIR/paper.jar"
 curl -fL "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot" -o "$INSTALL_DIR/plugins/Geyser-Spigot.jar"
 curl -fL "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot" -o "$INSTALL_DIR/plugins/floodgate-spigot.jar"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ -f "$SCRIPT_DIR/plugin/pom.xml" ]]; then
+  echo "Baue NEXUS-BAY RPG/Admin-Plugin..."
+  mvn -B -f "$SCRIPT_DIR/plugin/pom.xml" clean package
+  install -m 640 "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" "$INSTALL_DIR/plugins/NEXUS-BAY-Core.jar"
+else
+  echo "WARNUNG: Plugin-Quellcode nicht gefunden; Core-Plugin wurde übersprungen."
+fi
 
 cat > "$INSTALL_DIR/start.sh" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$INSTALL_DIR"
-exec "$JAVA_BIN" -Xms1G -Xmx${RAM_GB}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -jar paper.jar --nogui
+exec "$JAVA_BIN" -Xms2G -Xmx${RAM_GB}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -jar paper.jar --nogui
 EOF
 chmod 750 "$INSTALL_DIR/start.sh"
 cat > "$INSTALL_DIR/server.properties" <<'EOF'
-motd=§6NEXUS-BAY §f| Java + Bedrock
+motd=§6NEXUS-BAY §f| Pirate RPG | Java + Bedrock
 server-port=25565
 server-ip=
 online-mode=true
@@ -65,14 +83,19 @@ D="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$D/backups"
 systemctl stop nexus-bay
 trap 'systemctl start nexus-bay' EXIT
-tar -czf "$D/backups/nexus-bay-$(date +%Y%m%d-%H%M%S).tar.gz" -C "$D" world world_nether world_the_end server.properties plugins
+items=()
+for item in world world_nether world_the_end server.properties plugins config.yml; do
+  [[ ! -e "$D/$item" ]] || items+=("$item")
+done
+tar -czf "$D/backups/nexus-bay-$(date +%Y%m%d-%H%M%S).tar.gz" -C "$D" "${items[@]}"
 EOF
 chmod 750 "$INSTALL_DIR/backup.sh"
 chown -R "$RUN_USER:$RUN_USER" "$INSTALL_DIR"
 cat > "/etc/systemd/system/$SERVICE.service" <<EOF
 [Unit]
-Description=NEXUS-BAY Minecraft Server
-After=network.target
+Description=NEXUS-BAY Minecraft Java + Bedrock RPG Server
+After=network-online.target
+Wants=network-online.target
 [Service]
 User=$RUN_USER
 Group=$RUN_USER
@@ -81,17 +104,24 @@ ExecStart=$INSTALL_DIR/start.sh
 Restart=on-failure
 RestartSec=10
 KillSignal=SIGINT
-TimeoutStopSec=60
+TimeoutStopSec=90
 NoNewPrivileges=true
 PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=$INSTALL_DIR
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
 systemctl enable "$SERVICE"
+if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then
+  ufw allow 25565/tcp
+  ufw allow 19132/udp
+fi
 echo
-echo "Dateien installiert: Paper $MC_VERSION Build $BUILD"
+echo "NEXUS-BAY installiert: Paper $MC_VERSION Build $BUILD"
+echo "RPG/Admin-Plugin: $([[ -f "$INSTALL_DIR/plugins/NEXUS-BAY-Core.jar" ]] && echo installiert || echo nicht gebaut)"
 echo "EULA prüfen/akzeptieren: nano $INSTALL_DIR/eula.txt"
 echo "Danach starten: systemctl start $SERVICE"
-echo "Firewall: TCP 25565 und UDP 19132 freigeben."
+echo "Provider-Firewall: TCP 25565 und UDP 19132 freigeben."
 echo "Java: VPS-IP:25565 | Bedrock: VPS-IP Port 19132"
