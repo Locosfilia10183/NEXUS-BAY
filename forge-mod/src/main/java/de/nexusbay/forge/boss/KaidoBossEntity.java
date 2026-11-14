@@ -107,6 +107,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private double arenaCenterZ;
     private double arenaRadius = 42.0D;
     private final Set<UUID> arenaAnnouncedPlayers = new HashSet<>();
+    private final Set<UUID> arenaParticipants = new HashSet<>();
 
     public void setArenaBounds(double centerX, double centerZ, double radius) {
         this.arenaBound = true;
@@ -122,8 +123,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                     arenaCenterZ - arenaRadius, arenaCenterX + arenaRadius, getY() + 64.0D,
                     arenaCenterZ + arenaRadius);
             for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, noticeArea)) {
-                if (arenaAnnouncedPlayers.add(player.getUUID())) {
-                    player.displayClientMessage(Component.literal("§4§lONIGASHIMA §c– Du hast Kaidos Gebiet betreten! Bereite dich auf den Kampf vor."), false);
+                double playerDx = player.getX() - arenaCenterX;
+                double playerDz = player.getZ() - arenaCenterZ;
+                if (playerDx * playerDx + playerDz * playerDz <= arenaRadius * arenaRadius) {
+                    arenaParticipants.add(player.getUUID());
+                    if (arenaAnnouncedPlayers.add(player.getUUID())) {
+                        player.displayClientMessage(Component.literal("§4§lONIGASHIMA §c– Du hast Kaidos Gebiet betreten! Bereite dich auf den Kampf vor."), false);
+                    }
                 }
             }
         }
@@ -949,6 +955,19 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
      */
     private void dropKaidoRewards() {
         if (!(level() instanceof ServerLevel serverLevel)) return;
+
+        // Every player who entered the Onigashima arena receives a participation reward.
+        for (UUID participantId : arenaParticipants) {
+            ServerPlayer participant = serverLevel.getServer().getPlayerList().getPlayer(participantId);
+            if (participant != null) {
+                giveParticipationReward(participant);
+                participant.displayClientMessage(
+                        Component.literal("§6§lKAIDO BESIEGT! §eDeine Teilnahme-Belohnung wurde ausgegeben."),
+                        false);
+            }
+        }
+
+        // The killer receives the original world-boss loot roll and guaranteed trophy.
         LivingEntity killer = getKillCredit();
         if (killer == null) return;
 
@@ -961,10 +980,24 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         dropNamedReward(serverLevel, Items.CHORUS_FRUIT,
                 "§dAzurblauer Drachenfrucht-Kern", 1, 0.005D);
 
-        // A guaranteed trophy makes every successful world-boss defeat rewarding.
         ItemStack trophy = new ItemStack(Items.NETHER_STAR);
         trophy.setHoverName(Component.literal("§cTrophäe: Kaido, König der Bestien"));
         spawnAtLocation(trophy);
+    }
+
+    private void giveParticipationReward(ServerPlayer player) {
+        ItemStack scales = new ItemStack(Items.PRISMARINE_SHARD, 2);
+        scales.setHoverName(Component.literal("§bKaidos Drachenschuppe"));
+        ItemStack fragment = new ItemStack(Items.BLAZE_ROD);
+        fragment.setHoverName(Component.literal("§6Kanabo-Splitter"));
+        giveOrDrop(player, scales);
+        giveOrDrop(player, fragment);
+    }
+
+    private void giveOrDrop(ServerPlayer player, ItemStack stack) {
+        if (!player.getInventory().add(stack)) {
+            player.drop(stack, false);
+        }
     }
 
     private void dropNamedReward(ServerLevel serverLevel, net.minecraft.world.item.Item item,
