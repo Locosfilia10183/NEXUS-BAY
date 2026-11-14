@@ -16,7 +16,7 @@ public final class ModEntities {
     public static final RegistryObject<EntityType<KaidoBossEntity>> KAIDO =
             ENTITY_TYPES.register("kaido", () -> EntityType.Builder
                     .of(KaidoBossEntity::new, MobCategory.MONSTER)
-                    .sized(2.2F, 4.8F)
+                    .sized(2.7F, 6.4F)
                     .clientTrackingRange(12)
                     .build("kaido"));
 
