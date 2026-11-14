@@ -44,23 +44,23 @@ public final class KaidoCommands {
     }
 
     private static int spawn(ServerLevel level, double x, double y, double z,
-                             java.util.function.Consumer<java.util.function.Supplier<Component>> feedback) {
+                             java.util.function.BiConsumer<java.util.function.Supplier<Component>, Boolean> feedback) {
         AABB area = new AABB(x - 12, y - 8, z - 12, x + 12, y + 12, z + 12);
         if (!level.getEntitiesOfClass(KaidoBossEntity.class, area).isEmpty()) {
-            feedback.accept(() -> Component.literal("Kaido ist in diesem Gebiet bereits anwesend."));
+            feedback.accept(() -> Component.literal("Kaido ist in diesem Gebiet bereits anwesend."), false);
             return 0;
         }
         Entity entity = ModEntities.KAIDO.get().create(level);
         if (!(entity instanceof KaidoBossEntity kaido)) {
-            feedback.accept(() -> Component.literal("Kaido konnte nicht erstellt werden."));
+            feedback.accept(() -> Component.literal("Kaido konnte nicht erstellt werden."), false);
             return 0;
         }
         kaido.moveTo(x, y, z, level.random.nextFloat() * 360.0F, 0.0F);
         if (!level.addFreshEntity(kaido)) {
-            feedback.accept(() -> Component.literal("Kaido konnte nicht in die Welt gesetzt werden."));
+            feedback.accept(() -> Component.literal("Kaido konnte nicht in die Welt gesetzt werden."), false);
             return 0;
         }
-        feedback.accept(() -> Component.literal("KAIDO – König der Bestien wurde beschworen!"));
+        feedback.accept(() -> Component.literal("KAIDO – König der Bestien wurde beschworen!"), true);
         return Command.SINGLE_SUCCESS;
     }
 }
