@@ -17,11 +17,12 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 - Ocean travel must be meaningful; avoid placing every island within short swimming distance.
 
 ## Generator implementation sequence
-1. Implement a dedicated world preset/dimension configuration for a new save, not a mutation of existing world settings.
-2. Establish ocean-heavy biome/terrain distribution and verify island spacing with seed-based tests.
-3. Add structure placement pools for ports, Marine bases, pirate outposts, and ruins.
-4. Add region progression and discovery/map metadata.
-5. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+1. [x] Add an isolated `nexusbay:one_piece_ocean` world-preset scaffold at `data/nexusbay/worldgen/world_preset/one_piece_ocean.json`; it does not alter the existing save.
+2. [ ] Replace the scaffold's vanilla terrain noise with an ocean-dominant generator and controlled island landmasses. The current scaffold assigns the Deep Ocean biome but still uses vanilla Overworld terrain, so it does NOT yet meet the 85-90% ocean target and is not ready for live-world use.
+3. [ ] Verify ocean-heavy biome/terrain distribution and island spacing with seed-based tests.
+4. Add structure placement pools for ports, Marine bases, pirate outposts, and ruins.
+5. Add region progression and discovery/map metadata.
+6. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
 
 ## Ships gameplay goals
 - Large custom ship entity with visible hull, deck, mast, sails, wheel, and collision bounds.
