@@ -47,6 +47,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
     private static final RawAnimation RAGNAROK_ANIM = RawAnimation.begin().thenPlay("animation.kaido.ragnarok");
+    private static final RawAnimation THUNDER_BAGUA_ANIM = RawAnimation.begin().thenPlay("animation.kaido.thunder_bagua");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
@@ -54,6 +55,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final int BREATH_ATTACK = 1;
     private static final int SLAM_ATTACK = 2;
     private static final int RAGNAROK_ATTACK = 3;
+    private static final int THUNDER_BAGUA_ATTACK = 4;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -67,6 +69,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int breathCooldown = 0;
     private int slamCooldown = 0;
     private int ragnarokCooldown = 0;
+    private int thunderBaguaCooldown = 0;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
@@ -109,7 +112,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM)
                 .triggerableAnim("hit_react", HIT_REACT_ANIM)
                 .triggerableAnim("death", DEATH_ANIM)
-                .triggerableAnim("ragnarok", RAGNAROK_ANIM));
+                .triggerableAnim("ragnarok", RAGNAROK_ANIM)
+                .triggerableAnim("thunder_bagua", THUNDER_BAGUA_ANIM));
     }
 
     @Override
@@ -157,6 +161,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (breathCooldown > 0) breathCooldown--;
             if (slamCooldown > 0) slamCooldown--;
             if (ragnarokCooldown > 0) ragnarokCooldown--;
+            if (thunderBaguaCooldown > 0) thunderBaguaCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -258,6 +263,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 if (pendingAttack == BREATH_ATTACK) applyBreathDamage();
                 else if (pendingAttack == SLAM_ATTACK) applySlamDamage();
                 else if (pendingAttack == RAGNAROK_ATTACK) applyRagnarokDamage();
+                else if (pendingAttack == THUNDER_BAGUA_ATTACK) applyThunderBaguaDamage();
             }
         }
 
@@ -272,6 +278,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (target == null || !target.isAlive()) return;
 
         double distanceSqr = distanceToSqr(target);
+        if (currentPhase >= 2 && distanceSqr >= 25.0D && distanceSqr <= 225.0D
+                && thunderBaguaCooldown <= 0) {
+            startThunderBaguaAttack();
+            thunderBaguaCooldown = 300;
+            return;
+        }
         if (currentPhase == 2 && distanceSqr >= 16.0D && distanceSqr <= 100.0D
                 && ragnarokCooldown <= 0) {
             startRagnarokAttack();
@@ -311,6 +323,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         triggerAnim("attack", "ragnarok");
     }
 
+    private void startThunderBaguaAttack() {
+        pendingAttack = THUNDER_BAGUA_ATTACK;
+        attackImpactDelay = 16; // 0.8-second wind-up before the lightning-fast strike
+        attackLockTicks = 30;   // 1.5-second total attack window
+        triggerAnim("attack", "thunder_bagua");
+    }
+
     private void applyBreathDamage() {
         Vec3 look = getLookAngle().normalize();
         Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
@@ -342,6 +361,42 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 45.0F : 22.0F);
                 victim.setSecondsOnFire(currentPhase == 3 ? 8 : 5);
             }
+        }
+    }
+
+    private void applyThunderBaguaDamage() {
+        LivingEntity target = getTarget();
+        if (target == null || !target.isAlive()) return;
+
+        Vec3 strikePoint = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
+        AABB impactArea = new AABB(
+                strikePoint.x - 3.5D, strikePoint.y - 3.0D, strikePoint.z - 3.5D,
+                strikePoint.x + 3.5D, strikePoint.y + 3.0D, strikePoint.z + 3.5D
+        );
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                    strikePoint.x, strikePoint.y, strikePoint.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            for (int i = 0; i < 32; i++) {
+                double angle = (Math.PI * 2.0D * i) / 32.0D;
+                double radius = 1.0D + (i % 4) * 0.55D;
+                double x = strikePoint.x + Math.cos(angle) * radius;
+                double z = strikePoint.z + Math.sin(angle) * radius;
+                double y = strikePoint.y + ((i % 5) - 2) * 0.45D;
+                serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                        x, y, z, 5, 0.18D, 0.28D, 0.18D, 0.08D);
+            }
+            serverLevel.sendParticles(ParticleTypes.CRIT,
+                    strikePoint.x, strikePoint.y, strikePoint.z,
+                    18, 1.2D, 0.8D, 1.2D, 0.18D);
+        }
+
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, impactArea,
+                entity -> entity != this && entity.isAlive())) {
+            victim.hurt(damageSources().mobAttack(this), 55.0F);
+            Vec3 knockback = victim.position().subtract(position()).normalize();
+            victim.push(knockback.x * 2.8D, 0.75D, knockback.z * 2.8D);
+            victim.hurtMarked = true;
         }
     }
 
