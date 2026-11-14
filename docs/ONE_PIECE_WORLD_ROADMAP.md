@@ -27,7 +27,7 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 8. [ ] Make the terrain generator produce landmasses at the atlas anchors and preserve large ocean gaps. The atlas currently describes planned locations; it does not itself create terrain.
 9. [x] Define deterministic terrain design profiles for all 28 atlas islands in `data/nexusbay/islands/terrain_profiles.json` (shape, maximum height, surface palette, vegetation, shoreline material, and landmark anchors). These are design data only; no terrain is generated from them yet.
 10. [ ] Implement a tested generator that consumes the atlas anchors and these profiles to create real island landmasses.
-10. [ ] Test the map in a fresh dedicated save.
+11. [ ] Test the map in a fresh dedicated save.
 12. [x] Align the Kaido home anchor with the planned Onigashima location in the New World atlas (X=36500, Z=14000); Y=90 remains provisional until the island surface exists.
 13. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
 14. Add region progression and discovery/map metadata.
