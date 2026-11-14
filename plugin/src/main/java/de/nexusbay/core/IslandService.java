@@ -151,7 +151,7 @@ public final class IslandService {
         w.getBlockAt(cx+1,cy+1,cz).setType(Material.BARREL,false);
         w.getBlockAt(cx,cy+2,cz).setType(Material.OAK_SIGN,false);
         // Each island receives a small, deterministic grove so regeneration stays consistent.
-        if (!theme.desert()) {
+        if (!theme.desert() && theme.leaves()!=Material.IRON_BARS) {
             for (int i=0;i<6;i++) {
                 double angle=(Math.PI*2*i)/6.0;
                 int tx=cx+(int)(Math.cos(angle)*radius*0.48);
