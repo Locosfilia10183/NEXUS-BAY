@@ -378,9 +378,33 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         );
         hasImpulse = true;
 
-        if (tickCount % 4 == 0 && level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(ParticleTypes.CLOUD,
-                    getX(), getY() + 0.4D, getZ(), 3, 0.8D, 0.25D, 0.8D, 0.01D);
+        if (level() instanceof ServerLevel serverLevel) {
+            if (tickCount % 4 == 0) {
+                serverLevel.sendParticles(ParticleTypes.CLOUD,
+                        getX(), getY() + 0.4D, getZ(), 3, 0.8D, 0.25D, 0.8D, 0.01D);
+            }
+
+            // Broad paired wing trails make the dragon's flight readable at a distance.
+            if (tickCount % 6 == 0) {
+                double yaw = Math.toRadians(getYRot());
+                double sideX = Math.cos(yaw);
+                double sideZ = Math.sin(yaw);
+                for (int side : new int[] {-1, 1}) {
+                    for (int segment = 1; segment <= 6; segment++) {
+                        double span = segment * 1.15D * side;
+                        double sweep = segment * 0.32D;
+                        double x = getX() + sideX * span - Math.sin(yaw) * sweep;
+                        double z = getZ() + sideZ * span + Math.cos(yaw) * sweep;
+                        double y = getY() + 1.8D - segment * 0.12D;
+                        serverLevel.sendParticles(ParticleTypes.CLOUD,
+                                x, y, z, 3, 0.18D, 0.12D, 0.18D, 0.015D);
+                        if (segment % 2 == 0) {
+                            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                                    x, y + 0.12D, z, 2, 0.12D, 0.16D, 0.12D, 0.035D);
+                        }
+                    }
+                }
+            }
         }
     }
 
