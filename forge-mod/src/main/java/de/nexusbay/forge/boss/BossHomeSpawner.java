@@ -43,7 +43,13 @@ public final class BossHomeSpawner {
                 KAIDO_HOME.getX() + HOME_RADIUS, KAIDO_HOME.getY() + 64.0D,
                 KAIDO_HOME.getZ() + HOME_RADIUS
         );
-        if (!level.getEntitiesOfClass(KaidoBossEntity.class, homeArea).isEmpty()) return;
+        var existingBosses = level.getEntitiesOfClass(KaidoBossEntity.class, homeArea);
+        if (!existingBosses.isEmpty()) {
+            KaidoBossEntity existing = existingBosses.get(0);
+            existing.setPersistenceRequired();
+            existing.setArenaBounds(KAIDO_HOME.getX() + 0.5D, KAIDO_HOME.getZ() + 0.5D, 42.0D);
+            return;
+        }
 
         Entity created = ModEntities.KAIDO.get().create(level);
         if (!(created instanceof KaidoBossEntity kaido)) return;
