@@ -16,6 +16,7 @@ import java.util.List;
 public final class AdminMenu implements Listener {
     private final NexusBay plugin;
     private static final String TITLE="§0NEXUS-BAY §8| §6Admin Control";
+    private static final String INSPECT_PREFIX="§0NEXUS-BAY §8| §cInventory: ";
     public AdminMenu(NexusBay plugin) { this.plugin=plugin; }
     private ItemStack item(Material material,String name,String... lore) {
         ItemStack stack=new ItemStack(material); ItemMeta meta=stack.getItemMeta();
@@ -34,7 +35,14 @@ public final class AdminMenu implements Listener {
         inv.setItem(49,item(Material.BARRIER,"§cSchließen"));
         p.openInventory(inv);
     }
+    public void inspect(Player admin,Player target) {
+        Inventory inv=Bukkit.createInventory(null,54,INSPECT_PREFIX+target.getName());
+        ItemStack[] contents=target.getInventory().getStorageContents();
+        for (int i=0;i<Math.min(contents.length,36);i++) if (contents[i]!=null) inv.setItem(i,contents[i].clone());
+        admin.openInventory(inv);
+    }
     @EventHandler public void onClick(InventoryClickEvent e) {
+        if (e.getView().getTitle().startsWith(INSPECT_PREFIX)) { e.setCancelled(true); return; }
         if (!TITLE.equals(e.getView().getTitle())) return;
         e.setCancelled(true);
         if (!(e.getWhoClicked() instanceof Player p) || e.getCurrentItem()==null) return;
@@ -50,5 +58,5 @@ public final class AdminMenu implements Listener {
             case 49 -> p.closeInventory();
         }
     }
-    @EventHandler public void onDrag(InventoryDragEvent e) { if (TITLE.equals(e.getView().getTitle())) e.setCancelled(true); }
+    @EventHandler public void onDrag(InventoryDragEvent e) { if (TITLE.equals(e.getView().getTitle()) || e.getView().getTitle().startsWith(INSPECT_PREFIX)) e.setCancelled(true); }
 }
