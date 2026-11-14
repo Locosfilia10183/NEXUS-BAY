@@ -465,6 +465,85 @@
         "royal_estate",
         "southern_harbor"
       ]
+    },
+    {
+      "islandId": "tequila_wolf",
+      "shape": "industrial_coast",
+      "maxHeight": 92,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "endless_bridge_piers",
+        "worker_camp",
+        "unfinished_spans"
+      ]
+    },
+    {
+      "islandId": "spider_miles",
+      "shape": "industrial_city_coast",
+      "maxHeight": 110,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "factory_district",
+        "smokestacks",
+        "harbor_yards"
+      ]
+    },
+    {
+      "islandId": "minion_island",
+      "shape": "cold_forest_coast",
+      "maxHeight": 118,
+      "topBlock": "snow",
+      "vegetation": "spruce",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "winter_village_ruins",
+        "frozen_cove",
+        "pine_ridge"
+      ]
+    },
+    {
+      "islandId": "torino_kingdom",
+      "shape": "jungle_basin",
+      "maxHeight": 132,
+      "topBlock": "grass",
+      "vegetation": "jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "giant_tree_grove",
+        "tribal_village",
+        "ancient_ruins"
+      ]
+    },
+    {
+      "islandId": "kuraigana",
+      "shape": "gothic_ruined_highlands",
+      "maxHeight": 158,
+      "topBlock": "podzol",
+      "vegetation": "dark_oak",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "shikkearu_castle",
+        "ruined_battleground",
+        "dark_forest"
+      ]
+    },
+    {
+      "islandId": "elbaf",
+      "shape": "giant_forest_mountains",
+      "maxHeight": 230,
+      "topBlock": "grass",
+      "vegetation": "giant_spruce",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "giant_village",
+        "adam_tree",
+        "warrior_hall",
+        "mountain_fjord"
+      ]
     }
   ]
 }
