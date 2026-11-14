@@ -438,6 +438,31 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         }
     }
 
+
+    /**
+     * Gives nearby players a readable warning before a signature attack.
+     * The warning ring is visual only and never changes blocks.
+     */
+    private void announceAttackWarning(String message, Vec3 center, double radius) {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        double alertRadius = radius + 18.0D;
+        AABB alertArea = new AABB(center.x - alertRadius, center.y - 12.0D, center.z - alertRadius,
+                center.x + alertRadius, center.y + 18.0D, center.z + alertRadius);
+        for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, alertArea)) {
+            if (player.distanceToSqr(center) <= alertRadius * alertRadius) {
+                player.displayClientMessage(Component.literal("§c§l⚠ " + message), false);
+                player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS, SoundSource.HOSTILE, 0.8F, 0.65F);
+            }
+        }
+        for (int point = 0; point < 32; point++) {
+            double angle = Math.PI * 2.0D * point / 32.0D;
+            double x = center.x + Math.cos(angle) * radius;
+            double z = center.z + Math.sin(angle) * radius;
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                    x, center.y + 0.18D, z, 3, 0.12D, 0.08D, 0.12D, 0.025D);
+        }
+    }
+
     private void runBossCombat() {
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) return;
@@ -515,6 +540,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = BREATH_ATTACK;
         attackImpactDelay = 12; // 0.6 seconds: breath release after the wind-up
         attackLockTicks = 24;   // 1.2-second animation lock
+        announceAttackWarning("DRACHENATEM – RAUS AUS DER FEUERLINIE!", position(), 4.0D);
         triggerAnim("attack", currentPhase == 3 ? "dragon_breath" : "breath");
     }
 
@@ -522,6 +548,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = SLAM_ATTACK;
         attackImpactDelay = 12; // 0.6 seconds: impact at the downward strike
         attackLockTicks = 18;   // 0.9-second animation lock
+        announceAttackWarning("KANABO-SCHMETTERSCHLAG – ABSTAND HALTEN!", position(), 7.0D);
         triggerAnim("attack", "slam");
     }
 
@@ -529,6 +556,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = RAGNAROK_ATTACK;
         attackImpactDelay = 24; // 1.2-second charge-up before the overhead strike
         attackLockTicks = 36;   // 1.8-second recovery window
+        announceAttackWarning("RAGNAROK – FLÄCHENANGRIFF! SOFORT AUSWEICHEN!", position(), 11.0D);
         triggerAnim("attack", "ragnarok");
     }
 
@@ -536,6 +564,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = THUNDER_BAGUA_ATTACK;
         attackImpactDelay = 16; // 0.8-second wind-up before the lightning-fast strike
         attackLockTicks = 30;   // 1.5-second total attack window
+        LivingEntity target = getTarget();
+        if (target != null) announceAttackWarning("THUNDER BAGUA – KAIDO STÜRMT DEIN ZIEL!", target.position(), 3.5D);
         triggerAnim("attack", "thunder_bagua");
     }
 
@@ -543,6 +573,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = BLAST_BREATH_ATTACK;
         attackImpactDelay = 24; // 1.2-second dragon breath charge-up
         attackLockTicks = 40;   // 2-second attack and recovery window
+        LivingEntity target = getTarget();
+        if (target != null) announceAttackWarning("BLAST BREATH – VERLASSE DIE FEUERBAHN!", target.position(), 5.0D);
         triggerAnim("attack", "blast_breath");
     }
 
@@ -551,6 +583,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = DRAGON_SKYFALL_ATTACK;
         attackImpactDelay = 18; // dive wind-up and descent
         attackLockTicks = 42;   // impact plus recovery
+        announceAttackWarning("DRAGON SKYFALL – EINSCHLAGSPUNKT VERLASSEN!", skyfallTarget, 8.5D);
         triggerAnim("attack", "dragon_skyfall");
     }
 
@@ -559,6 +592,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         attackImpactDelay = 22; // 1.1-second pressure build-up before the burst
         attackLockTicks = 38;   // recovery window after the shockwave
         getNavigation().stop();
+        announceAttackWarning("KÖNIGSHAKI – DER DRUCKWELLENRING KOMMT!", position(),
+                currentPhase == 3 ? 15.0D : 11.0D);
         triggerAnim("attack", "conquerors_haki_burst");
     }
 
@@ -604,6 +639,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         pendingAttack = DRAGON_TWISTER_ATTACK;
         attackImpactDelay = 20;
         attackLockTicks = 44;
+        announceAttackWarning("DRAGON TWISTER – WIRBELSTURM-BEREICH VERLASSEN!", position(), 12.0D);
         triggerAnim("attack", "dragon_twister");
     }
 
