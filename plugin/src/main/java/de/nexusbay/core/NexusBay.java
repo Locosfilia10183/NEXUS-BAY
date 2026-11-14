@@ -16,6 +16,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         saveDefaultConfig();
         data = new PlayerData(this);
         islands = new IslandService(this);
+        islands.generateWorld();
         adminMenu = new AdminMenu(this);
         quests = new QuestService(this);
         for (String command : new String[]{"bayadmin","bayisland","bayprofile","baypay","bayinv","bayquest"}) {
