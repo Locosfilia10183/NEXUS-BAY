@@ -31,19 +31,19 @@ public final class NexusShipModel {
         root.addOrReplaceChild("hull",
                 CubeListBuilder.create().texOffs(0, 0)
                         .addBox(-24, -2, -9, 48, 10, 18),
-                net.minecraft.client.model.geom.builders.PartPose.ZERO);
+                net.minecraft.client.model.geom.PartPose.ZERO);
         root.addOrReplaceChild("deck",
                 CubeListBuilder.create().texOffs(0, 0)
                         .addBox(-21, -4, -7, 42, 2, 14),
-                net.minecraft.client.model.geom.builders.PartPose.ZERO);
+                net.minecraft.client.model.geom.PartPose.ZERO);
         root.addOrReplaceChild("mast",
                 CubeListBuilder.create().texOffs(0, 0)
                         .addBox(-1, -48, -1, 2, 46, 2),
-                net.minecraft.client.model.geom.builders.PartPose.ZERO);
+                net.minecraft.client.model.geom.PartPose.ZERO);
         root.addOrReplaceChild("sail",
                 CubeListBuilder.create().texOffs(0, 0)
                         .addBox(-15, -43, -0.5F, 30, 30, 1),
-                net.minecraft.client.model.geom.builders.PartPose.ZERO);
+                net.minecraft.client.model.geom.PartPose.ZERO);
 
         return LayerDefinition.create(mesh, 64, 64);
     }
