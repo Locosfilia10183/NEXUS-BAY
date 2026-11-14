@@ -44,6 +44,29 @@ public final class IslandService {
         return true;
     }
 
+    /**
+     * Creates the first five world locations automatically after the server starts.
+     * Existing islands are preserved; no player command is required.
+     */
+    public void generateFirstArchipelago() {
+        if (!plugin.getConfig().getBoolean("settings.auto-generate-islands", true)) {
+            plugin.getLogger().info("Automatic island generation is disabled in config.yml.");
+            return;
+        }
+        String[] names = {"DrumIsland", "Alabasta", "Skypia", "Water7", "Sabaody"};
+        for (int i = 0; i < names.length; i++) {
+            final String islandName = names[i];
+            long delay = 20L + (i * 20L);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (create(islandName)) {
+                    plugin.getLogger().info("Automatically generated island: " + islandName);
+                } else {
+                    plugin.getLogger().info("Island already exists or world is unavailable: " + islandName);
+                }
+            }, delay);
+        }
+    }
+
     public boolean visit(org.bukkit.entity.Player player, String name) {
         String key = name.toLowerCase(Locale.ROOT);
         if (!plugin.getConfig().contains("islands." + key)) return false;
