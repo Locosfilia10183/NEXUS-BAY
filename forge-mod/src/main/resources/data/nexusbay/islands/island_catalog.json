@@ -434,6 +434,84 @@
       },
       "theme": "oni_fortress",
       "radius": 650
+    },
+    {
+      "id": "ohara",
+      "name": "Ohara",
+      "region": "west_blue",
+      "requiredLevel": 18,
+      "center": {
+        "x": 9000,
+        "y": 64,
+        "z": -8000
+      },
+      "theme": "scholar_forest",
+      "radius": 850
+    },
+    {
+      "id": "kano_country",
+      "name": "Kano Country",
+      "region": "west_blue",
+      "requiredLevel": 28,
+      "center": {
+        "x": 16000,
+        "y": 64,
+        "z": 5000
+      },
+      "theme": "mountain_fortress",
+      "radius": 900
+    },
+    {
+      "id": "flevance",
+      "name": "Flevance",
+      "region": "north_blue",
+      "requiredLevel": 22,
+      "center": {
+        "x": -7000,
+        "y": 64,
+        "z": -18000
+      },
+      "theme": "white_city",
+      "radius": 750
+    },
+    {
+      "id": "germa_kingdom",
+      "name": "Germa Kingdom",
+      "region": "north_blue",
+      "requiredLevel": 32,
+      "center": {
+        "x": 7000,
+        "y": 64,
+        "z": -17000
+      },
+      "theme": "moving_kingdom",
+      "radius": 650
+    },
+    {
+      "id": "baterilla",
+      "name": "Baterilla",
+      "region": "south_blue",
+      "requiredLevel": 14,
+      "center": {
+        "x": -8000,
+        "y": 64,
+        "z": 18000
+      },
+      "theme": "tropical_village",
+      "radius": 700
+    },
+    {
+      "id": "sorbet_kingdom",
+      "name": "Sorbet Kingdom",
+      "region": "south_blue",
+      "requiredLevel": 26,
+      "center": {
+        "x": 8000,
+        "y": 64,
+        "z": 18000
+      },
+      "theme": "temperate_kingdom",
+      "radius": 800
     }
   ]
 }
