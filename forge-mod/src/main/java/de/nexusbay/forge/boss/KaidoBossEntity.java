@@ -54,6 +54,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation BLAST_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.blast_breath");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_DRAGON_FLYING =
+            SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final int NO_ATTACK = 0;
     private static final int BREATH_ATTACK = 1;
@@ -85,6 +87,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, 1);
+        this.entityData.define(DATA_DRAGON_FLYING, false);
     }
 
     public int getCurrentPhase() {
@@ -92,7 +95,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     }
 
     public boolean isDragonFlying() {
-        return dragonFlying;
+        return this.entityData.get(DATA_DRAGON_FLYING);
+    }
+
+    private void setDragonFlying(boolean flying) {
+        dragonFlying = flying;
+        this.entityData.set(DATA_DRAGON_FLYING, flying);
     }
 
     @Override
@@ -115,7 +123,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "movement", 5, state -> {
             if (getCurrentPhase() == 3) {
-                if (dragonFlying) return state.setAndContinue(DRAGON_FLY_ANIM);
+                if (isDragonFlying()) return state.setAndContinue(DRAGON_FLY_ANIM);
                 if (state.isMoving()) return state.setAndContinue(DRAGON_MOVE_ANIM);
                 return state.setAndContinue(DRAGON_IDLE_ANIM);
             }
@@ -215,7 +223,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         LivingEntity target = getTarget();
         if (getCurrentPhase() != 3 || target == null || !target.isAlive()) {
             if (dragonFlying) {
-                dragonFlying = false;
+                setDragonFlying(false);
                 setNoGravity(false);
                 triggerAnim("attack", "dragon_land");
             }
@@ -224,12 +232,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
 
         double distanceSqr = distanceToSqr(target);
         if (!dragonFlying && distanceSqr > 144.0D) {
-            dragonFlying = true;
+            setDragonFlying(true);
             setNoGravity(true);
             getNavigation().stop();
             triggerAnim("attack", "dragon_takeoff");
         } else if (dragonFlying && distanceSqr < 49.0D) {
-            dragonFlying = false;
+            setDragonFlying(false);
             setNoGravity(false);
             triggerAnim("attack", "dragon_land");
             return;
