@@ -13,7 +13,7 @@ public final class BossTerrainProtection {
     @SubscribeEvent
     public static void onMobGriefing(EntityMobGriefingEvent event) {
         if (event.getEntity() instanceof BossMob) {
-            event.setCanGrief(false);
+            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
         }
     }
 }
