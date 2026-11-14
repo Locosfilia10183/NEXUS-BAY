@@ -6,8 +6,12 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
 
 public class KaidoModel extends GeoModel<KaidoBossEntity> {
-    private static final ResourceLocation MODEL =
+    private static final ResourceLocation HUMAN_MODEL =
             new ResourceLocation(NexusBayForge.MOD_ID, "geckolib/models/entity/kaido.geo.json");
+    private static final ResourceLocation HYBRID_MODEL =
+            new ResourceLocation(NexusBayForge.MOD_ID, "geckolib/models/entity/kaido_hybrid.geo.json");
+    private static final ResourceLocation DRAGON_MODEL =
+            new ResourceLocation(NexusBayForge.MOD_ID, "geckolib/models/entity/kaido_dragon.geo.json");
     private static final ResourceLocation TEXTURE =
             new ResourceLocation(NexusBayForge.MOD_ID, "textures/entity/kaido.png");
     private static final ResourceLocation ANIMATION =
