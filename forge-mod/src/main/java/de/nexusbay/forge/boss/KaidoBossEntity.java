@@ -941,7 +941,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         };
         for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, alertArea)) {
             player.displayClientMessage(Component.literal("§4§l" + announcement), false);
-            player.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL.value(),
+            player.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL,
                     SoundSource.HOSTILE, phase == 3 ? 1.0F : 0.8F, phase == 3 ? 0.55F : 0.72F);
         }
         double radius = phase == 3 ? 8.0D : 5.0D;
