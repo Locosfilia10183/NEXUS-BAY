@@ -26,7 +26,14 @@ public final class IslandService {
         all.set(key+".x",x+0.5); all.set(key+".y",y+3); all.set(key+".z",z+0.5);
         all.set(key+".required-level",IslandProgression.requiredLevel(name));
         all.set(key+".slot",index);
-        all.set(key+".generated-version",2);
+        all.set(key+".generated-version",3);
+        if (name.equalsIgnoreCase("Onigashima")) {
+            all.set(key+".boss-kaido.world",world.getName());
+            all.set(key+".boss-kaido.x",x+0.5);
+            all.set(key+".boss-kaido.y",y+1.0);
+            all.set(key+".boss-kaido.z",z+0.5);
+            all.set(key+".boss-kaido.arena-radius",17);
+        }
         plugin.saveConfig();
         return true;
     }
@@ -46,7 +53,7 @@ public final class IslandService {
                 String key = islandName.toLowerCase(Locale.ROOT);
                 ConfigurationSection section = plugin.getConfig().getConfigurationSection("islands");
                 boolean current = section != null
-                        && section.getInt(key + ".generated-version", 0) >= 2
+                        && section.getInt(key + ".generated-version", 0) >= 3
                         && section.getInt(key + ".slot", -1) == slot;
                 if (!current) {
                     if (create(islandName)) {
@@ -250,7 +257,10 @@ public final class IslandService {
             for(int dx=-4;dx<=4;dx++) w.getBlockAt(cx+dx,cy+11,gz).setType(Material.CRIMSON_PLANKS,false);
         }
         buildWatchTower(w,cx,cy+1,cz-outer-8,Material.REDSTONE_BLOCK);
-        w.getBlockAt(cx,cy+1,cz).setType(Material.BEACON,false);
+        // Keep the exact center clear as the future Kaido spawn anchor.
+        for(int x=-2;x<=2;x++) for(int z=-2;z<=2;z++)
+            for(int y=cy+1;y<=cy+5;y++) w.getBlockAt(cx+x,y,cz+z).setType(Material.AIR,false);
+        w.getBlockAt(cx,cy,cz).setType(Material.BEACON,false);
     }
 
     private void buildWatchTower(World w,int x,int y,int z,Material accent) {
