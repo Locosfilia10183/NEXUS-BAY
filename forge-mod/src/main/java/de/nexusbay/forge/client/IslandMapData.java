@@ -2,44 +2,47 @@ package de.nexusbay.forge.client;
 
 import java.util.List;
 
-/** Canonical Grand Line atlas coordinates. Must match IslandProgression slot layout in the Paper core. */
+/**
+ * Planned island atlas for the separate One Piece save.
+ * Coordinates are canonical map anchors; terrain generation must place land around these anchors.
+ */
 public final class IslandMapData {
-    public record Island(String name, int requiredLevel, int worldX, int worldZ) {}
+    public record Island(String name, String region, int requiredLevel, int worldX, int worldZ, String theme, int radius) {}
 
-    public static final int MIN_X = 512;
-    public static final int MIN_Z = 512;
-    public static final int MAX_X = 2752;
-    public static final int MAX_Z = 1472;
+    public static final int MIN_X = -18000;
+    public static final int MIN_Z = -16000;
+    public static final int MAX_X = 36000;
+    public static final int MAX_Z = 19000;
 
     public static final List<Island> ISLANDS = List.of(
-            new Island("Foosha Village", 1, 512, 512),
-            new Island("Shells Town", 5, 832, 512),
-            new Island("Orange Town", 8, 1152, 512),
-            new Island("Syrup Village", 12, 1472, 512),
-            new Island("Baratie", 16, 1792, 512),
-            new Island("Arlong Park", 20, 2112, 512),
-            new Island("Loguetown", 25, 2432, 512),
-            new Island("Reverse Mountain", 30, 2752, 512),
-            new Island("Whiskey Peak", 34, 512, 832),
-            new Island("Little Garden", 38, 832, 832),
-            new Island("Drum Island", 42, 1152, 832),
-            new Island("Alabasta", 48, 1472, 832),
-            new Island("Jaya", 55, 1792, 832),
-            new Island("Skypiea", 62, 2112, 832),
-            new Island("Water 7", 68, 2432, 832),
-            new Island("Enies Lobby", 72, 2752, 832),
-            new Island("Thriller Bark", 78, 512, 1152),
-            new Island("Sabaody Archipelago", 82, 832, 1152),
-            new Island("Amazon Lily", 85, 1152, 1152),
-            new Island("Impel Down", 88, 1472, 1152),
-            new Island("Marineford", 92, 1792, 1152),
-            new Island("Fish-Man Island", 95, 2112, 1152),
-            new Island("Punk Hazard", 98, 2432, 1152),
-            new Island("Dressrosa", 100, 2752, 1152),
-            new Island("Zou", 105, 512, 1472),
-            new Island("Whole Cake Island", 110, 832, 1472),
-            new Island("Wano kuni", 120, 1152, 1472),
-            new Island("Onigashima", 125, 1472, 1472)
+            new Island("Foosha Village", "East Blue", 1, -18000, -9000, "Tropical", 700),
+            new Island("Shells Town", "East Blue", 5, -14000, -4000, "Temperate", 650),
+            new Island("Orange Town", "East Blue", 8, -9000, -11000, "Temperate", 600),
+            new Island("Syrup Village", "East Blue", 12, -6500, -3000, "Forest", 700),
+            new Island("Baratie", "East Blue", 16, -11000, 2000, "Ocean Platform", 180),
+            new Island("Arlong Park", "East Blue", 20, -18000, 7000, "Tropical Reef", 650),
+            new Island("Loguetown", "East Blue", 25, -7000, 9000, "Temperate", 850),
+            new Island("Reverse Mountain", "Grand Line", 30, 0, -16000, "Mountain Pass", 1100),
+            new Island("Whiskey Peak", "Grand Line", 34, 1500, -11000, "Desert", 700),
+            new Island("Little Garden", "Grand Line", 38, -1800, -7000, "Prehistoric Jungle", 1000),
+            new Island("Drum Island", "Grand Line", 42, -2500, -2500, "Snowy Mountain", 900),
+            new Island("Alabasta", "Grand Line", 48, 2500, -1000, "Desert", 1800),
+            new Island("Jaya", "Grand Line", 55, -2200, 3500, "Jungle", 850),
+            new Island("Skypiea", "Grand Line", 62, 0, 5000, "Sky Island", 900),
+            new Island("Water 7", "Grand Line", 68, 2500, 8500, "Canal City", 850),
+            new Island("Enies Lobby", "Grand Line", 72, -2500, 11000, "Fortress", 900),
+            new Island("Thriller Bark", "Grand Line", 78, 6000, -5000, "Haunted Forest", 1100),
+            new Island("Sabaody Archipelago", "Grand Line", 82, 1000, 14500, "Mangrove", 1000),
+            new Island("Amazon Lily", "Grand Line", 85, -6500, 15500, "Jungle", 850),
+            new Island("Impel Down", "Grand Line", 88, 7000, 15000, "Underwater Fortress", 600),
+            new Island("Marineford", "Grand Line", 92, 11000, 9000, "Fortress", 1100),
+            new Island("Fish-Man Island", "Grand Line", 95, 0, 19000, "Underwater", 900),
+            new Island("Punk Hazard", "New World", 98, 25000, -10000, "Volcanic / Ice", 1000),
+            new Island("Dressrosa", "New World", 100, 30000, -4000, "Mediterranean", 1100),
+            new Island("Zou", "New World", 105, 36000, 3000, "Moving Forest", 900),
+            new Island("Whole Cake Island", "New World", 110, 28000, 7000, "Fantasy", 1200),
+            new Island("Wano kuni", "New World", 120, 34000, 12000, "Mountain Forest", 1500),
+            new Island("Onigashima", "New World", 125, 2752, 1472, "Oni Fortress", 650)
     );
 
     private IslandMapData() {}
