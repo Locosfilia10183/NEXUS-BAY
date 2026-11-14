@@ -53,6 +53,14 @@ public final class IslandService {
             if(dist<radius*0.76 && Math.floorMod(x*31+z*17,47)==0) w.getBlockAt(cx+x,top+1,cz+z).setType(Material.SHORT_GRASS,false);
             if(dist<radius*0.7 && Math.floorMod(x*13-z*29,173)==0) w.getBlockAt(cx+x,top+1,cz+z).setType(Material.OAK_LEAVES,false);
         }
+        // Ocean ring around the island; the untouched center remains above sea level.
+        int sea=cy-10;
+        for(int x=-(radius+24);x<=radius+24;x++) for(int z=-(radius+24);z<=radius+24;z++) {
+            double d=Math.sqrt(x*x+z*z);
+            if(d>radius-2 && d<=radius+24) {
+                for(int wy=sea-2;wy<=sea;wy++) w.getBlockAt(cx+x,wy,cz+z).setType(Material.WATER,false);
+            }
+        }
         // Small pirate outpost, dock and lighthouse landmark.
         int dockZ=cz+radius/2;
         for(int x=-5;x<=5;x++) for(int z=0;z<12;z++) w.getBlockAt(cx+x,cy-1,dockZ+z).setType(Material.OAK_PLANKS,false);
