@@ -1,21 +1,58 @@
-# NEXUS-BAY – Gameplay roadmap
+# NEXUS-BAY – Entwicklungsroadmap
 
-## Included in the first core build
-- Paper Java server foundation and Geyser/Floodgate cross-play
-- Admin permission and 54-slot administration GUI
-- Procedural starter island generator with dock, lighthouse and outpost
-- Persistent player profile: level, XP and Bay-Coins
-- Player-to-player coin transfers
-- Systemd service and backup helper
+## Phase 0 – Foundation (aktuell auf Branch `network-foundation`)
 
-## Next gameplay systems
-1. Island archipelago generator: multiple biome themes, ports, forts, shipwrecks, caves and hidden treasure rooms.
-2. Pirate progression: weapon mastery, Haki branches, crew reputation and prestige.
-3. Quest framework: NPC quest givers, daily/weekly contracts, island discovery and boss objectives.
-4. Economy: player market, auction house, shops, taxes and anti-dupe transaction ledger.
-5. Crews and territory: crew creation, ranks, flags, claims, alliances and wars.
-6. Bosses and dungeons: encounter phases, loot tables, keys and repeatable instances.
-7. Admin suite: player inspection, moderation, inventory inspection, vanish, teleport, item editor, economy controls and audit log.
+- [x] Velocity Proxy Grundgerüst
+- [x] Paper Lobby + Survival
+- [x] Geyser + Floodgate Crossplay (Proxy + Backend)
+- [x] Modern Forwarding (Velocity ↔ Paper)
+- [x] NEXUS-BAY Core Plugin (Level, XP, Bay-Coins, Inseln, Admin-GUI)
+- [x] MariaDB Schema (Spieler, Transaktionen, Freunde, Clans, Moderation)
+- [x] Systemd-Dienste + Management-Skripte
+- [x] Idempotentes install.sh
+- [x] Deutsche Dokumentation
 
-## Important technical boundary
-The first core plugin creates vanilla-block structures and basic RPG/admin systems. It does not yet contain custom 3D models, a full NPC quest database, devil-fruit abilities, Haki combat, or a complete marketplace. Those are separate systems to implement and test in later releases. Paper plugins are used for Java/Bedrock compatibility; Forge/Fabric-only mods cannot be installed on this Paper server.
+## Phase 1 – Kernsysteme (nächster Schritt)
+
+- [ ] Core-Plugin an MariaDB anbinden (statt config.yml)
+- [ ] LuckPerms installieren und Ranggruppen anlegen (Spieler → Owner)
+- [ ] Vault + Economy-Bridge für Bay-Coins
+- [ ] Lobby-Scoreboard + Tablist + Willkommensnachricht
+- [ ] Server-Selector (Kompass / NPC / Menü)
+- [ ] Befehl `/server lobby|survival`
+
+## Phase 2 – Soziale Systeme & Survival
+
+- [ ] Freundesystem (Anfragen, Liste, Online-Status)
+- [ ] Clansystem (Erstellen, Ränge, Chat, Tag)
+- [ ] Private Nachrichten + Chatfilter
+- [ ] Survival: Homes, Warps, RTP, Claims (vorbereiten)
+- [ ] Daily Rewards
+
+## Phase 3 – Spielmodi
+
+- [ ] BedWars-Modul (Arenen, Teams, Generatoren, Shop)
+- [ ] SkyWars-Modul (Solo/Team, Loot)
+- [ ] Events-System (zeitlich begrenzte Modi)
+
+## Phase 4 – Administration & Sicherheit
+
+- [ ] Erweiterte Moderation (Ban, Mute, Warn, Report) mit DB-Historie
+- [ ] Staff-Chat, Vanish, Audit-Log
+- [ ] Rate-Limits und Connection-Limits am Proxy
+- [ ] Anti-Cheat-Integration (kompatible Lösung, Bedrock berücksichtigen)
+- [ ] Wartungsmodus
+
+## Phase 5 – Betrieb
+
+- [ ] Automatische Backup-Rotation + Restore-Skript
+- [ ] Healthcheck erweitern (DB, Geyser, Plugin-Status)
+- [ ] Monitoring (Prometheus/Grafana oder einfaches Status-Dashboard)
+- [ ] GitHub Actions für Plugin-Build + Config-Validierung
+
+## Wichtige Regeln
+
+- Kein Feature wird als „fertig“ markiert, bevor es getestet und dokumentiert ist.
+- Keine Secrets im Repository.
+- BedWars/SkyWars werden modular vorbereitet und erst implementiert, wenn die Foundation stabil läuft.
+- Das Projekt bleibt unabhängig von jeder anderen Installation.

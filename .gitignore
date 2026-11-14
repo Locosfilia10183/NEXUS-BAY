@@ -1,3 +1,4 @@
+# Runtime / Server
 server/
 world/
 world_nether/
@@ -10,3 +11,22 @@ backups/
 *.lck
 eula.txt
 server.properties
+forwarding.secret
+
+# Secrets
+config/secrets.env
+**/secrets.env
+.env
+
+# Build
+plugin/target/
+*.class
+
+# OS / IDE
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Local overrides
+local/
