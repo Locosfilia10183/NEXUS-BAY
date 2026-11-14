@@ -2,6 +2,7 @@ package de.nexusbay.forge.registry;
 
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.boss.KaidoBossEntity;
+import de.nexusbay.forge.ship.NexusShipEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -19,6 +20,13 @@ public final class ModEntities {
                     .sized(2.7F, 6.4F)
                     .clientTrackingRange(12)
                     .build("kaido"));
+
+    public static final RegistryObject<EntityType<NexusShipEntity>> NEXUS_SHIP =
+            ENTITY_TYPES.register("nexus_ship", () -> EntityType.Builder
+                    .of(NexusShipEntity::new, MobCategory.MISC)
+                    .sized(4.5F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build("nexus_ship"));
 
     private ModEntities() {}
 
