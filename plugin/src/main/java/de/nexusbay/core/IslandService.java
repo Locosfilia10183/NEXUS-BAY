@@ -26,6 +26,18 @@ public final class IslandService {
         plugin.saveConfig();
         return true;
     }
+    public boolean visit(org.bukkit.entity.Player player,String name) {
+        String key=name.toLowerCase(Locale.ROOT);
+        if (!plugin.getConfig().contains("islands."+key)) return false;
+        String worldName=plugin.getConfig().getString("islands."+key+".world","world");
+        World world=Bukkit.getWorld(worldName);
+        if (world==null) return false;
+        double x=plugin.getConfig().getDouble("islands."+key+".x");
+        double y=plugin.getConfig().getDouble("islands."+key+".y");
+        double z=plugin.getConfig().getDouble("islands."+key+".z");
+        player.teleport(new Location(world,x,y,z));
+        return true;
+    }
     private void buildIsland(World w,int cx,int cy,int cz,String name) {
         int radius=plugin.getConfig().getInt("settings.island-radius",42);
         for(int x=-radius;x<=radius;x++) for(int z=-radius;z<=radius;z++) {
