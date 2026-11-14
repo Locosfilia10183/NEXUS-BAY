@@ -32,6 +32,7 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
+apt-get install -y ca-certificates curl gnupg
 install -d -m 0755 /etc/apt/keyrings
 curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg
 chmod 644 /etc/apt/keyrings/adoptium.gpg
