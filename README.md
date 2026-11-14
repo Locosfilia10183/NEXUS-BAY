@@ -1,20 +1,22 @@
 # NEXUS-BAY
 
-Fresh Minecraft Java + Bedrock cross-play server for an Ubuntu VPS.
+Independent pirate-themed Minecraft Java + Bedrock RPG server for an Ubuntu VPS. This project is separate from NEXUSCRAFT and does not modify it.
 
-## Included
-- Paper Minecraft server
-- Geyser-Spigot + Floodgate-Spigot for Bedrock cross-play
-- Dedicated Linux user and systemd service
-- Separate installation directory, backup helper, and network guide
-
-This is a **new, separate server**. It does not modify NEXUSCRAFT or any existing Minecraft server.
+## First core release
+- Paper server with Geyser + Floodgate cross-play
+- NEXUS-BAY Core plugin: persistent player levels, XP, Bay-Coins and player transfers
+- Admin control GUI with world tools, status, broadcast and coin grant
+- Read-only admin inventory inspection via `/bayinv <player>`
+- Procedural starter islands with terrain, dock, lighthouse and outpost
+- Island management: `/bayisland create <name>`, `/bayisland visit <name>`, `/bayisland list`
+- Player profile: `/bayprofile`; coin transfer: `/baypay <player> <amount>`
+- Dedicated Linux user, systemd service and backup script
 
 ## Requirements
-- Ubuntu 22.04/24.04 VPS
-- 2 CPU cores and 4 GB RAM minimum (6–8 GB recommended)
+- Ubuntu 24.04 VPS recommended
+- 2 CPU cores; 6–8 GB RAM recommended
 - Root/sudo access
-- TCP 25565 and UDP 19132 open in the VPS firewall
+- Provider firewall: TCP 25565 and UDP 19132
 
 ## Install
 ```bash
@@ -24,19 +26,29 @@ cd NEXUS-BAY
 sudo bash install.sh
 ```
 
-The installer asks for the Minecraft version and RAM, downloads Paper, Geyser and Floodgate, and creates a systemd service. Choose a Paper-supported version compatible with Java 21.
+Leave the Minecraft version prompt empty to let the installer select the newest **stable Paper build** available from PaperMC. The installer installs Java 25, Maven, Paper, Geyser, Floodgate and builds the NEXUS-BAY Core plugin from this repository. It refuses to overwrite a non-empty install directory.
 
 ## First start
-After installation, accept the Minecraft EULA only after reading it:
+Read the Minecraft EULA before accepting it:
 ```bash
 sudo nano /opt/nexus-bay/eula.txt
-# change eula=false to eula=true, save
+# only after reading and accepting the EULA, change eula=false to eula=true
 sudo systemctl start nexus-bay
+sudo systemctl status nexus-bay
 ```
 
 ## Connect
 - Java: `YOUR_VPS_IP:25565`
 - Bedrock: `YOUR_VPS_IP`, port `19132`
+
+## Admin and player commands
+- `/bayadmin` – admin control panel (OP / nexusbay.admin)
+- `/bayinv <player>` – read-only online player inventory inspection
+- `/bayisland create <name>` – create a starter island
+- `/bayisland visit <name>` – teleport to an island
+- `/bayisland list` – list islands
+- `/bayprofile` – show RPG level, XP and coins
+- `/baypay <player> <amount>` – transfer Bay-Coins
 
 ## Manage
 ```bash
@@ -46,4 +58,6 @@ sudo journalctl -u nexus-bay -f
 sudo /opt/nexus-bay/backup.sh
 ```
 
-The installer refuses to overwrite a non-empty target directory. Backups are stored in `/opt/nexus-bay/backups`.
+Open TCP 25565 and UDP 19132 in the VPS provider firewall. If UFW is already active, the installer adds both rules; it does not enable UFW or change SSH rules.
+
+See [network guide](docs/NETWORK.md) and [gameplay roadmap](docs/ROADMAP.md). The first core release is a foundation, not a finished One Piece clone: devil-fruit abilities, Haki combat, full questlines, crew wars, custom NPCs and a player marketplace remain future development systems. Paper plugins are used for cross-play; Forge/Fabric-only mods are not compatible with this Paper server.
