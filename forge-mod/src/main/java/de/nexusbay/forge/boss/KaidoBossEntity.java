@@ -923,6 +923,35 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                 default -> "MENSCHENFORM";
             };
             bossEvent.setName(Component.literal("KAIDO – " + phaseName));
+            announcePhaseChange(phaseName, nextPhase);
+        }
+    }
+
+    /**
+     * Announces Kaido's new combat phase to nearby players.
+     */
+    private void announcePhaseChange(String phaseName, int phase) {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        double alertRadius = 96.0D;
+        AABB alertArea = getBoundingBox().inflate(alertRadius, 32.0D, alertRadius);
+        String announcement = switch (phase) {
+            case 2 -> "KAIDO ENTFESSELT SEINE HYBRIDFORM!";
+            case 3 -> "KAIDO ZEIGT SEINE WAHRE DRACHENFORM!";
+            default -> "KAIDO WECHSELT ZURÜCK IN DIE MENSCHENFORM!";
+        };
+        for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, alertArea)) {
+            player.displayClientMessage(Component.literal("§4§l" + announcement), false);
+            player.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL.value(),
+                    SoundSource.HOSTILE, phase == 3 ? 1.0F : 0.8F, phase == 3 ? 0.55F : 0.72F);
+        }
+        double radius = phase == 3 ? 8.0D : 5.0D;
+        for (int point = 0; point < 48; point++) {
+            double angle = Math.PI * 2.0D * point / 48.0D;
+            double x = getX() + Math.cos(angle) * radius;
+            double z = getZ() + Math.sin(angle) * radius;
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                    x, getY() + 0.35D + (point % 5) * 0.45D, z,
+                    4, 0.18D, 0.3D, 0.18D, 0.045D);
         }
     }
 
