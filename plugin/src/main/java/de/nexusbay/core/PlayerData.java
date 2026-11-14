@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 
 public final class PlayerData implements Listener {
     private final NexusBay plugin;
@@ -27,6 +28,13 @@ public final class PlayerData implements Listener {
         players.set(k + ".name", p.getName());
     }
     @EventHandler public void onJoin(PlayerJoinEvent event) { init(event.getPlayer()); save(); }
+    @EventHandler public void onMobKill(EntityDeathEvent event) {
+        Player killer=event.getEntity().getKiller();
+        if (killer != null && !(event.getEntity() instanceof Player)) {
+            addXp(killer, 10);
+            killer.sendMessage("§b+10 XP §7für einen besiegten Gegner");
+        }
+    }
     public int level(Player p) { init(p); return players.getInt(key(p)+".level",1); }
     public int xp(Player p) { init(p); return players.getInt(key(p)+".xp",0); }
     public int coins(Player p) { init(p); return players.getInt(key(p)+".coins",0); }
