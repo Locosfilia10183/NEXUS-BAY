@@ -1,21 +1,22 @@
 # Kaido GeckoLib model status
 
-The Forge entity now implements GeckoLib 4's `GeoEntity` interface and has an idle/walk
-animation controller. A client renderer and entity-renderer registration have been added.
-The model resource contains a first blockout with body, head, limbs, horns, and kanabo bones.
-The animation resource defines idle, walk, breath, and slam clips.
+## Implemented
 
-## Important visual limitation
+- Registered Forge entity, GeckoLib `GeoEntity`, model and client renderer.
+- Geometry blockout with body, chest, head, horns, limbs and kanabo bones.
+- 128x128 texture atlas at `assets/nexusbay/textures/entity/kaido.png`.
+- GeckoLib animation resource with idle, walk, breath and slam clips.
+- Movement controller selects idle / walk; attack controller exposes named breath / slam triggers.
+- Server combat calls the matching GeckoLib triggers.
 
-The model is a rough geometry blockout, not a finished character likeness. The referenced
-texture file `assets/nexusbay/textures/entity/kaido.png` has not yet been added. Until the
-texture atlas exists and is UV-tested in Blockbench, the renderer will not look finished.
-The breath and slam clips are authored but are not yet triggered by combat state; only idle
-and walk are currently selected by the entity controller.
+## Visual limitations
 
-## Required next steps
+The model is still a first-pass blockout, not a final Kaido likeness. The texture is a hand-authored first-pass pixel atlas and requires an in-game UV review. The current geometry reuses UV regions for mirrored limbs and horns.
 
-1. Create and add the 128x128 Kaido texture atlas and verify UV mapping.
-2. Refine proportions, horns, hair, facial details, dragon features, and kanabo.
-3. Add synchronized attack/phase state and trigger breath/slam clips.
-4. Run the GitHub Actions build and fix compile errors before any live deployment.
+## Next steps
+
+1. Inspect the atlas on the live geometry in a Forge client and refine UV placement / detail.
+2. Improve face, hair, horns, dragon scales, waist armor and kanabo silhouette.
+3. Add hybrid / dragon geometry or layered form models and synchronize phase transitions.
+4. Add attack wind-up / impact timing, hit, transformation and death clips.
+5. Run multiplayer visual and combat tests before any live deployment.

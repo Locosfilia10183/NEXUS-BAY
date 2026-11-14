@@ -1,24 +1,27 @@
 # Custom Character and Combat Animation Pipeline
 
 ## Runtime target
-Use GeckoLib 4 on Forge 1.20.1 for animated entity and item models.
+GeckoLib 4 on Forge 1.20.1.
 
 ## Per-boss asset set
-Each boss requires:
-- Geometry model JSON
-- Texture PNG
+- Geometry model JSON and matching PNG texture atlas
 - Animation JSON
 - GeckoLib entity renderer and model class
-- Animation controller with named triggers
+- Movement and attack animation controllers
 - Server-side attack state that triggers the matching client animation
 
-## Kaido animation IDs
+## Current Kaido clips
 - `animation.kaido.idle`
 - `animation.kaido.walk`
-- `animation.kaido.kanabo_attack`
-- `animation.kaido.dragon_transform`
-- `animation.kaido.flame_breath`
-- `animation.kaido.hit`
-- `animation.kaido.death`
+- `animation.kaido.breath`
+- `animation.kaido.slam`
 
-Animation files alone do not create a character model or register an animated entity. Geometry, textures, renderer/model classes, animation controllers, and synchronized server attack events must be implemented and tested together.
+The entity currently selects idle / walk from movement and triggers breath / slam from server combat. Damage currently resolves at attack start; the next combat pass must add wind-up and impact-frame timing.
+
+## Planned Kaido clips
+- Kanabo attack
+- Hybrid / dragon transformation
+- Hit reaction
+- Death
+
+Animation files alone do not create a character model or registered animated entity. Geometry, textures, renderer/model classes, animation controllers, and synchronized server attack events must be implemented and tested together.
