@@ -1,0 +1,549 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Deterministic terrain-generation design profiles for the One Piece atlas. These profiles are data only; they do not generate blocks until consumed by a tested worldgen implementation.",
+  "defaults": {
+    "seaLevel": 63,
+    "shorelineBand": [
+      63,
+      68
+    ],
+    "beachWidthFactor": 0.08,
+    "coastFalloff": "smooth",
+    "oceanClearanceMin": 1200
+  },
+  "profiles": [
+    {
+      "islandId": "foosha_village",
+      "shape": "rolling_coast",
+      "maxHeight": 78,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "windmill_hill",
+        "village_bay",
+        "small_docks"
+      ]
+    },
+    {
+      "islandId": "shells_town",
+      "shape": "fortified_coast",
+      "maxHeight": 92,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "marine_base",
+        "town_square",
+        "harbor"
+      ]
+    },
+    {
+      "islandId": "orange_town",
+      "shape": "lowland_coast",
+      "maxHeight": 76,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "circus_square",
+        "town_blocks",
+        "pier"
+      ]
+    },
+    {
+      "islandId": "syrup_village",
+      "shape": "woodland_hills",
+      "maxHeight": 104,
+      "topBlock": "grass",
+      "vegetation": "birch",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "mansion_hill",
+        "forest_path",
+        "coast_village"
+      ]
+    },
+    {
+      "islandId": "baratie",
+      "shape": "sea_platform",
+      "maxHeight": 70,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "floating_restaurant",
+        "mooring_ring",
+        "underwater_support"
+      ]
+    },
+    {
+      "islandId": "arlong_park",
+      "shape": "reef_coast",
+      "maxHeight": 82,
+      "topBlock": "grass",
+      "vegetation": "jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "arlong_park_compound",
+        "coral_reef",
+        "fishman_gate"
+      ]
+    },
+    {
+      "islandId": "loguetown",
+      "shape": "broad_lowland",
+      "maxHeight": 86,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "execution_platform",
+        "market_district",
+        "grand_harbor"
+      ]
+    },
+    {
+      "islandId": "reverse_mountain",
+      "shape": "extreme_peak",
+      "maxHeight": 220,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "four_ocean_channels",
+        "summit_pass",
+        "lighthouse"
+      ]
+    },
+    {
+      "islandId": "whiskey_peak",
+      "shape": "desert_badlands",
+      "maxHeight": 112,
+      "topBlock": "sand",
+      "vegetation": "cactus",
+      "shoreBlock": "sandstone",
+      "landmarks": [
+        "cactus_hills",
+        "town_basin",
+        "stone_spires"
+      ]
+    },
+    {
+      "islandId": "little_garden",
+      "shape": "prehistoric_jungle",
+      "maxHeight": 148,
+      "topBlock": "grass",
+      "vegetation": "giant_jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "giant_tree_grove",
+        "dinosaur_basin",
+        "volcanic_ridge"
+      ]
+    },
+    {
+      "islandId": "drum_island",
+      "shape": "snow_mountain",
+      "maxHeight": 240,
+      "topBlock": "snow",
+      "vegetation": "spruce",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "drum_rock_peaks",
+        "castle_peak",
+        "snow_valleys"
+      ]
+    },
+    {
+      "islandId": "alabasta",
+      "shape": "mega_desert",
+      "maxHeight": 138,
+      "topBlock": "sand",
+      "vegetation": "palm_sparse",
+      "shoreBlock": "sandstone",
+      "landmarks": [
+        "sand_sea",
+        "rainbase_oasis",
+        "alubarna_plateau",
+        "river_canyon"
+      ]
+    },
+    {
+      "islandId": "jaya",
+      "shape": "dense_jungle",
+      "maxHeight": 128,
+      "topBlock": "grass",
+      "vegetation": "jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "mock_town",
+        "jungle_ruins",
+        "knock_up_stream_zone"
+      ]
+    },
+    {
+      "islandId": "skypiea",
+      "shape": "sky_archipelago",
+      "maxHeight": 185,
+      "topBlock": "cloud",
+      "vegetation": "sky_island",
+      "shoreBlock": "cloud",
+      "landmarks": [
+        "upper_yard",
+        "angel_beach",
+        "shandora_ruins",
+        "cloud_sea"
+      ]
+    },
+    {
+      "islandId": "water_7",
+      "shape": "canal_city",
+      "maxHeight": 94,
+      "topBlock": "grass",
+      "vegetation": "none",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "tiered_city",
+        "canal_network",
+        "dry_dock",
+        "sea_train_station"
+      ]
+    },
+    {
+      "islandId": "enies_lobby",
+      "shape": "fortress_plateau",
+      "maxHeight": 118,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "judicial_tower",
+        "three_gate_bridges",
+        "central_plaza"
+      ]
+    },
+    {
+      "islandId": "thriller_bark",
+      "shape": "haunted_forest",
+      "maxHeight": 132,
+      "topBlock": "podzol",
+      "vegetation": "dark_oak",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "giant_shadow_tree",
+        "graveyard",
+        "horror_mansion",
+        "fog_clearing"
+      ]
+    },
+    {
+      "islandId": "sabaody_archipelago",
+      "shape": "mangrove_islets",
+      "maxHeight": 96,
+      "topBlock": "grass",
+      "vegetation": "mangrove",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "numbered_grove_islets",
+        "bubble_fields",
+        "auction_house",
+        "coating_dock"
+      ]
+    },
+    {
+      "islandId": "amazon_lily",
+      "shape": "jungle_cliffs",
+      "maxHeight": 154,
+      "topBlock": "grass",
+      "vegetation": "jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "kuja_village",
+        "arena",
+        "serpent_cliffs"
+      ]
+    },
+    {
+      "islandId": "impel_down",
+      "shape": "submerged_fortress",
+      "maxHeight": 88,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "undersea_prison_tower",
+        "sea_floor_foundation",
+        "prison_levels"
+      ]
+    },
+    {
+      "islandId": "marineford",
+      "shape": "military_bay",
+      "maxHeight": 126,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "crescent_harbor",
+        "execution_platform",
+        "marine_hq",
+        "bay_walls"
+      ]
+    },
+    {
+      "islandId": "fish_man_island",
+      "shape": "underwater_dome",
+      "maxHeight": 82,
+      "topBlock": "prismarine",
+      "vegetation": "coral",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "bubble_dome",
+        "ryugu_palace",
+        "coral_districts",
+        "sea_forest"
+      ]
+    },
+    {
+      "islandId": "punk_hazard",
+      "shape": "split_climate",
+      "maxHeight": 176,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "blackstone",
+      "landmarks": [
+        "lava_half",
+        "ice_half",
+        "central_laboratory",
+        "toxic_lake"
+      ]
+    },
+    {
+      "islandId": "dressrosa",
+      "shape": "mediterranean_hills",
+      "maxHeight": 142,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "dressrosa_city",
+        "colosseum",
+        "flower_fields",
+        "king_plateau"
+      ]
+    },
+    {
+      "islandId": "zou",
+      "shape": "moving_forest",
+      "maxHeight": 220,
+      "topBlock": "grass",
+      "vegetation": "giant_spruce",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "elephant_back_plateau",
+        "mokomo_city",
+        "waterfall_edge"
+      ]
+    },
+    {
+      "islandId": "whole_cake_island",
+      "shape": "candy_fantasy",
+      "maxHeight": 156,
+      "topBlock": "grass",
+      "vegetation": "fantasy",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "whole_cake_castle",
+        "candy_forests",
+        "sweet_towns",
+        "coast_cake"
+      ]
+    },
+    {
+      "islandId": "wano_kuni",
+      "shape": "japanese_mountain",
+      "maxHeight": 210,
+      "topBlock": "grass",
+      "vegetation": "bamboo",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "flower_capital",
+        "kuri_coast",
+        "oden_castle_ruins",
+        "mount_fuji"
+      ]
+    },
+    {
+      "islandId": "onigashima",
+      "shape": "oni_fortress",
+      "maxHeight": 190,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "blackstone",
+      "landmarks": [
+        "skull_dome",
+        "horned_peak",
+        "kaido_keep",
+        "harbor_gate"
+      ]
+    },
+    {
+      "islandId": "ohara",
+      "shape": "scholar_forest",
+      "maxHeight": 112,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "tree_of_knowledge",
+        "archaeology_library",
+        "harbor_village"
+      ]
+    },
+    {
+      "islandId": "kano_country",
+      "shape": "mountain_fortress",
+      "maxHeight": 168,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "eight_treasures_mountain",
+        "royal_city",
+        "coastal_docks"
+      ]
+    },
+    {
+      "islandId": "flevance",
+      "shape": "white_city_ruins",
+      "maxHeight": 88,
+      "topBlock": "quartz",
+      "vegetation": "sparse",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "white_city",
+        "royal_palace_ruins",
+        "abandoned_harbor"
+      ]
+    },
+    {
+      "islandId": "germa_kingdom",
+      "shape": "mobile_kingdom",
+      "maxHeight": 104,
+      "topBlock": "stone",
+      "vegetation": "none",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "germa_castle",
+        "clone_barracks",
+        "fleet_docks"
+      ]
+    },
+    {
+      "islandId": "baterilla",
+      "shape": "tropical_lowland",
+      "maxHeight": 82,
+      "topBlock": "grass",
+      "vegetation": "palm",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "coastal_village",
+        "palm_grove",
+        "quiet_bay"
+      ]
+    },
+    {
+      "islandId": "sorbet_kingdom",
+      "shape": "rolling_kingdom",
+      "maxHeight": 96,
+      "topBlock": "grass",
+      "vegetation": "oak",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "sorbet_town",
+        "royal_estate",
+        "southern_harbor"
+      ]
+    },
+    {
+      "islandId": "tequila_wolf",
+      "shape": "industrial_coast",
+      "maxHeight": 92,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "endless_bridge_piers",
+        "worker_camp",
+        "unfinished_spans"
+      ]
+    },
+    {
+      "islandId": "spider_miles",
+      "shape": "industrial_city_coast",
+      "maxHeight": 110,
+      "topBlock": "stone",
+      "vegetation": "sparse",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "factory_district",
+        "smokestacks",
+        "harbor_yards"
+      ]
+    },
+    {
+      "islandId": "minion_island",
+      "shape": "cold_forest_coast",
+      "maxHeight": 118,
+      "topBlock": "snow",
+      "vegetation": "spruce",
+      "shoreBlock": "gravel",
+      "landmarks": [
+        "winter_village_ruins",
+        "frozen_cove",
+        "pine_ridge"
+      ]
+    },
+    {
+      "islandId": "torino_kingdom",
+      "shape": "jungle_basin",
+      "maxHeight": 132,
+      "topBlock": "grass",
+      "vegetation": "jungle",
+      "shoreBlock": "sand",
+      "landmarks": [
+        "giant_tree_grove",
+        "tribal_village",
+        "ancient_ruins"
+      ]
+    },
+    {
+      "islandId": "kuraigana",
+      "shape": "gothic_ruined_highlands",
+      "maxHeight": 158,
+      "topBlock": "podzol",
+      "vegetation": "dark_oak",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "shikkearu_castle",
+        "ruined_battleground",
+        "dark_forest"
+      ]
+    },
+    {
+      "islandId": "elbaf",
+      "shape": "giant_forest_mountains",
+      "maxHeight": 230,
+      "topBlock": "grass",
+      "vegetation": "giant_spruce",
+      "shoreBlock": "stone",
+      "landmarks": [
+        "giant_village",
+        "adam_tree",
+        "warrior_hall",
+        "mountain_fjord"
+      ]
+    }
+  ]
+}

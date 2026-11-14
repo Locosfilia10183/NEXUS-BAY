@@ -7,6 +7,6 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class KaidoRenderer extends GeoEntityRenderer<KaidoBossEntity> {
     public KaidoRenderer(EntityRendererProvider.Context context) {
         super(context, new KaidoModel());
-        this.shadowRadius = 2.2F;
+        this.shadowRadius = 4.0F;
     }
 }

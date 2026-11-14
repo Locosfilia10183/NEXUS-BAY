@@ -5,11 +5,15 @@ on:
     branches: [forge-development]
     paths:
       - "forge-mod/**"
+      - "tools/**"
+      - "docs/**"
       - ".github/workflows/forge-build.yml"
   pull_request:
     branches: [forge-development]
     paths:
       - "forge-mod/**"
+      - "tools/**"
+      - "docs/**"
       - ".github/workflows/forge-build.yml"
   workflow_dispatch:
 
@@ -31,6 +35,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.8"
+
+      - name: Validate One Piece worldgen data
+        run: python3 tools/validate_one_piece_worldgen.py
+
+      - name: Analyze One Piece atlas land and ocean coverage
+        run: python3 tools/analyze_one_piece_atlas.py --step 128
 
       - name: Build Forge mod
         run: gradle -p forge-mod clean build --no-daemon

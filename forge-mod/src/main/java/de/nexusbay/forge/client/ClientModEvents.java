@@ -12,7 +12,13 @@ public final class ClientModEvents {
     private ClientModEvents() {}
 
     @SubscribeEvent
+    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(NexusShipModel.LAYER, NexusShipModel::createLayer);
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.KAIDO.get(), KaidoRenderer::new);
+        event.registerEntityRenderer(ModEntities.NEXUS_SHIP.get(), NexusShipRenderer::new);
     }
 }
