@@ -16,12 +16,14 @@ public final class NexusShipModel {
     public final ModelPart deck;
     public final ModelPart mast;
     public final ModelPart sail;
+    public final ModelPart wheel;
 
     public NexusShipModel(ModelPart root) {
         hull = root.getChild("hull");
         deck = root.getChild("deck");
         mast = root.getChild("mast");
         sail = root.getChild("sail");
+        wheel = root.getChild("wheel");
     }
 
     public static LayerDefinition createLayer() {
@@ -43,6 +45,14 @@ public final class NexusShipModel {
         root.addOrReplaceChild("sail",
                 CubeListBuilder.create().texOffs(0, 0)
                         .addBox(-15, -43, -0.5F, 30, 30, 1),
+                net.minecraft.client.model.geom.PartPose.ZERO);
+
+        PartDefinition wheel = root.addOrReplaceChild("wheel",
+                CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-0.5F, -10, 5.5F, 1, 6, 1)
+                        .addBox(-4, -11, 5, 8, 1, 1)
+                        .addBox(-0.5F, -14, 5, 1, 7, 1)
+                        .addBox(-3, -14, 5, 6, 1, 1),
                 net.minecraft.client.model.geom.PartPose.ZERO);
 
         return LayerDefinition.create(mesh, 64, 64);
