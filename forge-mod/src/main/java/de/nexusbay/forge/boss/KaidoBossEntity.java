@@ -47,6 +47,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_TAKEOFF_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_takeoff");
     private static final RawAnimation DRAGON_LAND_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_land");
     private static final RawAnimation DRAGON_SKYFALL_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_skyfall");
+    private static final RawAnimation DRAGON_TWISTER_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_twister");
     private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
     private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
@@ -65,6 +66,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final int THUNDER_BAGUA_ATTACK = 4;
     private static final int BLAST_BREATH_ATTACK = 5;
     private static final int DRAGON_SKYFALL_ATTACK = 6;
+    private static final int DRAGON_TWISTER_ATTACK = 7;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -81,6 +83,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int thunderBaguaCooldown = 0;
     private int blastBreathCooldown = 0;
     private int skyfallCooldown = 0;
+    private int dragonTwisterCooldown = 0;
     private Vec3 skyfallTarget = Vec3.ZERO;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
@@ -148,7 +151,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("blast_breath", BLAST_BREATH_ANIM)
                 .triggerableAnim("dragon_takeoff", DRAGON_TAKEOFF_ANIM)
                 .triggerableAnim("dragon_land", DRAGON_LAND_ANIM)
-                .triggerableAnim("dragon_skyfall", DRAGON_SKYFALL_ANIM));
+                .triggerableAnim("dragon_skyfall", DRAGON_SKYFALL_ANIM)
+                .triggerableAnim("dragon_twister", DRAGON_TWISTER_ANIM));
     }
 
     @Override
@@ -205,6 +209,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (thunderBaguaCooldown > 0) thunderBaguaCooldown--;
             if (blastBreathCooldown > 0) blastBreathCooldown--;
             if (skyfallCooldown > 0) skyfallCooldown--;
+            if (dragonTwisterCooldown > 0) dragonTwisterCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -314,6 +319,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 else if (pendingAttack == THUNDER_BAGUA_ATTACK) applyThunderBaguaDamage();
                 else if (pendingAttack == BLAST_BREATH_ATTACK) applyBlastBreathDamage();
                 else if (pendingAttack == DRAGON_SKYFALL_ATTACK) applyDragonSkyfallDamage();
+                else if (pendingAttack == DRAGON_TWISTER_ATTACK) applyDragonTwisterDamage();
             }
         }
 
@@ -328,6 +334,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (target == null || !target.isAlive()) return;
 
         double distanceSqr = distanceToSqr(target);
+        if (currentPhase == 3 && isDragonFlying() && distanceSqr <= 256.0D
+                && dragonTwisterCooldown <= 0) {
+            startDragonTwisterAttack();
+            dragonTwisterCooldown = 420;
+            return;
+        }
         if (currentPhase == 3 && isDragonFlying() && distanceSqr >= 49.0D
                 && distanceSqr <= 225.0D && skyfallCooldown <= 0) {
             startDragonSkyfallAttack(target);
@@ -405,6 +417,49 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         attackImpactDelay = 18; // dive wind-up and descent
         attackLockTicks = 42;   // impact plus recovery
         triggerAnim("attack", "dragon_skyfall");
+    }
+
+    private void startDragonTwisterAttack() {
+        pendingAttack = DRAGON_TWISTER_ATTACK;
+        attackImpactDelay = 20;
+        attackLockTicks = 44;
+        triggerAnim("attack", "dragon_twister");
+    }
+
+    private void applyDragonTwisterDamage() {
+        double radius = 12.0D;
+        AABB area = getBoundingBox().inflate(radius, 7.0D, radius);
+        if (level() instanceof ServerLevel serverLevel) {
+            for (int ring = 1; ring <= 5; ring++) {
+                double ringRadius = ring * 2.2D;
+                for (int point = 0; point < 32; point++) {
+                    double angle = (Math.PI * 2.0D * point) / 32.0D + tickCount * 0.12D;
+                    double x = getX() + Math.cos(angle) * ringRadius;
+                    double z = getZ() + Math.sin(angle) * ringRadius;
+                    double y = getY() + 1.0D + (point % 8) * 0.55D;
+                    serverLevel.sendParticles(ParticleTypes.CLOUD,
+                            x, y, z, 3, 0.35D, 0.45D, 0.35D, 0.08D);
+                    if (point % 2 == 0) {
+                        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                                x, y, z, 2, 0.2D, 0.35D, 0.2D, 0.08D);
+                    }
+                }
+            }
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION,
+                    getX(), getY() + 1.0D, getZ(), 12, 3.0D, 1.2D, 3.0D, 0.12D);
+        }
+
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
+                entity -> entity != this && entity.isAlive())) {
+            double distance = victim.distanceTo(this);
+            if (distance <= radius) {
+                victim.hurt(damageSources().mobAttack(this), 48.0F);
+                Vec3 away = victim.position().subtract(position()).normalize();
+                double force = Math.max(1.0D, (radius - distance) * 0.22D);
+                victim.push(away.x * force, 1.1D + force * 0.25D, away.z * force);
+                victim.hurtMarked = true;
+            }
+        }
     }
 
     private void applyDragonSkyfallDamage() {
