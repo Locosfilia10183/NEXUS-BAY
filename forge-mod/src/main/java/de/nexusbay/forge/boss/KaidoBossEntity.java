@@ -8,6 +8,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -129,6 +131,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                     arenaParticipants.add(player.getUUID());
                     if (arenaAnnouncedPlayers.add(player.getUUID())) {
                         player.displayClientMessage(Component.literal("§4§lONIGASHIMA §c– Du hast Kaidos Gebiet betreten! Bereite dich auf den Kampf vor."), false);
+                        player.playNotifySound(SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 0.85F, 0.72F);
                     }
                 }
             }
