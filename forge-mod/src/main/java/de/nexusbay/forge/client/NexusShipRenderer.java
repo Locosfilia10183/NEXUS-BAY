@@ -31,10 +31,15 @@ public final class NexusShipRenderer extends EntityRenderer<NexusShipEntity> {
         pose.mulPose(Axis.YP.rotationDegrees(180.0F - yaw));
         pose.scale(1.0F, -1.0F, 1.0F);
 
+        float wave = (entity.tickCount + partialTick) * 0.08F;
+        model.sail.zRot = (float) Math.sin(wave) * 0.035F;
+        model.wheel.yRot = (float) Math.sin(wave * 0.55F) * 0.12F;
+
         renderPart(model.hull, WOOD, pose, buffers, packedLight);
         renderPart(model.deck, WOOD, pose, buffers, packedLight);
         renderPart(model.mast, LOG, pose, buffers, packedLight);
         renderPart(model.sail, SAIL, pose, buffers, packedLight);
+        renderPart(model.wheel, LOG, pose, buffers, packedLight);
 
         pose.popPose();
         super.render(entity, yaw, partialTick, pose, buffers, packedLight);
