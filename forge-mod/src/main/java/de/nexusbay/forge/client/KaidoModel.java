@@ -14,7 +14,13 @@ public class KaidoModel extends GeoModel<KaidoBossEntity> {
             new ResourceLocation(NexusBayForge.MOD_ID, "geckolib/animations/entity/kaido.animation.json");
 
     @Override
-    public ResourceLocation getModelResource(KaidoBossEntity entity) { return MODEL; }
+    public ResourceLocation getModelResource(KaidoBossEntity entity) {
+        return switch (entity.getCurrentPhase()) {
+            case 2 -> HYBRID_MODEL;
+            case 3 -> DRAGON_MODEL;
+            default -> HUMAN_MODEL;
+        };
+    }
 
     @Override
     public ResourceLocation getTextureResource(KaidoBossEntity entity) { return TEXTURE; }

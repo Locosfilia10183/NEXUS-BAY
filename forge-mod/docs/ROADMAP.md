@@ -23,7 +23,9 @@
 - [x] Server attack triggers with tick-based impact timing.
 - [x] Kaido kanabo melee swing animation trigger and weapon-bone motion.
 - [ ] Hit, death, kanabo combo and transformation animations.
-- [ ] Hybrid / dragon form visuals synchronized with phase transitions.
+- [x] First-pass hybrid / dragon form geometry selection synchronized with phase transitions.
+- [x] Hybrid / dragon transition clips and dragon idle / movement clips.
+- [ ] Refine form geometry, texture UVs, dragon flight and in-game scale.
 - [ ] Client/server multiplayer visual verification.
 
 ## Phase 4 — Islands and content

@@ -1,6 +1,10 @@
 package de.nexusbay.forge.boss;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
@@ -33,6 +37,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.breath");
     private static final RawAnimation SLAM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.slam");
     private static final RawAnimation KANABO_ANIM = RawAnimation.begin().thenPlay("animation.kaido.kanabo");
+    private static final RawAnimation HYBRID_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hybrid_transform");
+    private static final RawAnimation DRAGON_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_transform");
+    private static final RawAnimation DRAGON_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_idle");
+    private static final RawAnimation DRAGON_MOVE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_move");
+    private static final EntityDataAccessor<Integer> DATA_PHASE =
+            SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
     private static final int NO_ATTACK = 0;
     private static final int BREATH_ATTACK = 1;
@@ -53,6 +63,16 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
 
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_PHASE, 1);
+    }
+
+    public int getCurrentPhase() {
+        return this.entityData.get(DATA_PHASE);
+    }
+
     public KaidoBossEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
         this.xpReward = 5000;
@@ -70,7 +90,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
                 .triggerableAnim("breath", BREATH_ANIM)
                 .triggerableAnim("slam", SLAM_ANIM)
-                .triggerableAnim("kanabo", KANABO_ANIM));
+                .triggerableAnim("kanabo", KANABO_ANIM)
+                .triggerableAnim("hybrid_transform", HYBRID_TRANSFORM_ANIM)
+                .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM));
     }
 
     @Override

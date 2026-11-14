@@ -29,3 +29,11 @@ The server owns the attack state and damage timing. Clients receive the GeckoLib
 - Vanilla melee damage remains authoritative; the animation hook does not apply a second damage event.
 - The clip is cosmetic and is triggered only for a successful hit when no breath/slam special is active.
 - Exact hand/weapon alignment and hit-frame synchronization still require an in-game GeckoLib test.
+
+
+## Form switching — first visual implementation
+
+- The current phase is synchronized through Minecraft entity data so clients select the same form as the server.
+- Phase 1 uses the original humanoid blockout; phase 2 switches to a heavier hybrid silhouette; phase 3 switches to a long eastern-dragon silhouette with neck, horns, tail and wings.
+- Hybrid and dragon transitions have dedicated GeckoLib clips; dragon form has separate idle and movement clips.
+- This is a first-pass geometry pass using the existing Kaido texture atlas. It is not yet a final anime-accurate sculpt: UVs, wing silhouette, flight movement and in-game scale still require visual iteration.
