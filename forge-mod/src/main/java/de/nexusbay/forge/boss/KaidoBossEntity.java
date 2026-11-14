@@ -451,7 +451,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, alertArea)) {
             if (player.distanceToSqr(center) <= alertRadius * alertRadius) {
                 player.displayClientMessage(Component.literal("§c§l⚠ " + message), false);
-                player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS, SoundSource.HOSTILE, 0.8F, 0.65F);
+                player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.HOSTILE, 0.8F, 0.65F);
             }
         }
         for (int point = 0; point < 32; point++) {
