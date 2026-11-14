@@ -7,7 +7,7 @@ set -Eeuo pipefail
 SERVICE_USER="nexusbay"
 DEFAULT_DIR="/opt/nexus-bay"
 PAPER_API="https://fill.papermc.io/v3"
-VELOCITY_API="https://fill.papermc.io/v3/projects/velocity"
+UA="NEXUS-BAY/1.2 (https://github.com/Locosfilia10183/NEXUS-BAY)"
 GEYSER_SPIGOT="https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot"
 FLOODGATE_SPIGOT="https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot"
 GEYSER_VELOCITY="https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity"
@@ -43,10 +43,10 @@ fi
 # --- Eingaben ---
 read -rp "Minecraft-Version (leer = neueste stabile Paper): " MC_VERSION
 if [[ -z "$MC_VERSION" ]]; then
-  PROJECT=$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0' "$PAPER_API/projects/paper")
+  PROJECT=$(curl -fsSL -A "$UA" "$PAPER_API/projects/paper")
   mapfile -t VERSIONS < <(echo "$PROJECT" | jq -r '.versions | to_entries[] | .value[]' | sort -Vru)
   for candidate in "${VERSIONS[@]}"; do
-    response=$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0' "$PAPER_API/projects/paper/versions/$candidate/builds") || continue
+    response=$(curl -fsSL -A "$UA" "$PAPER_API/projects/paper/versions/$candidate/builds") || continue
     stable=$(echo "$response" | jq -r '[.[] | select(.channel == "STABLE")] | first | .id // empty')
     if [[ -n "$stable" ]]; then
       MC_VERSION="$candidate"
@@ -114,42 +114,69 @@ mkdir -p "$INSTALL_DIR"/{proxy/plugins,servers/lobby/plugins,servers/survival/pl
 
 # --- Paper herunterladen ---
 echo "Lade Paper $MC_VERSION..."
-BUILDS=$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0' "$PAPER_API/projects/paper/versions/$MC_VERSION/builds")
+BUILDS=$(curl -fsSL -A "$UA" "$PAPER_API/projects/paper/versions/$MC_VERSION/builds")
 BUILD=$(echo "$BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .id // empty')
 PAPER_URL=$(echo "$BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .downloads["server:default"].url // empty')
-[[ -n "$BUILD" && -n "$PAPER_URL" ]] || { echo "Kein stabiler Paper-Build für $MC_VERSION."; exit 1; }
+if [[ -z "$BUILD" || -z "$PAPER_URL" ]]; then
+  # Fallback: latest build of this version
+  BUILD=$(echo "$BUILDS" | jq -r '.[0].id // empty')
+  PAPER_URL=$(echo "$BUILDS" | jq -r '.[0].downloads["server:default"].url // empty')
+fi
+[[ -n "$BUILD" && -n "$PAPER_URL" ]] || { echo "Kein Paper-Build für $MC_VERSION."; exit 1; }
 
-curl -fL "$PAPER_URL" -o "$INSTALL_DIR/servers/lobby/paper.jar"
+curl -fL -A "$UA" "$PAPER_URL" -o "$INSTALL_DIR/servers/lobby/paper.jar"
 cp "$INSTALL_DIR/servers/lobby/paper.jar" "$INSTALL_DIR/servers/survival/paper.jar"
+echo "Paper Build $BUILD geladen."
 
-# --- Velocity ---
+# --- Velocity (fill API: .versions is object grouped by family) ---
 echo "Lade Velocity..."
-VEL_PROJECT=$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0' "$VELOCITY_API")
-VEL_VERSION=$(echo "$VEL_PROJECT" | jq -r '.versions[-1]')
-VEL_BUILDS=$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0' "$VELOCITY_API/versions/$VEL_VERSION/builds")
-VEL_URL=$(echo "$VEL_BUILDS" | jq -r '.[-1].downloads["application"].url // empty')
-[[ -n "$VEL_URL" ]] || { echo "Velocity-Download fehlgeschlagen."; exit 1; }
-curl -fL "$VEL_URL" -o "$INSTALL_DIR/proxy/velocity.jar"
+VEL_PROJECT=$(curl -fsSL -A "$UA" "$PAPER_API/projects/velocity")
+# Newest family first, then first version in that family (API lists newest first)
+VEL_VERSION=$(echo "$VEL_PROJECT" | jq -r '.versions | to_entries[0] | .value[0] // empty')
+[[ -n "$VEL_VERSION" ]] || { echo "Keine Velocity-Version gefunden."; exit 1; }
+echo "Velocity-Version: $VEL_VERSION"
+
+VEL_BUILDS=$(curl -fsSL -A "$UA" "$PAPER_API/projects/velocity/versions/$VEL_VERSION/builds")
+# Prefer STABLE, else newest build
+VEL_URL=$(echo "$VEL_BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .downloads["server:default"].url // .downloads.application.url // empty')
+if [[ -z "$VEL_URL" ]]; then
+  VEL_URL=$(echo "$VEL_BUILDS" | jq -r '.[0].downloads["server:default"].url // .[0].downloads.application.url // empty')
+fi
+# Alternate key names used by some fill responses
+if [[ -z "$VEL_URL" ]]; then
+  VEL_URL=$(echo "$VEL_BUILDS" | jq -r '.[0].downloads | to_entries[0] | .value.url // empty')
+fi
+[[ -n "$VEL_URL" ]] || {
+  echo "Velocity-Download-URL nicht gefunden. API-Antwort (Auszug):"
+  echo "$VEL_BUILDS" | jq -c '.[0] // .' | head -c 500
+  echo
+  exit 1
+}
+curl -fL -A "$UA" "$VEL_URL" -o "$INSTALL_DIR/proxy/velocity.jar"
+echo "Velocity geladen."
 
 # --- Geyser / Floodgate ---
 echo "Lade Geyser + Floodgate..."
-curl -fL "$GEYSER_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/Geyser-Velocity.jar" || true
-curl -fL "$FLOODGATE_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/floodgate-velocity.jar" || true
-curl -fL "$GEYSER_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/Geyser-Spigot.jar" || true
-curl -fL "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/floodgate-spigot.jar" || true
-curl -fL "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/survival/plugins/floodgate-spigot.jar" || true
+curl -fL -A "$UA" "$GEYSER_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/Geyser-Velocity.jar" || true
+curl -fL -A "$UA" "$FLOODGATE_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/floodgate-velocity.jar" || true
+curl -fL -A "$UA" "$GEYSER_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/Geyser-Spigot.jar" || true
+curl -fL -A "$UA" "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/floodgate-spigot.jar" || true
+curl -fL -A "$UA" "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/survival/plugins/floodgate-spigot.jar" || true
 
 # --- Core Plugin bauen ---
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 if [[ -f "$SCRIPT_DIR/plugin/pom.xml" ]]; then
   echo "Baue NEXUS-BAY Core Plugin..."
-  mvn -B -f "$SCRIPT_DIR/plugin/pom.xml" clean package -q
-  if [[ -f "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" ]]; then
-    cp "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" "$INSTALL_DIR/servers/lobby/plugins/"
-    cp "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" "$INSTALL_DIR/servers/survival/plugins/"
-    echo "Core-Plugin installiert."
+  if mvn -B -f "$SCRIPT_DIR/plugin/pom.xml" clean package -q; then
+    if [[ -f "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" ]]; then
+      cp "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" "$INSTALL_DIR/servers/lobby/plugins/"
+      cp "$SCRIPT_DIR/plugin/target/NEXUS-BAY-Core.jar" "$INSTALL_DIR/servers/survival/plugins/"
+      echo "Core-Plugin installiert."
+    else
+      echo "Warnung: JAR nicht gefunden nach Build."
+    fi
   else
-    echo "Warnung: Core-Plugin konnte nicht gebaut werden."
+    echo "Warnung: Core-Plugin-Build fehlgeschlagen (Server laufen trotzdem ohne Custom-Plugin)."
   fi
 fi
 
@@ -213,7 +240,6 @@ proxies:
 EOF
 done
 
-# start.sh für Lobby und Survival (sauber)
 cat > "$INSTALL_DIR/servers/lobby/start.sh" <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
@@ -354,6 +380,7 @@ echo "  NEXUS-BAY Installation abgeschlossen"
 echo "=============================================="
 echo "Pfad:          $INSTALL_DIR"
 echo "Paper:         $MC_VERSION (Build $BUILD)"
+echo "Velocity:      $VEL_VERSION"
 echo "Proxy RAM:     ${PROXY_RAM}G"
 echo "Lobby RAM:     ${LOBBY_RAM}G"
 echo "Survival RAM:  ${SURVIVAL_RAM}G"
