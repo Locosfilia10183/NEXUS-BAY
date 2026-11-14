@@ -1,0 +1,16 @@
+# Beispiel server.properties für den Lobby-Server
+motd=§6NEXUS-BAY §f| Lobby
+server-port=25566
+server-ip=127.0.0.1
+online-mode=false
+max-players=100
+view-distance=6
+simulation-distance=4
+spawn-protection=16
+gamemode=adventure
+force-gamemode=true
+pvp=false
+allow-flight=true
+difficulty=peaceful
+white-list=false
+enable-command-block=false

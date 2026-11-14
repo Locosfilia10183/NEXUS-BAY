@@ -3,10 +3,21 @@ settings:
   island-radius: 42
   starting-coins: 250
   xp-per-level: 100
+
+# Später: Datenbank-Verbindung (Phase 1)
+# database:
+#   enabled: false
+#   host: localhost
+#   port: 3306
+#   name: nexusbay
+#   user: nexusbay
+#   password: ""   # wird aus secrets.env geladen, nie hardcoded
+
 spawn:
   world: world
   x: 0.5
   y: 100
   z: 0.5
+
 islands: {}
 players: {}

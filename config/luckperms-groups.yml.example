@@ -1,0 +1,102 @@
+# NEXUS-BAY – Beispiel LuckPerms Gruppen
+# Nach der Installation von LuckPerms können diese Gruppen importiert oder manuell angelegt werden.
+# Befehl auf dem Proxy oder einem Backend (mit LuckPerms):
+#   /lp import groups <datei>   oder manuell über /lp creategroup ...
+
+groups:
+  spieler:
+    displayname: "&7Spieler"
+    weight: 10
+    permissions:
+      - nexusbay.player
+      - essentials.spawn
+      - essentials.tpa
+      - essentials.msg
+
+  vip:
+    displayname: "&aVIP"
+    weight: 20
+    parents:
+      - spieler
+    permissions:
+      - nexusbay.vip
+      - essentials.fly
+      - essentials.nick
+
+  vipplus:
+    displayname: "&aVIP+"
+    weight: 30
+    parents:
+      - vip
+    permissions:
+      - nexusbay.vipplus
+
+  mvp:
+    displayname: "&bMVP"
+    weight: 40
+    parents:
+      - vipplus
+    permissions:
+      - nexusbay.mvp
+
+  mvpplus:
+    displayname: "&bMVP+"
+    weight: 50
+    parents:
+      - mvp
+    permissions:
+      - nexusbay.mvpplus
+
+  legend:
+    displayname: "&6LEGEND"
+    weight: 60
+    parents:
+      - mvpplus
+    permissions:
+      - nexusbay.legend
+
+  youtuber:
+    displayname: "&cYouTuber"
+    weight: 70
+    parents:
+      - legend
+    permissions:
+      - nexusbay.youtuber
+
+  supporter:
+    displayname: "&9Supporter"
+    weight: 80
+    parents:
+      - spieler
+    permissions:
+      - nexusbay.supporter
+      - essentials.kick
+      - essentials.mute
+
+  moderator:
+    displayname: "&2Moderator"
+    weight: 90
+    parents:
+      - supporter
+    permissions:
+      - nexusbay.moderator
+      - essentials.ban
+      - essentials.tempban
+      - essentials.vanish
+
+  admin:
+    displayname: "&cAdmin"
+    weight: 100
+    parents:
+      - moderator
+    permissions:
+      - nexusbay.admin
+      - "*"
+
+  owner:
+    displayname: "&4Owner"
+    weight: 110
+    parents:
+      - admin
+    permissions:
+      - "*"
