@@ -57,6 +57,9 @@ public class KaidoBossEntity extends Monster {
     @Override
     public void tick() {
         super.tick();
+        if (!level().isClientSide && tickCount == 1) {
+            setHealth((float) getMaxHealth());
+        }
         if (!level().isClientSide && tickCount % 5 == 0) {
             float progress = (float) Math.max(0.0D, Math.min(1.0D,
                     getHealth() / getMaxHealth()));
