@@ -1,0 +1,44 @@
+name: Forge mod build
+
+on:
+  push:
+    branches: [forge-development]
+    paths:
+      - "forge-mod/**"
+      - ".github/workflows/forge-build.yml"
+  pull_request:
+    branches: [forge-development]
+    paths:
+      - "forge-mod/**"
+      - ".github/workflows/forge-build.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.8"
+
+      - name: Build Forge mod
+        run: gradle -p forge-mod clean build --no-daemon
+
+      - name: Upload mod artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-bay-forge
+          path: forge-mod/build/libs/*.jar
+          if-no-files-found: error
