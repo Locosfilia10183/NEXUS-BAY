@@ -48,6 +48,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
     private static final RawAnimation RAGNAROK_ANIM = RawAnimation.begin().thenPlay("animation.kaido.ragnarok");
     private static final RawAnimation THUNDER_BAGUA_ANIM = RawAnimation.begin().thenPlay("animation.kaido.thunder_bagua");
+    private static final RawAnimation BLAST_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.blast_breath");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
@@ -56,6 +57,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final int SLAM_ATTACK = 2;
     private static final int RAGNAROK_ATTACK = 3;
     private static final int THUNDER_BAGUA_ATTACK = 4;
+    private static final int BLAST_BREATH_ATTACK = 5;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -70,6 +72,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int slamCooldown = 0;
     private int ragnarokCooldown = 0;
     private int thunderBaguaCooldown = 0;
+    private int blastBreathCooldown = 0;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
@@ -113,7 +116,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("hit_react", HIT_REACT_ANIM)
                 .triggerableAnim("death", DEATH_ANIM)
                 .triggerableAnim("ragnarok", RAGNAROK_ANIM)
-                .triggerableAnim("thunder_bagua", THUNDER_BAGUA_ANIM));
+                .triggerableAnim("thunder_bagua", THUNDER_BAGUA_ANIM)
+                .triggerableAnim("blast_breath", BLAST_BREATH_ANIM));
     }
 
     @Override
@@ -162,6 +166,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (slamCooldown > 0) slamCooldown--;
             if (ragnarokCooldown > 0) ragnarokCooldown--;
             if (thunderBaguaCooldown > 0) thunderBaguaCooldown--;
+            if (blastBreathCooldown > 0) blastBreathCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -264,6 +269,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 else if (pendingAttack == SLAM_ATTACK) applySlamDamage();
                 else if (pendingAttack == RAGNAROK_ATTACK) applyRagnarokDamage();
                 else if (pendingAttack == THUNDER_BAGUA_ATTACK) applyThunderBaguaDamage();
+                else if (pendingAttack == BLAST_BREATH_ATTACK) applyBlastBreathDamage();
             }
         }
 
@@ -278,6 +284,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (target == null || !target.isAlive()) return;
 
         double distanceSqr = distanceToSqr(target);
+        if (currentPhase == 3 && distanceSqr >= 400.0D && distanceSqr <= 1600.0D
+                && blastBreathCooldown <= 0) {
+            startBlastBreathAttack();
+            blastBreathCooldown = 400;
+            return;
+        }
         if (currentPhase >= 2 && distanceSqr >= 25.0D && distanceSqr <= 225.0D
                 && thunderBaguaCooldown <= 0) {
             startThunderBaguaAttack();
@@ -330,6 +342,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         triggerAnim("attack", "thunder_bagua");
     }
 
+    private void startBlastBreathAttack() {
+        pendingAttack = BLAST_BREATH_ATTACK;
+        attackImpactDelay = 24; // 1.2-second dragon breath charge-up
+        attackLockTicks = 40;   // 2-second attack and recovery window
+        triggerAnim("attack", "blast_breath");
+    }
+
     private void applyBreathDamage() {
         Vec3 look = getLookAngle().normalize();
         Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
@@ -360,6 +379,67 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (look.dot(direction) > coneDot && victim.distanceToSqr(this) <= range * range) {
                 victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 45.0F : 22.0F);
                 victim.setSecondsOnFire(currentPhase == 3 ? 8 : 5);
+            }
+        }
+    }
+
+    private void applyBlastBreathDamage() {
+        LivingEntity target = getTarget();
+        if (target == null || !target.isAlive()) return;
+
+        Vec3 origin = position().add(0.0D, getBbHeight() * 0.68D, 0.0D);
+        Vec3 direction = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
+                .subtract(origin).normalize();
+        double range = 40.0D;
+        double impactRadius = 5.0D;
+        Vec3 endpoint = origin.add(direction.scale(range));
+
+        if (level() instanceof ServerLevel serverLevel) {
+            // A continuous-looking fire beam with smoke around its core.
+            for (double distance = 2.0D; distance <= range; distance += 1.5D) {
+                Vec3 point = origin.add(direction.scale(distance));
+                double spread = 0.45D + distance * 0.035D;
+                serverLevel.sendParticles(ParticleTypes.FLAME,
+                        point.x, point.y, point.z, 14, spread, spread, spread, 0.025D);
+                serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE,
+                        point.x, point.y, point.z, 5, spread * 0.8D, spread * 0.8D,
+                        spread * 0.8D, 0.008D);
+                if (distance % 6.0D < 1.5D) {
+                    serverLevel.sendParticles(ParticleTypes.LAVA,
+                            point.x, point.y, point.z, 3, spread * 0.35D,
+                            spread * 0.35D, spread * 0.35D, 0.0D);
+                }
+            }
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                    endpoint.x, endpoint.y, endpoint.z, 2, 1.0D, 0.8D, 1.0D, 0.0D);
+            serverLevel.sendParticles(ParticleTypes.FLAME,
+                    endpoint.x, endpoint.y, endpoint.z, 90, 2.2D, 1.6D, 2.2D, 0.12D);
+            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE,
+                    endpoint.x, endpoint.y, endpoint.z, 35, 2.0D, 1.4D, 2.0D, 0.035D);
+        }
+
+        AABB searchArea = new AABB(
+                Math.min(origin.x, endpoint.x) - impactRadius,
+                Math.min(origin.y, endpoint.y) - impactRadius,
+                Math.min(origin.z, endpoint.z) - impactRadius,
+                Math.max(origin.x, endpoint.x) + impactRadius,
+                Math.max(origin.y, endpoint.y) + impactRadius,
+                Math.max(origin.z, endpoint.z) + impactRadius
+        );
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, searchArea,
+                entity -> entity != this && entity.isAlive())) {
+            Vec3 victimPoint = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D);
+            Vec3 relative = victimPoint.subtract(origin);
+            double alongBeam = relative.dot(direction);
+            if (alongBeam < 0.0D || alongBeam > range) continue;
+            Vec3 closestPoint = origin.add(direction.scale(alongBeam));
+            double distanceToBeam = victimPoint.distanceTo(closestPoint);
+            if (distanceToBeam <= impactRadius) {
+                victim.hurt(damageSources().mobAttack(this), 75.0F);
+                victim.setSecondsOnFire(10);
+                Vec3 knockback = victim.position().subtract(endpoint).normalize();
+                victim.push(knockback.x * 1.6D, 0.85D, knockback.z * 1.6D);
+                victim.hurtMarked = true;
             }
         }
     }
