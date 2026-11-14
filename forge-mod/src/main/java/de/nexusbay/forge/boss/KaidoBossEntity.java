@@ -7,6 +7,9 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -24,6 +27,8 @@ public class KaidoBossEntity extends Monster {
             BossEvent.BossBarOverlay.PROGRESS
     );
     private int currentPhase = 1;
+    private int breathCooldown = 0;
+    private int slamCooldown = 0;
 
     public KaidoBossEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -60,11 +65,57 @@ public class KaidoBossEntity extends Monster {
         if (!level().isClientSide && tickCount == 1) {
             setHealth((float) getMaxHealth());
         }
-        if (!level().isClientSide && tickCount % 5 == 0) {
-            float progress = (float) Math.max(0.0D, Math.min(1.0D,
-                    getHealth() / getMaxHealth()));
-            bossEvent.setProgress(progress);
-            updatePhase();
+        if (!level().isClientSide) {
+            if (breathCooldown > 0) breathCooldown--;
+            if (slamCooldown > 0) slamCooldown--;
+            if (tickCount % 5 == 0) {
+                float progress = (float) Math.max(0.0D, Math.min(1.0D,
+                        getHealth() / getMaxHealth()));
+                bossEvent.setProgress(progress);
+                updatePhase();
+            }
+            runBossCombat();
+        }
+    }
+
+    private void runBossCombat() {
+        LivingEntity target = getTarget();
+        if (target == null || !target.isAlive()) return;
+        double distanceSqr = distanceToSqr(target);
+        if (distanceSqr >= 36.0D && distanceSqr <= 576.0D && breathCooldown <= 0) {
+            breatheFire();
+            breathCooldown = currentPhase == 3 ? 65 : 100;
+        }
+        if (distanceSqr <= 64.0D && slamCooldown <= 0) {
+            groundSlam();
+            slamCooldown = currentPhase == 3 ? 75 : 110;
+        }
+    }
+
+    private void breatheFire() {
+        Vec3 look = getLookAngle().normalize();
+        Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
+        AABB area = getBoundingBox().expandTowards(look.scale(18.0D)).inflate(3.0D);
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
+                entity -> entity != this && entity.isAlive())) {
+            Vec3 direction = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D)
+                    .subtract(origin).normalize();
+            if (look.dot(direction) > 0.72D && victim.distanceToSqr(this) <= 400.0D) {
+                victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 32.0F : 22.0F);
+                victim.setSecondsOnFire(5);
+            }
+        }
+    }
+
+    private void groundSlam() {
+        double radius = currentPhase == 3 ? 9.0D : 7.0D;
+        AABB area = getBoundingBox().inflate(radius, 3.0D, radius);
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
+                entity -> entity != this && entity.isAlive())) {
+            victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 38.0F : 26.0F);
+            Vec3 push = victim.position().subtract(position()).normalize();
+            victim.push(push.x * 2.2D, 0.8D, push.z * 2.2D);
+            victim.hurtMarked = true;
         }
     }
 
