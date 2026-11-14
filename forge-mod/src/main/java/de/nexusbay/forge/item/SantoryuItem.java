@@ -44,7 +44,9 @@ public class SantoryuItem extends SwordItem {
             double dot = flatLook.dot(flatOffset.normalize());
             if (dot < 0.35D) continue;
 
-            victim.hurt(attacker.damageSources().mobAttack(attacker), 4.0F);
+            victim.hurt(attacker instanceof Player player
+                    ? attacker.damageSources().playerAttack(player)
+                    : attacker.damageSources().mobAttack(attacker), 4.0F);
             victim.knockback(0.45D, -flatLook.x, -flatLook.z);
         }
 
