@@ -7,7 +7,7 @@ Independent pirate-themed Minecraft Java + Bedrock RPG server for an Ubuntu VPS.
 - NEXUS-BAY Core plugin: persistent player levels, XP, Bay-Coins and player transfers
 - Admin control GUI with world tools, status, broadcast and coin grant
 - Read-only admin inventory inspection via `/bayinv <player>`
-- Procedural starter islands with terrain, dock, lighthouse and outpost
+- Procedural starter island plus five distinct first-batch profiles: Drum Island, Alabasta, Skypia, Water 7 and Sabaody (terrain and basic landmarks)
 - Island management: `/bayisland create <name>`, `/bayisland visit <name>`, `/bayisland list`
 - Player profile: `/bayprofile`; coin transfer: `/baypay <player> <amount>`
 - Pirate bounty contract: `/bayquest accept` starts a 10-monster contract; `/bayquest status` shows progress; `/bayquest abandon` cancels it. Completion grants 100 Bay-Coins and 50 XP. Progress persists across reconnects and restarts.
@@ -63,3 +63,14 @@ sudo /opt/nexus-bay/backup.sh
 Open TCP 25565 and UDP 19132 in the VPS provider firewall. If UFW is already active, the installer adds both rules; it does not enable UFW or change SSH rules.
 
 See [network guide](docs/NETWORK.md) and [gameplay roadmap](docs/ROADMAP.md). This is an evolving RPG foundation, not a finished One Piece clone: devil-fruit abilities, Haki combat, full questlines, crew wars, custom NPCs and a player marketplace remain future development systems. Paper plugins are used for cross-play; Forge/Fabric-only mods are not compatible with this Paper server.
+
+## First island profile test
+After installing the plugin and joining as an admin, create the five first-batch test islands in the `world` world:
+```text
+/bayisland create DrumIsland
+/bayisland create Alabasta
+/bayisland create Skypia
+/bayisland create Water7
+/bayisland create Sabaody
+```
+Visit each island with `/bayisland visit DrumIsland` (replace the name for the others). These profiles are generated when the create command is run; automatic archipelago generation and chunk-batched generation are not implemented yet. Back up your world before testing, and use a fresh test world because island creation writes blocks into the world.
