@@ -1,114 +1,64 @@
 # NEXUS-BAY
 
-**Eigenständiges Minecraft-Netzwerk** mit Java- und Bedrock-Crossplay.  
-Maritime Fantasy / Piraten-Thema. Separate Installation – berührt keine andere NEXUSCRAFT-Installation.
+**Pirate-themed Minecraft network** (Java + Bedrock) for Ubuntu VPS.  
+Independent project – not related to NEXUSCRAFT.
 
-## Architektur (Foundation)
+Theme: Caribbean bays, cursed islands, crews, skill trees, quests and exploration.  
+See [`docs/THEME.md`](docs/THEME.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-```
-Velocity Proxy (25565)
-        │
-        ├── Lobby      (Paper)
-        └── Survival   (Paper)
+## Current status (branch `network-foundation`)
 
-Bedrock → Geyser + Floodgate
-Daten   → MariaDB (Spieler, Economy, Ränge, Clans, Freunde)
-```
+Network foundation is in place:
 
-BedWars, SkyWars und Events sind als Verzeichnis- und Systemd-Struktur vorbereitet und können schrittweise ausgebaut werden.
+- Velocity proxy + Lobby + Survival
+- Geyser + Floodgate (Java & Bedrock)
+- MariaDB schema prepared
+- Systemd services + full management scripts
+- Core plugin (profiles, coins, islands, admin GUI)
+- LuckPerms rank examples
+- Theme & architecture documentation
 
-## Features der aktuellen Foundation
+This is still a **foundation**, not the finished pirate RPG.
 
-- Velocity + Paper Multi-Server Grundgerüst
-- Java (TCP 25565) + Bedrock (UDP 19132) Crossplay
-- NEXUS-BAY Core Plugin: Level, XP, Bay-Coins, Inseln, Admin-GUI
-- LuckPerms + Vault vorbereitet
-- MariaDB Schema für Profile, Transaktionen, Freunde, Clans, Moderation
-- Systemd-Dienste mit automatischem Neustart
-- Backup-, Status- und Healthcheck-Skripte
-- Idempotentes Installationsskript
+## Requirements
+- Ubuntu 24.04 recommended
+- 6–8 GB+ RAM for the full network
+- Root/sudo
+- Firewall: TCP 25565 + UDP 19132
 
-## Anforderungen
-
-| Ressource     | Minimum     | Empfohlen      |
-|---------------|-------------|----------------|
-| OS            | Ubuntu 24.04| Ubuntu 24.04   |
-| CPU           | 4 Kerne     | 6+ Kerne       |
-| RAM           | 8 GB        | 12–16 GB       |
-| Festplatte    | 40 GB SSD   | 80+ GB         |
-
-## Installation
-
+## Install (from this branch)
 ```bash
 sudo apt update && sudo apt install -y git
-git clone https://github.com/Locosfilia10183/NEXUS-BAY.git
+git clone -b network-foundation https://github.com/Locosfilia10183/NEXUS-BAY.git
 cd NEXUS-BAY
 sudo bash install.sh
 ```
 
-Das Skript installiert Java, Velocity, Paper (Lobby + Survival), Geyser, Floodgate, MariaDB und baut das Core-Plugin.  
-Es weigert sich, ein nicht-leeres Zielverzeichnis zu überschreiben.
+The installer sets up proxy, lobby, survival, database, plugins and systemd units. It refuses to overwrite a non-empty install directory.
 
-Detaillierte Anleitung: [docs/INSTALLATION.md](docs/INSTALLATION.md)  
-Architektur: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)  
-Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+## After install
+1. Accept EULA on lobby + survival
+2. `sudo systemctl start nexus-bay-proxy nexus-bay-lobby nexus-bay-survival`
+3. `sudo bash /opt/nexus-bay/scripts/status.sh`
 
-## Nach der Installation
+## Connect
+- Java: `YOUR_IP:25565`
+- Bedrock: `YOUR_IP` port `19132`
 
-```bash
-# EULA akzeptieren (nur nach Lesen der Minecraft EULA)
-sudo nano /opt/nexus-bay/servers/lobby/eula.txt
-sudo nano /opt/nexus-bay/servers/survival/eula.txt
+## Key commands
+| Command | Description |
+|---------|-------------|
+| `/bayadmin` | Admin panel |
+| `/bayprofile` | Level, XP, Coins |
+| `/baypay <player> <amount>` | Transfer coins |
+| `/bayisland create/visit/list` | Island tools |
+| `/bayinv <player>` | Read-only inventory view |
 
-sudo systemctl start nexus-bay-proxy nexus-bay-lobby nexus-bay-survival
-sudo bash /opt/nexus-bay/scripts/status.sh
-```
-
-## Verbindung
-
-- **Java:** `DEINE_VPS_IP:25565`
-- **Bedrock:** `DEINE_VPS_IP` Port `19132`
-
-## Wichtige Admin-Befehle (Core-Plugin)
-
-| Befehl                    | Beschreibung                      |
-|---------------------------|-----------------------------------|
-| `/bayadmin`               | Admin-Kontrollpanel               |
-| `/bayprofile`             | Eigenes RPG-Profil                |
-| `/baypay <spieler> <betrag>` | Bay-Coins überweisen           |
-| `/bayisland create <name>`| Insel erstellen (Admin)           |
-| `/bayisland visit <name>` | Insel besuchen                    |
-| `/bayinv <spieler>`       | Inventar einsehen (read-only)     |
-
-## Management
-
-```bash
-sudo systemctl status nexus-bay-*
-sudo journalctl -u nexus-bay-proxy -f
-sudo /opt/nexus-bay/scripts/backup.sh
-sudo /opt/nexus-bay/scripts/healthcheck.sh
-sudo /opt/nexus-bay/scripts/restart.sh
-```
-
-## Sicherheit & Hinweise
-
-- Keine Passwörter, Tokens oder API-Keys im Repository.
-- Datenbank-Zugangsdaten werden lokal generiert.
-- Firewall: TCP 25565 und UDP 19132 beim Provider freigeben.
-- Das Core-Plugin speichert derzeit Spielerdaten noch dateibasiert; die MariaDB-Anbindung wird im nächsten Schritt vervollständigt.
-
-## Roadmap (Auszug)
-
-1. Vollständige MariaDB-Anbindung im Core-Plugin
-2. Rangsystem über LuckPerms + zentrale Sync
-3. Freundes- und Clansystem (UI + DB)
-4. Lobby-Menüs und Server-Selector
-5. Survival-Claims / Homes / Warps
-6. BedWars- und SkyWars-Module
-7. Monitoring und erweiterte Backups
-
-Siehe [docs/ROADMAP.md](docs/ROADMAP.md) für Details.
-
----
-
-NEXUS-BAY ist ein eigenständiges Projekt. Es teilt keine Verzeichnisse, Ports oder Datenbanken mit anderen Installationen.
+## Docs
+- [Theme](docs/THEME.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Installation](docs/INSTALLATION.md)
+- [Ranks](docs/RANKS.md)
+- [Commands](docs/COMMANDS.md)
+- [Inspiration](docs/INSPIRATION.md)

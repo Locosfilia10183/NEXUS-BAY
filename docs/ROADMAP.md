@@ -1,58 +1,43 @@
-# NEXUS-BAY – Entwicklungsroadmap
+# NEXUS-BAY – Roadmap
 
-## Phase 0 – Foundation (aktuell auf Branch `network-foundation`)
+## Phase 0 – Network Foundation (current branch)
+- [x] Velocity proxy + Lobby + Survival layout
+- [x] Geyser / Floodgate (Java + Bedrock)
+- [x] MariaDB schema (players, islands, economy, crews, quests placeholders)
+- [x] Systemd units, install.sh, management scripts (start/stop/status/backup/restore/update/healthcheck)
+- [x] LuckPerms rank examples + documentation
+- [x] Theme & architecture docs
 
-- [x] Velocity Proxy Grundgerüst
-- [x] Paper Lobby + Survival
-- [x] Geyser + Floodgate Crossplay (Proxy + Backend)
-- [x] Modern Forwarding (Velocity ↔ Paper)
-- [x] NEXUS-BAY Core Plugin (Level, XP, Bay-Coins, Inseln, Admin-GUI)
-- [x] MariaDB Schema (Spieler, Transaktionen, Freunde, Clans, Moderation)
-- [x] Systemd-Dienste + Management-Skripte
-- [x] Idempotentes install.sh
-- [x] Deutsche Dokumentation
+## Phase 1 – Core systems on the network
+- [ ] Core plugin: MariaDB connection (replace pure YAML persistence)
+- [ ] Shared player profile across Lobby + Survival (level, XP, Bay-Coins)
+- [ ] LuckPerms fully configured (ranks from Spieler → Owner)
+- [ ] Lobby spawn + basic server selector (Lobby ↔ Survival)
+- [ ] Basic /spawn, /hub and cross-server messaging
 
-## Phase 1 – Kernsysteme (nächster Schritt)
+## Phase 2 – Pirate progression & social
+- [ ] Crew system (create, invite, ranks, crew bank, crew skill tree)
+- [ ] Weapon mastery skill trees (Säbel, Büchsen, Pistolen, Harpunen)
+- [ ] Quest / Logbook framework (daily, weekly, crew, story)
+- [ ] Player classes / roles (simple first version)
 
-- [ ] Core-Plugin an MariaDB anbinden (statt config.yml)
-- [ ] LuckPerms installieren und Ranggruppen anlegen (Spieler → Owner)
-- [ ] Vault + Economy-Bridge für Bay-Coins
-- [ ] Lobby-Scoreboard + Tablist + Willkommensnachricht
-- [ ] Server-Selector (Kompass / NPC / Menü)
-- [ ] Befehl `/server lobby|survival`
+## Phase 3 – World & content
+- [ ] Improved island / archipelago generator (tropical + cursed/ash themes)
+- [ ] Structure templates: Lighthouse, Tavern, Treasure chamber, Pirate portal, Shipwreck dock
+- [ ] First dungeon / boss instance
+- [ ] Treasure and key system
 
-## Phase 2 – Soziale Systeme & Survival
+## Phase 4 – Economy & quality
+- [ ] Player market / auction house
+- [ ] Shops + taxes + anti-dupe ledger
+- [ ] Tab, scoreboard, holograms, better chat formatting
+- [ ] Performance & anti-cheat baseline
 
-- [ ] Freundesystem (Anfragen, Liste, Online-Status)
-- [ ] Clansystem (Erstellen, Ränge, Chat, Tag)
-- [ ] Private Nachrichten + Chatfilter
-- [ ] Survival: Homes, Warps, RTP, Claims (vorbereiten)
-- [ ] Daily Rewards
+## Phase 5 – Polish & scale
+- [ ] Additional game modes (BedWars / SkyWars placeholders already in layout)
+- [ ] More biomes and large builds
+- [ ] Public release preparation, rules, Discord integration
 
-## Phase 3 – Spielmodi
-
-- [ ] BedWars-Modul (Arenen, Teams, Generatoren, Shop)
-- [ ] SkyWars-Modul (Solo/Team, Loot)
-- [ ] Events-System (zeitlich begrenzte Modi)
-
-## Phase 4 – Administration & Sicherheit
-
-- [ ] Erweiterte Moderation (Ban, Mute, Warn, Report) mit DB-Historie
-- [ ] Staff-Chat, Vanish, Audit-Log
-- [ ] Rate-Limits und Connection-Limits am Proxy
-- [ ] Anti-Cheat-Integration (kompatible Lösung, Bedrock berücksichtigen)
-- [ ] Wartungsmodus
-
-## Phase 5 – Betrieb
-
-- [ ] Automatische Backup-Rotation + Restore-Skript
-- [ ] Healthcheck erweitern (DB, Geyser, Plugin-Status)
-- [ ] Monitoring (Prometheus/Grafana oder einfaches Status-Dashboard)
-- [ ] GitHub Actions für Plugin-Build + Config-Validierung
-
-## Wichtige Regeln
-
-- Kein Feature wird als „fertig“ markiert, bevor es getestet und dokumentiert ist.
-- Keine Secrets im Repository.
-- BedWars/SkyWars werden modular vorbereitet und erst implementiert, wenn die Foundation stabil läuft.
-- Das Projekt bleibt unabhängig von jeder anderen Installation.
+## Design notes
+Theme: Pirate Bay / Cursed Bay (see `docs/THEME.md`).  
+All custom combat systems stay Paper-plugin compatible so Java + Bedrock players can play together.
