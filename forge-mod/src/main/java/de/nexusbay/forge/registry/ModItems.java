@@ -13,12 +13,12 @@ public final class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, NexusBayForge.MOD_ID);
 
-    public static final RegistryObject<Item> WADO_ICHIMONJI = ITEMS.register("wado_ichimonji",
-            () -> new SwordItem(Tiers.DIAMOND, 4, -2.2F, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> ENMA = ITEMS.register("enma",
-            () -> new SwordItem(Tiers.NETHERITE, 5, -2.3F, new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<Item> SANDAI_KITETSU = ITEMS.register("sandai_kitetsu",
-            () -> new SwordItem(Tiers.DIAMOND, 4, -2.4F, new Item.Properties().stacksTo(1)));
+    /**
+     * One weapon item representing Zoro's complete three-sword Santoryu set:
+     * Wado Ichimonji, Enma and Sandai Kitetsu.
+     */
+    public static final RegistryObject<Item> SANTORYU = ITEMS.register("santoryu",
+            () -> new SwordItem(Tiers.NETHERITE, 8, -2.4F, new Item.Properties().stacksTo(1)));
 
     private ModItems() {}
 
