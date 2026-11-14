@@ -8,7 +8,7 @@
 - Player-to-player coin transfers
 - Systemd service and backup helper
 
-## World generation specification\n- See [Worldgen catalog](WORLDGEN.md) for the canonical island profiles, generation rules and staged implementation plan. The catalog is a design specification; runtime generation is still generic.\n\n## Next gameplay systems
+## World generation specification\n- See [Worldgen catalog](WORLDGEN.md) for the canonical island profiles, generation rules and staged implementation plan. The catalog is a design specification; runtime generation is still generic.\n\n## First island implementation batch\n- See [Worldgen Phase 1](WORLDGEN-PHASE-1.md) for concrete generation zones, palettes, landmarks and acceptance tests for Drum Island, Alabasta, Skypia, Water 7 and Sabaody. This is the implementation specification; runtime generation is not complete yet.\n\n## Next gameplay systems
 1. Island archipelago generator: multiple biome themes, ports, forts, shipwrecks, caves and hidden treasure rooms.
 2. Pirate progression: weapon mastery, Haki branches, crew reputation and prestige.
 3. Quest framework: NPC quest givers, daily/weekly contracts, island discovery and boss objectives.
