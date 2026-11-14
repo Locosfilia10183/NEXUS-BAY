@@ -39,6 +39,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private static final RawAnimation BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.breath");
     private static final RawAnimation SLAM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.slam");
     private static final RawAnimation KANABO_ANIM = RawAnimation.begin().thenPlay("animation.kaido.kanabo");
+    private static final RawAnimation DRUNKEN_SWAY_ANIM = RawAnimation.begin().thenPlay("animation.kaido.drunken_sway");
+    private static final RawAnimation DRUNKEN_STRIKE_ANIM = RawAnimation.begin().thenPlay("animation.kaido.drunken_strike");
+    private static final RawAnimation KANABO_COMBO_ANIM = RawAnimation.begin().thenPlay("animation.kaido.kanabo_combo");
     private static final RawAnimation HYBRID_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hybrid_transform");
     private static final RawAnimation DRAGON_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_transform");
     private static final RawAnimation DRAGON_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_idle");
@@ -93,6 +96,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private int attackLockTicks = 0;
     private boolean dragonFlying = false;
     private int aerialComboStep = 0;
+    private int kanaboComboStep = 0;
 
     @Override
     protected void defineSynchedData() {
@@ -145,6 +149,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                 .triggerableAnim("breath", BREATH_ANIM)
                 .triggerableAnim("slam", SLAM_ANIM)
                 .triggerableAnim("kanabo", KANABO_ANIM)
+                .triggerableAnim("drunken_sway", DRUNKEN_SWAY_ANIM)
+                .triggerableAnim("drunken_strike", DRUNKEN_STRIKE_ANIM)
+                .triggerableAnim("kanabo_combo", KANABO_COMBO_ANIM)
                 .triggerableAnim("hybrid_transform", HYBRID_TRANSFORM_ANIM)
                 .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM)
                 .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM)
@@ -185,7 +192,23 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     public boolean doHurtTarget(Entity target) {
         boolean hit = super.doHurtTarget(target);
         if (hit && !level().isClientSide && pendingAttack == NO_ATTACK) {
-            triggerAnim("attack", "kanabo");
+            kanaboComboStep = (kanaboComboStep + 1) % 4;
+            // Kaido's drunken style deliberately changes rhythm between strikes.
+            if (getCurrentPhase() >= 2 && kanaboComboStep == 0) {
+                triggerAnim("attack", "drunken_sway");
+            } else if (getCurrentPhase() >= 2 && kanaboComboStep == 2) {
+                triggerAnim("attack", "drunken_strike");
+                if (target instanceof LivingEntity victim && victim.isAlive()) {
+                    victim.hurt(damageSources().mobAttack(this), 16.0F);
+                    Vec3 push = victim.position().subtract(position()).normalize();
+                    victim.push(push.x * 0.9D, 0.45D, push.z * 0.9D);
+                    victim.hurtMarked = true;
+                }
+            } else if (kanaboComboStep == 3) {
+                triggerAnim("attack", "kanabo_combo");
+            } else {
+                triggerAnim("attack", "kanabo");
+            }
         }
         return hit;
     }
