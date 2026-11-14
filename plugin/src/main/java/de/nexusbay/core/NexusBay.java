@@ -26,6 +26,8 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(data, this);
         getServer().getPluginManager().registerEvents(quests, this);
         getLogger().info("NEXUS-BAY Core enabled. RPG, islands, bounty quests and admin tools ready.");
+        // Let the world finish loading, then generate the first archipelago automatically.
+        Bukkit.getScheduler().runTaskLater(this, () -> islands.generateFirstArchipelago(), 40L);
     }
 
     @Override public void onDisable() { if (data != null) data.save(); }
