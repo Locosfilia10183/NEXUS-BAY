@@ -1,7 +1,7 @@
 package de.nexusbay.forge.event;
 
 import de.nexusbay.forge.boss.BossMob;
-import net.minecraftforge.event.entity.MobGriefingEvent;
+import net.minecraftforge.event.entity.living.MobGriefingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
