@@ -1,6 +1,7 @@
 settings:
   island-spacing: 320
   island-radius: 42
+  auto-generate-islands: true
   starting-coins: 250
   xp-per-level: 100
 spawn:
