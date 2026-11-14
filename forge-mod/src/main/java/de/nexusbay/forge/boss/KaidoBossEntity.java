@@ -165,6 +165,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             }
 
             tickDragonFlight();
+            tickConquerorsHakiAura();
             tickPendingAttack();
             if (pendingAttack == NO_ATTACK) {
                 runBossCombat();
@@ -214,6 +215,33 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (tickCount % 4 == 0 && level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(ParticleTypes.CLOUD,
                     getX(), getY() + 0.4D, getZ(), 3, 0.8D, 0.25D, 0.8D, 0.01D);
+        }
+    }
+
+    /**
+     * Server-side visual aura for Kaido's advanced forms.
+     * The particles are cosmetic and do not apply extra damage.
+     */
+    private void tickConquerorsHakiAura() {
+        int phase = getCurrentPhase();
+        if (phase < 2 || tickCount % 5 != 0 || !(level() instanceof ServerLevel serverLevel)) return;
+
+        double radius = phase == 3 ? 2.8D : 1.9D;
+        double height = getBbHeight();
+        for (int i = 0; i < (phase == 3 ? 12 : 8); i++) {
+            double angle = (Math.PI * 2.0D * i) / (phase == 3 ? 12.0D : 8.0D)
+                    + tickCount * 0.08D;
+            double x = getX() + Math.cos(angle) * radius;
+            double z = getZ() + Math.sin(angle) * radius;
+            double y = getY() + 0.35D + (i % 4) * (height / 4.0D);
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                    x, y, z, 2, 0.12D, 0.22D, 0.12D, 0.015D);
+        }
+
+        if (phase == 3) {
+            serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE,
+                    getX(), getY() + height * 0.55D, getZ(),
+                    2, 1.0D, height * 0.25D, 1.0D, 0.005D);
         }
     }
 
