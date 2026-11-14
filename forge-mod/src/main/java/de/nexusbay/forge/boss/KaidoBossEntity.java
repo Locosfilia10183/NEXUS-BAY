@@ -43,6 +43,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_transform");
     private static final RawAnimation DRAGON_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_idle");
     private static final RawAnimation DRAGON_MOVE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_move");
+    private static final RawAnimation DRAGON_FLY_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_fly");
+    private static final RawAnimation DRAGON_TAKEOFF_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_takeoff");
+    private static final RawAnimation DRAGON_LAND_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_land");
     private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
     private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
@@ -88,6 +91,10 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         return this.entityData.get(DATA_PHASE);
     }
 
+    public boolean isDragonFlying() {
+        return dragonFlying;
+    }
+
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
         super.onSyncedDataUpdated(accessor);
@@ -108,6 +115,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "movement", 5, state -> {
             if (getCurrentPhase() == 3) {
+                if (dragonFlying) return state.setAndContinue(DRAGON_FLY_ANIM);
                 if (state.isMoving()) return state.setAndContinue(DRAGON_MOVE_ANIM);
                 return state.setAndContinue(DRAGON_IDLE_ANIM);
             }
@@ -125,7 +133,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("death", DEATH_ANIM)
                 .triggerableAnim("ragnarok", RAGNAROK_ANIM)
                 .triggerableAnim("thunder_bagua", THUNDER_BAGUA_ANIM)
-                .triggerableAnim("blast_breath", BLAST_BREATH_ANIM));
+                .triggerableAnim("blast_breath", BLAST_BREATH_ANIM)
+                .triggerableAnim("dragon_takeoff", DRAGON_TAKEOFF_ANIM)
+                .triggerableAnim("dragon_land", DRAGON_LAND_ANIM));
     }
 
     @Override
@@ -207,6 +217,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (dragonFlying) {
                 dragonFlying = false;
                 setNoGravity(false);
+                triggerAnim("attack", "dragon_land");
             }
             return;
         }
@@ -216,9 +227,11 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             dragonFlying = true;
             setNoGravity(true);
             getNavigation().stop();
+            triggerAnim("attack", "dragon_takeoff");
         } else if (dragonFlying && distanceSqr < 49.0D) {
             dragonFlying = false;
             setNoGravity(false);
+            triggerAnim("attack", "dragon_land");
             return;
         }
 
