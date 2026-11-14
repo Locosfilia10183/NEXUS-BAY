@@ -35,7 +35,16 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         }
         if (name.equals("bayisland")) {
             if (!sender.hasPermission("nexusbay.admin")) { sender.sendMessage("§cKeine Berechtigung."); return true; }
-            if (args.length < 2 || !args[0].equalsIgnoreCase("create")) { sender.sendMessage("§eVerwendung: /bayisland create <name>"); return true; }
+            if (args.length == 2 && args[0].equalsIgnoreCase("visit") && sender instanceof Player player) {
+                if (!islands.visit(player,args[1])) sender.sendMessage("§cInsel nicht gefunden.");
+                return true;
+            }
+            if (args.length == 1 && args[0].equalsIgnoreCase("list")) {
+                var section=getConfig().getConfigurationSection("islands");
+                sender.sendMessage("§6NEXUS-BAY Inseln: §f"+(section==null ? "Noch keine" : String.join(", ",section.getKeys(false))));
+                return true;
+            }
+            if (args.length < 2 || !args[0].equalsIgnoreCase("create")) { sender.sendMessage("§e/bayisland create <name> | /bayisland visit <name> | /bayisland list"); return true; }
             String islandName = args[1].replaceAll("[^a-zA-Z0-9_-]", "");
             if (islandName.isBlank()) { sender.sendMessage("§cUngültiger Inselname."); return true; }
             if (islands.create(islandName)) sender.sendMessage("§aInsel §f" + islandName + " §awurde erstellt.");
