@@ -23,11 +23,14 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.idle");
     private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("animation.kaido.walk");
+    private static final RawAnimation BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.breath");
+    private static final RawAnimation SLAM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.slam");
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
     private final ServerBossEvent bossEvent = new ServerBossEvent(
@@ -53,6 +56,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (state.isMoving()) return state.setAndContinue(WALK_ANIM);
             return state.setAndContinue(IDLE_ANIM);
         }));
+        controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
+                .triggerableAnim("breath", BREATH_ANIM)
+                .triggerableAnim("slam", SLAM_ANIM));
     }
 
     @Override
@@ -115,6 +121,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     }
 
     private void breatheFire() {
+        triggerAnim("attack", "breath");
         Vec3 look = getLookAngle().normalize();
         Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
         AABB area = getBoundingBox().expandTowards(look.scale(18.0D)).inflate(3.0D);
@@ -130,6 +137,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     }
 
     private void groundSlam() {
+        triggerAnim("attack", "slam");
         double radius = currentPhase == 3 ? 9.0D : 7.0D;
         AABB area = getBoundingBox().inflate(radius, 3.0D, radius);
         for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
