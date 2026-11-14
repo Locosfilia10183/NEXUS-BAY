@@ -275,9 +275,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         // Collision dimensions follow the active form instead of applying one
         // oversized hitbox to every form.
         return switch (getCurrentPhase()) {
-            case 2 -> EntityDimensions.scalable(2.2F, 4.8F);
-            case 3 -> EntityDimensions.scalable(5.2F, 7.5F);
-            default -> EntityDimensions.scalable(1.35F, 3.2F);
+            case 2 -> EntityDimensions.scalable(4.4F, 9.6F);
+            case 3 -> EntityDimensions.scalable(10.4F, 15.0F);
+            default -> EntityDimensions.scalable(2.7F, 6.4F);
         };
     }
 
