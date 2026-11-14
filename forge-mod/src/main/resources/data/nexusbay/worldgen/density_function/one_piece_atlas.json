@@ -196,6 +196,48 @@
       "z": 14000,
       "radius": 650,
       "maxHeight": 190
+    },
+    {
+      "id": "ohara",
+      "x": 9000,
+      "z": -8000,
+      "radius": 850,
+      "maxHeight": 112
+    },
+    {
+      "id": "kano_country",
+      "x": 16000,
+      "z": 5000,
+      "radius": 900,
+      "maxHeight": 168
+    },
+    {
+      "id": "flevance",
+      "x": -7000,
+      "z": -18000,
+      "radius": 750,
+      "maxHeight": 88
+    },
+    {
+      "id": "germa_kingdom",
+      "x": 7000,
+      "z": -17000,
+      "radius": 650,
+      "maxHeight": 104
+    },
+    {
+      "id": "baterilla",
+      "x": -8000,
+      "z": 18000,
+      "radius": 700,
+      "maxHeight": 82
+    },
+    {
+      "id": "sorbet_kingdom",
+      "x": 8000,
+      "z": 18000,
+      "radius": 800,
+      "maxHeight": 96
     }
   ]
 }
