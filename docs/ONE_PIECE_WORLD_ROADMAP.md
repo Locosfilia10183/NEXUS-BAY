@@ -24,11 +24,13 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 5. [x] Switch from a fixed Deep Ocean biome to the vanilla multi-noise climate biome source and restore temperature, vegetation, continentalness, erosion, depth, and ridge climate signals in the custom router. This is a first biome variety pass, not yet a custom One Piece region climate map.
 6. [x] Define a canonical island atlas with planned coordinates, region, level gate, terrain theme, and island radius in `data/nexusbay/islands/island_catalog.json`; sync the client map markers to the atlas.
 7. [ ] Make the terrain generator produce landmasses at the atlas anchors and preserve large ocean gaps. The atlas currently describes planned locations; it does not itself create terrain.
-8. [ ] Add per-island terrain profiles and test the map in a fresh dedicated save.
-9. [x] Align the Kaido home anchor with the planned Onigashima location in the New World atlas (X=36500, Z=14000); the actual island surface height still needs to be measured after terrain generation.
-10. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
-11. Add region progression and discovery/map metadata.
-12. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+8. [x] Define deterministic terrain design profiles for all 28 atlas islands in `data/nexusbay/islands/terrain_profiles.json` (shape, maximum height, surface palette, vegetation, shoreline material, and landmark anchors). These are design data only; no terrain is generated from them yet.
+9. [ ] Implement a tested generator that consumes the atlas anchors and these profiles to create real island landmasses.
+10. [ ] Test the map in a fresh dedicated save.
+11. [x] Align the Kaido home anchor with the planned Onigashima location in the New World atlas (X=36500, Z=14000); Y=90 remains provisional until the island surface exists.
+12. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
+13. Add region progression and discovery/map metadata.
+14. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
 
 ## Gameplay sequence after the world map
 - Finish and validate the world map, ocean, island landmasses, and island-specific terrain before adding gameplay loops.
@@ -66,4 +68,4 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 - Never force-load distant island chunks only to keep a boss active.
 - Keep boss respawn policy separate from initial spawning so defeat rewards cannot be farmed through instant respawns.
 - A boss is added to the active home-spawn roster only after its own entity, model, renderer, AI, and island anchor exist.
-- Initial active implementation: Kaido at Onigashima (anchor X=2752, Y=101, Z=1472). Other catalog entries remain planned until their individual boss implementations are ready.
+- Initial active implementation: Kaido at the planned Onigashima atlas anchor (X=36500, Y=90, Z=14000); Y is provisional until terrain generation is validated. Other catalog entries remain planned until their individual boss implementations are ready.
