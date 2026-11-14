@@ -1,5 +1,5 @@
 name: NexusBay
-version: 1.1.0
+version: 1.2.0
 main: de.nexusbay.core.NexusBay
 api-version: '26.2'
 authors: [NEXUS-BAY]
