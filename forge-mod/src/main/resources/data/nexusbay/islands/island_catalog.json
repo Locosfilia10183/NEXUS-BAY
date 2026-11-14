@@ -512,6 +512,84 @@
       },
       "theme": "temperate_kingdom",
       "radius": 800
+    },
+    {
+      "id": "tequila_wolf",
+      "name": "Tequila Wolf",
+      "region": "east_blue",
+      "requiredLevel": 24,
+      "center": {
+        "x": -20500,
+        "y": 64,
+        "z": -1000
+      },
+      "theme": "industrial_bridge",
+      "radius": 1050
+    },
+    {
+      "id": "spider_miles",
+      "name": "Spider Miles",
+      "region": "west_blue",
+      "requiredLevel": 36,
+      "center": {
+        "x": 19500,
+        "y": 64,
+        "z": -9000
+      },
+      "theme": "industrial_city",
+      "radius": 1000
+    },
+    {
+      "id": "minion_island",
+      "name": "Minion Island",
+      "region": "north_blue",
+      "requiredLevel": 38,
+      "center": {
+        "x": -10500,
+        "y": 64,
+        "z": -9000
+      },
+      "theme": "cold_forest",
+      "radius": 950
+    },
+    {
+      "id": "torino_kingdom",
+      "name": "Torino Kingdom",
+      "region": "south_blue",
+      "requiredLevel": 34,
+      "center": {
+        "x": -10500,
+        "y": 64,
+        "z": 9000
+      },
+      "theme": "tropical_jungle",
+      "radius": 1050
+    },
+    {
+      "id": "kuraigana",
+      "name": "Kuraigana Island",
+      "region": "grand_line",
+      "requiredLevel": 90,
+      "center": {
+        "x": 9000,
+        "y": 64,
+        "z": -15500
+      },
+      "theme": "gothic_ruins",
+      "radius": 1200
+    },
+    {
+      "id": "elbaf",
+      "name": "Elbaf",
+      "region": "new_world",
+      "requiredLevel": 135,
+      "center": {
+        "x": 23500,
+        "y": 64,
+        "z": 13000
+      },
+      "theme": "giant_forest",
+      "radius": 1600
     }
   ]
 }
