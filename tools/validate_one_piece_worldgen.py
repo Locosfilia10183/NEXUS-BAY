@@ -112,6 +112,47 @@ for index, first in enumerate(islands):
                 f"{first.get('id')} and {second.get('id')} design radii overlap"
             )
 
+# Check the density graph recursively so a valid-looking router cannot silently
+# stop using the custom island-mass field.
+def walk(value):
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from walk(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from walk(child)
+
+for density_key in ("initial_density_without_jaggedness", "final_density"):
+    nodes = list(walk(router.get(density_key)))
+    if not any(node.get("noise") == "nexusbay:island_mass" for node in nodes):
+        errors.append(f"{density_key} does not reference nexusbay:island_mass")
+
+fluid = settings.get("default_fluid", {})
+if fluid.get("Name") != "minecraft:water":
+    errors.append("One Piece noise settings must use water as the default fluid")
+if settings.get("default_block", {}).get("Name") != "minecraft:stone":
+    errors.append("One Piece noise settings must use stone as the default solid block")
+if settings.get("noise", {}).get("min_y") != -64 or settings.get("noise", {}).get("height") != 384:
+    errors.append("Expected the Minecraft 1.20.1 overworld vertical noise range (-64..319)")
+
+surface = settings.get("surface_rule", {})
+if surface.get("type") != "minecraft:sequence":
+    errors.append("Surface rule must be a sequence")
+else:
+    surface_blocks = {
+        node.get("then_run", {}).get("result_state", {}).get("Name")
+        for node in surface.get("sequence", [])
+    }
+    surface_blocks.update(
+        node.get("result_state", {}).get("Name")
+        for node in surface.get("sequence", [])
+    )
+    if "minecraft:grass_block" not in surface_blocks:
+        errors.append("Surface rule is missing the grass_block surface layer")
+    if "minecraft:stone" not in surface_blocks:
+        errors.append("Surface rule is missing the stone fallback layer")
+
 if errors:
     for error in errors:
         print("FAIL:", error)
