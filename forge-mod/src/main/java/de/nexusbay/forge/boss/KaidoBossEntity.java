@@ -152,7 +152,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
 
     @Override
     public EntityDimensions getDimensions(Pose pose) {
-        return super.getDimensions(pose).scale(3.5F);
+        // Collision dimensions follow the active form instead of applying one
+        // oversized hitbox to every form.
+        return switch (getCurrentPhase()) {
+            case 2 -> EntityDimensions.scalable(2.2F, 4.8F);
+            case 3 -> EntityDimensions.scalable(5.2F, 7.5F);
+            default -> EntityDimensions.scalable(1.35F, 3.2F);
+        };
     }
 
     @Override
@@ -534,16 +540,56 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         float healthPercent = getHealth() / getMaxHealth() * 100.0F;
         int nextPhase = healthPercent <= 30.0F ? 3 : healthPercent <= 65.0F ? 2 : 1;
         if (nextPhase != currentPhase) {
+            int previousPhase = currentPhase;
             currentPhase = nextPhase;
             this.entityData.set(DATA_PHASE, nextPhase);
+            refreshDimensions();
             if (nextPhase == 2) triggerAnim("attack", "hybrid_transform");
             else if (nextPhase == 3) triggerAnim("attack", "dragon_transform");
+            playTransformationBurst(previousPhase, nextPhase);
             String phaseName = switch (currentPhase) {
                 case 2 -> "HYBRIDFORM";
                 case 3 -> "DRACHENFORM";
                 default -> "MENSCHENFORM";
             };
             bossEvent.setName(Component.literal("KAIDO – " + phaseName));
+        }
+    }
+
+    /**
+     * One-time transformation burst when Kaido changes form.
+     * This is visual only; it does not deal damage or alter terrain.
+     */
+    private void playTransformationBurst(int previousPhase, int nextPhase) {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+
+        double height = getBbHeight();
+        double radius = nextPhase == 3 ? 5.5D : nextPhase == 2 ? 3.2D : 1.8D;
+        serverLevel.sendParticles(ParticleTypes.EXPLOSION,
+                getX(), getY() + height * 0.45D, getZ(),
+                nextPhase == 3 ? 8 : 4, radius * 0.35D, height * 0.25D,
+                radius * 0.35D, 0.08D);
+        serverLevel.sendParticles(ParticleTypes.CLOUD,
+                getX(), getY() + height * 0.35D, getZ(),
+                nextPhase == 3 ? 55 : 28, radius * 0.6D, height * 0.22D,
+                radius * 0.6D, 0.12D);
+        serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                getX(), getY() + height * 0.55D, getZ(),
+                nextPhase == 3 ? 90 : 45, radius, height * 0.45D,
+                radius, 0.16D);
+        serverLevel.sendParticles(ParticleTypes.FLAME,
+                getX(), getY() + height * 0.2D, getZ(),
+                nextPhase == 3 ? 35 : 16, radius * 0.5D, height * 0.18D,
+                radius * 0.5D, 0.04D);
+
+        // A rising spiral marks the transformation and makes its scale readable.
+        for (int i = 0; i < 18; i++) {
+            double angle = (Math.PI * 2.0D * i) / 18.0D;
+            double x = getX() + Math.cos(angle) * radius;
+            double z = getZ() + Math.sin(angle) * radius;
+            double y = getY() + (height * i / 18.0D);
+            serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                    x, y, z, 3, 0.12D, 0.18D, 0.12D, 0.035D);
         }
     }
 
