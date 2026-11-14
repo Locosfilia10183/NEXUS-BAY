@@ -1,0 +1,41 @@
+# NEXUS-BAY Velocity Configuration (Beispiel)
+# Wird bei der Installation nach /opt/nexus-bay/proxy/velocity.toml kopiert und angepasst.
+
+config-version = "2.7"
+
+bind = "0.0.0.0:25565"
+
+motd = "<gold>NEXUS-BAY</gold> <gray>|</gray> <aqua>Java + Bedrock Crossplay</aqua>"
+
+show-max-players = 200
+online-mode = true
+force-key-authentication = true
+player-info-forwarding-mode = "modern"
+forwarding-secret-file = "forwarding.secret"
+
+# Lobby als Fallback
+try = [
+    "lobby"
+]
+
+[servers]
+lobby = "127.0.0.1:25566"
+survival = "127.0.0.1:25567"
+# bedwars = "127.0.0.1:25568"
+# skywars = "127.0.0.1:25569"
+
+[forced-hosts]
+# Beispiel: "lobby.example.com" = ["lobby"]
+
+[advanced]
+compression-threshold = 256
+login-ratelimit = 3000
+connection-timeout = 5000
+read-timeout = 30000
+hawtio-enabled = false
+
+[query]
+enabled = false
+
+[metrics]
+enabled = false

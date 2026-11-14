@@ -1,0 +1,22 @@
+[Unit]
+Description=NEXUS-BAY Velocity Proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nexusbay
+Group=nexusbay
+WorkingDirectory=/opt/nexus-bay/proxy
+ExecStart=/usr/bin/java -Xms512M -Xmx1G -XX:+UseG1GC -jar velocity.jar
+Restart=on-failure
+RestartSec=8
+KillSignal=SIGINT
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/nexus-bay/proxy /opt/nexus-bay/logs
+
+[Install]
+WantedBy=multi-user.target

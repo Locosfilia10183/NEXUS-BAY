@@ -1,0 +1,35 @@
+# Beispiel paper-global.yml Optimierungen für NEXUS-BAY Backends
+# Die Installer-Skripte generieren angepasste Versionen.
+
+_version: 29
+
+timers:
+  lag-compensation:
+    enabled: true
+
+messages:
+  kick:
+    authentication-servers-down: <red>Authentifizierungsserver nicht erreichbar.
+    connection-incompatible: <red>Inkompatible Client-Version.
+    connection-timeout: <red>Verbindungstimeout.
+
+chunk-loading:
+  basic:
+    player-max-chunk-generate-rate: 50.0
+  advanced:
+    auto-config-send-distance: true
+
+unsupported-settings:
+  allow-permanent-block-break-exploits: false
+  allow-piston-duplication: false
+
+item-validation:
+  book:
+    page-max-length: 2048
+  display-name:
+    max-length: 128
+
+packet-limiter:
+  all-packets:
+    interval: 7.0
+    max-packet-rate: 500.0

@@ -1,0 +1,22 @@
+[Unit]
+Description=NEXUS-BAY Survival (Paper)
+After=network-online.target nexus-bay-proxy.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nexusbay
+Group=nexusbay
+WorkingDirectory=/opt/nexus-bay/servers/survival
+ExecStart=/opt/nexus-bay/servers/survival/start.sh
+Restart=on-failure
+RestartSec=10
+KillSignal=SIGINT
+TimeoutStopSec=90
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/nexus-bay/servers/survival /opt/nexus-bay/logs
+
+[Install]
+WantedBy=multi-user.target
