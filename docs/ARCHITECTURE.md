@@ -1,70 +1,47 @@
-# NEXUS-BAY Netzwerk-Architektur
-
-## Überblick
-
-NEXUS-BAY ist ein eigenständiges Minecraft-Netzwerk mit Java- und Bedrock-Crossplay.
-Es basiert auf Velocity (Proxy) und Paper (Backend-Server).
+# NEXUS-BAY Architecture
 
 ```
-Internet
-   │
-   ├── TCP 25565  →  Velocity Proxy
-   └── UDP 19132  →  Geyser (auf Proxy oder Lobby)
-          │
-          ├── Lobby      (Paper)
-          ├── Survival   (Paper)
-          ├── BedWars    (vorbereitet)
-          ├── SkyWars    (vorbereitet)
-          └── Events     (vorbereitet)
+                    Internet
+                       │
+              ┌────────▼────────┐
+              │  Velocity Proxy │  :25565 (Java)
+              │  + Geyser       │  :19132 (Bedrock)
+              └────────┬────────┘
+                       │ modern forwarding
+         ┌─────────────┼─────────────┐
+         │             │             │
+   ┌─────▼─────┐ ┌─────▼─────┐ ┌─────▼─────┐
+   │   Lobby   │ │ Survival  │ │  (später) │
+   │  :25566   │ │  :25567   │ │ BedWars…  │
+   └─────┬─────┘ └─────┬─────┘ └───────────┘
+         │             │
+         └──────┬──────┘
+                │
+         ┌──────▼──────┐
+         │   MariaDB   │  shared profiles, economy,
+         │  nexusbay   │  crews, quests, skills
+         └─────────────┘
 ```
 
 ## Komponenten
 
-| Komponente     | Technologie          | Port (intern) | Zweck                          |
-|----------------|----------------------|---------------|--------------------------------|
-| Proxy          | Velocity             | 25565         | Verbindung, Routing, Auth      |
-| Lobby          | Paper                | 25566         | Spawn, Menüs, Navigation       |
-| Survival       | Paper                | 25567         | Hauptspielmodus                |
-| BedWars        | Paper (vorbereitet)  | 25568         | Minigame                       |
-| SkyWars        | Paper (vorbereitet)  | 25569         | Minigame                       |
-| Database       | MariaDB              | 3306          | Spielerdaten, Economy, Ränge   |
-| Cache (opt.)   | Redis                | 6379          | Session, Cross-Server-Comm     |
+| Komponente | Rolle |
+|------------|------|
+| Velocity | Proxy, Server-Routing, Auth (online-mode) |
+| Paper Lobby | Spawn, Server-Selector, Social Hub |
+| Paper Survival | Hauptspielwelt, Inseln, Economy |
+| Geyser + Floodgate | Bedrock-Unterstützung |
+| MariaDB | Zentrale Persistenz |
+| NEXUS-BAY Core | Profile, Coins, Inseln, Admin, (später Crews/Quests) |
+| LuckPerms | Ränge & Permissions (Proxy + Backend) |
+| Systemd | Prozessverwaltung |
 
-## Verzeichnisstruktur auf dem VPS
+## Sicherheit
+- Backends nur auf `127.0.0.1` gebunden
+- Velocity modern forwarding + secret
+- Secrets in `config/secrets.env` (chmod 600)
+- Eigener System-User `nexusbay`
+- Systemd: `NoNewPrivileges`, `ProtectSystem=strict`
 
-```
-/opt/nexus-bay/
-├── proxy/                 # Velocity
-├── servers/
-│   ├── lobby/
-│   ├── survival/
-│   ├── bedwars/           # vorbereitet
-│   └── skywars/           # vorbereitet
-├── plugins/               # geteilte Plugins / Builds
-├── config/                # zentrale Beispiel-Konfigs
-├── database/              # Schema & Migrations
-├── backups/
-├── scripts/
-├── systemd/
-└── logs/
-```
-
-## Design-Prinzipien
-
-1. **Modularität** – Jeder Spielmodus ist unabhängig start- und stoppbar.
-2. **Crossplay** – Java + Bedrock über Geyser + Floodgate.
-3. **Zentrale Daten** – MariaDB für Profile, Economy, Ränge, Clans, Freunde.
-4. **Sicherheit** – Eigene Linux-User, Systemd-Isolation, keine Secrets im Repo.
-5. **Idempotente Installation** – `install.sh` kann mehrfach laufen, ohne bestehende Daten zu zerstören.
-6. **Erweiterbarkeit** – Neue Server einfach in Velocity und Systemd hinzufügen.
-
-## Aktueller Stand (Foundation)
-
-- Velocity + Lobby + Survival Grundgerüst
-- Geyser/Floodgate Crossplay
-- NEXUS-BAY Core Plugin (RPG, Inseln, Admin) auf den Backends
-- Management-Skripte und Systemd-Units
-- MariaDB-Schema vorbereitet
-- LuckPerms + Vault als Standard-Permission/Economy-Brücke
-
-Weitere Systeme (volle Clans, Freunde, BedWars-Arenen, Anti-Cheat-Integration, Monitoring) werden schrittweise ergänzt.
+## Erweiterbarkeit
+Neue Server (BedWars, SkyWars, Dungeons) werden einfach als weitere Paper-Instanzen unter Velocity registriert und können dieselbe Datenbank und dieselben Permissions nutzen.
