@@ -24,5 +24,5 @@ public final class IslandProgression {
         return -1;
     }
     public static boolean isKnown(String name) { return LEVELS.containsKey(key(name)); }
-    public static Map<String, Integer> all() { return Map.copyOf(LEVELS); }
+    public static Map<String, Integer> all() { return java.util.Collections.unmodifiableMap(new LinkedHashMap<>(LEVELS)); }
 }
