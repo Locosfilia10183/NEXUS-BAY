@@ -19,18 +19,19 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 ## Generator implementation sequence
 1. [x] Add an isolated `nexusbay:one_piece_ocean` world-preset scaffold at `data/nexusbay/worldgen/world_preset/one_piece_ocean.json`; it does not alter the existing save.
 2. [x] Add a first experimental custom noise settings file and low-frequency island-mass noise; connect the One Piece preset to it.
-3. [ ] Validate the noise-settings registry and density functions in an actual Forge 1.20.1 client/server. CI compilation alone does not validate datapack worldgen JSON.
-4. [ ] Tune island frequency and land ratio against multiple seeds until the large-map target is approximately 85-90% ocean. Current land ratio is NOT measured or guaranteed.
-5. [x] Switch from a fixed Deep Ocean biome to the vanilla multi-noise climate biome source and restore temperature, vegetation, continentalness, erosion, depth, and ridge climate signals in the custom router. This is a first biome variety pass, not yet a custom One Piece region climate map.
-6. [x] Define a canonical island atlas with planned coordinates, region, level gate, terrain theme, and island radius in `data/nexusbay/islands/island_catalog.json`; sync the client map markers to the atlas.
-7. [ ] Make the terrain generator produce landmasses at the atlas anchors and preserve large ocean gaps. The atlas currently describes planned locations; it does not itself create terrain.
-8. [x] Define deterministic terrain design profiles for all 28 atlas islands in `data/nexusbay/islands/terrain_profiles.json` (shape, maximum height, surface palette, vegetation, shoreline material, and landmark anchors). These are design data only; no terrain is generated from them yet.
-9. [ ] Implement a tested generator that consumes the atlas anchors and these profiles to create real island landmasses.
+3. [x] Add a CI structural validator for the One Piece preset, required noise-router fields, atlas coordinates, and all 28 catalog/profile ID pairs (`tools/validate_one_piece_worldgen.py`). This catches malformed JSON and inconsistent design data, but does not replace Minecraft runtime validation.
+4. [ ] Validate the noise-settings registry and density functions in an actual Forge 1.20.1 client/server.
+5. [ ] Tune island frequency and land ratio against multiple seeds until the large-map target is approximately 85-90% ocean. Current land ratio is NOT measured or guaranteed.
+6. [x] Switch from a fixed Deep Ocean biome to the vanilla multi-noise climate biome source and restore temperature, vegetation, continentalness, erosion, depth, and ridge climate signals in the custom router. This is a first biome variety pass, not yet a custom One Piece region climate map.
+7. [x] Define a canonical island atlas with planned coordinates, region, level gate, terrain theme, and island radius in `data/nexusbay/islands/island_catalog.json`; sync the client map markers to the atlas.
+8. [ ] Make the terrain generator produce landmasses at the atlas anchors and preserve large ocean gaps. The atlas currently describes planned locations; it does not itself create terrain.
+9. [x] Define deterministic terrain design profiles for all 28 atlas islands in `data/nexusbay/islands/terrain_profiles.json` (shape, maximum height, surface palette, vegetation, shoreline material, and landmark anchors). These are design data only; no terrain is generated from them yet.
+10. [ ] Implement a tested generator that consumes the atlas anchors and these profiles to create real island landmasses.
 10. [ ] Test the map in a fresh dedicated save.
-11. [x] Align the Kaido home anchor with the planned Onigashima location in the New World atlas (X=36500, Z=14000); Y=90 remains provisional until the island surface exists.
-12. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
-13. Add region progression and discovery/map metadata.
-14. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+12. [x] Align the Kaido home anchor with the planned Onigashima location in the New World atlas (X=36500, Z=14000); Y=90 remains provisional until the island surface exists.
+13. Add structure placement pools for ports, villages, Marine bases, pirate outposts, and ruins.
+14. Add region progression and discovery/map metadata.
+15. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
 
 ## Gameplay sequence after the world map
 - Finish and validate the world map, ocean, island landmasses, and island-specific terrain before adding gameplay loops.
