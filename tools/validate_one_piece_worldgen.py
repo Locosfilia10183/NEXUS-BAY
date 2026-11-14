@@ -20,7 +20,7 @@ def load_json(relative):
 
 preset = load_json("worldgen/world_preset/one_piece_ocean.json")
 settings = load_json("worldgen/noise_settings/one_piece_ocean.json")
-noise = load_json("worldgen/noise/island_mass.json")
+atlas_density = load_json("worldgen/density_function/one_piece_atlas.json")
 catalog = load_json("islands/island_catalog.json")
 profiles = load_json("islands/terrain_profiles.json")
 
@@ -47,8 +47,7 @@ if missing:
     errors.append("Noise router missing: " + ", ".join(missing))
 if settings.get("sea_level") != 63:
     errors.append("Expected sea level 63")
-if noise.get("firstOctave") != -4 or not noise.get("amplitudes"):
-    errors.append("Island mass noise parameters are incomplete")
+
 
 islands = catalog.get("islands", [])
 region_list = catalog.get("regions", [])
@@ -132,9 +131,38 @@ def walk(value):
             yield from walk(child)
 
 for density_key in ("initial_density_without_jaggedness", "final_density"):
-    nodes = list(walk(router.get(density_key)))
-    if not any(node.get("noise") == "nexusbay:island_mass" for node in nodes):
-        errors.append(f"{density_key} does not reference nexusbay:island_mass")
+    if router.get(density_key) != "nexusbay:one_piece_atlas":
+        errors.append(f"{density_key} must reference nexusbay:one_piece_atlas")
+
+atlas_entries = atlas_density.get("islands", [])
+atlas_ids = [item.get("id") for item in atlas_entries]
+if atlas_density.get("type") != "nexusbay:island_atlas":
+    errors.append("Atlas density resource has the wrong custom type")
+if len(atlas_ids) != len(set(atlas_ids)):
+    errors.append("Atlas density resource contains duplicate island IDs")
+if set(atlas_ids) != set(island_ids):
+    errors.append(
+        "Atlas density/catalog IDs differ; missing="
+        + repr(sorted(set(island_ids) - set(atlas_ids)))
+        + "; unknown=" + repr(sorted(set(atlas_ids) - set(island_ids)))
+    )
+profile_by_id = {item.get("islandId"): item for item in profile_list}
+catalog_by_id = {item.get("id"): item for item in islands}
+for entry in atlas_entries:
+    island_id = entry.get("id")
+    source = catalog_by_id.get(island_id, {})
+    center = source.get("center", {})
+    profile = profile_by_id.get(island_id, {})
+    if (entry.get("x"), entry.get("z"), entry.get("radius")) != (
+        center.get("x"), center.get("z"), source.get("radius")
+    ):
+        errors.append(f"Atlas density coordinates/radius are stale for {island_id}")
+    if entry.get("maxHeight") != profile.get("maxHeight"):
+        errors.append(f"Atlas density maxHeight is stale for {island_id}")
+    if not 64 <= entry.get("radius", 0) <= 10000:
+        errors.append(f"Atlas density radius out of codec range for {island_id}")
+    if not 64 <= entry.get("maxHeight", 0) <= 300:
+        errors.append(f"Atlas density maxHeight out of codec range for {island_id}")
 
 fluid = settings.get("default_fluid", {})
 if fluid.get("Name") != "minecraft:water":
@@ -167,7 +195,7 @@ if errors:
     sys.exit(1)
 
 print(
-    f"PASS: world preset structure, noise router, and {len(islands)} "
+    f"PASS: world preset structure, atlas density resource, and {len(islands)} "
     f"island catalog/profile pairs validated."
 )
 for warning in warnings:
