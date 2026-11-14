@@ -34,6 +34,9 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.idle");
@@ -103,6 +106,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private double arenaCenterX;
     private double arenaCenterZ;
     private double arenaRadius = 42.0D;
+    private final Set<UUID> arenaAnnouncedPlayers = new HashSet<>();
 
     public void setArenaBounds(double centerX, double centerZ, double radius) {
         this.arenaBound = true;
@@ -113,6 +117,16 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
 
     private void tickArenaBoundary() {
         if (!arenaBound) return;
+        if (level() instanceof ServerLevel serverLevel && tickCount % 10 == 0) {
+            AABB noticeArea = new AABB(arenaCenterX - arenaRadius, getY() - 64.0D,
+                    arenaCenterZ - arenaRadius, arenaCenterX + arenaRadius, getY() + 64.0D,
+                    arenaCenterZ + arenaRadius);
+            for (ServerPlayer player : serverLevel.getEntitiesOfClass(ServerPlayer.class, noticeArea)) {
+                if (arenaAnnouncedPlayers.add(player.getUUID())) {
+                    player.displayClientMessage(Component.literal("§4§lONIGASHIMA §c– Du hast Kaidos Gebiet betreten! Bereite dich auf den Kampf vor."), false);
+                }
+            }
+        }
         double dx = getX() - arenaCenterX;
         double dz = getZ() - arenaCenterZ;
         double distance = Math.sqrt(dx * dx + dz * dz);
