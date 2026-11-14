@@ -21,6 +21,7 @@
 - [x] GeckoLib Kaido blockout model, texture atlas and renderer foundation.
 - [x] Unique Kaido idle, locomotion, breath and slam animation clips.
 - [x] Server attack triggers with tick-based impact timing.
+- [x] Kaido kanabo melee swing animation trigger and weapon-bone motion.
 - [ ] Hit, death, kanabo combo and transformation animations.
 - [ ] Hybrid / dragon form visuals synchronized with phase transitions.
 - [ ] Client/server multiplayer visual verification.

@@ -20,3 +20,12 @@ The server owns the attack state and damage timing. Clients receive the GeckoLib
 - Phase labels change at 65% and 30% health, but the rendered geometry does not yet transform into hybrid or dragon forms.
 - The model is a first-pass blockout and the texture atlas requires in-game UV verification.
 - CI compilation is not a substitute for a live Forge client/server test.
+
+
+## Kanabo melee animation
+
+- A successful ordinary melee hit triggers Kaido's dedicated kanabo swing clip.
+- The clip animates the right arm, body counter-rotation and the kanabo bone as one authored weapon swing.
+- Vanilla melee damage remains authoritative; the animation hook does not apply a second damage event.
+- The clip is cosmetic and is triggered only for a successful hit when no breath/slam special is active.
+- Exact hand/weapon alignment and hit-frame synchronization still require an in-game GeckoLib test.

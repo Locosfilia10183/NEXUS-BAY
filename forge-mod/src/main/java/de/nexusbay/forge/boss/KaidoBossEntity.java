@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,6 +32,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("animation.kaido.walk");
     private static final RawAnimation BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.breath");
     private static final RawAnimation SLAM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.slam");
+    private static final RawAnimation KANABO_ANIM = RawAnimation.begin().thenPlay("animation.kaido.kanabo");
 
     private static final int NO_ATTACK = 0;
     private static final int BREATH_ATTACK = 1;
@@ -67,7 +69,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         }));
         controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
                 .triggerableAnim("breath", BREATH_ANIM)
-                .triggerableAnim("slam", SLAM_ANIM));
+                .triggerableAnim("slam", SLAM_ANIM)
+                .triggerableAnim("kanabo", KANABO_ANIM));
     }
 
     @Override
@@ -89,6 +92,15 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.15D, false));
         this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8D));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        if (hit && !level().isClientSide && pendingAttack == NO_ATTACK) {
+            triggerAnim("attack", "kanabo");
+        }
+        return hit;
     }
 
     @Override
