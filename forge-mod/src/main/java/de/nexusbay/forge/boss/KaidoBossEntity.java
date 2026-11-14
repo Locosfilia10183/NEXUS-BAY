@@ -99,6 +99,34 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private boolean dragonFlying = false;
     private int aerialComboStep = 0;
     private int kanaboComboStep = 0;
+    private boolean arenaBound = false;
+    private double arenaCenterX;
+    private double arenaCenterZ;
+    private double arenaRadius = 42.0D;
+
+    public void setArenaBounds(double centerX, double centerZ, double radius) {
+        this.arenaBound = true;
+        this.arenaCenterX = centerX;
+        this.arenaCenterZ = centerZ;
+        this.arenaRadius = Math.max(12.0D, radius);
+    }
+
+    private void tickArenaBoundary() {
+        if (!arenaBound) return;
+        double dx = getX() - arenaCenterX;
+        double dz = getZ() - arenaCenterZ;
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        if (distance <= arenaRadius) return;
+        double nx = dx / Math.max(0.001D, distance);
+        double nz = dz / Math.max(0.001D, distance);
+        getNavigation().stop();
+        setDeltaMovement(-nx * 0.42D, Math.max(-0.15D, getDeltaMovement().y), -nz * 0.42D);
+        hasImpulse = true;
+        if (distance > arenaRadius + 12.0D) {
+            setPos(arenaCenterX + nx * (arenaRadius - 2.0D), getY(),
+                    arenaCenterZ + nz * (arenaRadius - 2.0D));
+        }
+    }
 
     @Override
     protected void defineSynchedData() {
@@ -248,6 +276,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                 updatePhase();
             }
 
+            tickArenaBoundary();
             tickDragonFlight();
             tickConquerorsHakiAura();
             tickPendingAttack();
