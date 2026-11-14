@@ -1,14 +1,18 @@
 name: NexusBay
-version: '1.2.2-bounty'
+version: '1.3.0-harbor-admin'
 main: de.nexusbay.core.NexusBay
 api-version: '1.21'
 authors: [NEXUS-BAY]
-description: Core RPG, bounty quests, islands and admin for NEXUS-BAY
+description: Pirate RPG core – harbor spawn, modern admin GUI, bounty quests
 website: https://github.com/Locosfilia10183/NEXUS-BAY
 
 commands:
   bayadmin:
-    description: Administration panel
+    description: Modern multi-page admin menu (Java)
+    permission: nexusbay.admin
+  bayspawn:
+    description: Build large harbor spawn at your position
+    usage: /bayspawn build
     permission: nexusbay.admin
   bayisland:
     description: Island management
@@ -23,18 +27,15 @@ commands:
     permission: nexusbay.admin
   baycrew:
     description: Crew system
-    usage: /baycrew <create|invite|accept|leave|deposit|info>
   bayskill:
     description: Skill trees
-    usage: /bayskill list <tree> | unlock <tree> <node>
   bayquest:
-    description: Kopfgeld / Logbuch
+    description: Bounty / logbook
     usage: /bayquest list | status | accept | abandon
 
 permissions:
   nexusbay.admin:
-    description: Full administration
+    description: Full administration (GUI + spawn build)
     default: op
   nexusbay.player:
-    description: Basic player access
     default: true

@@ -15,6 +15,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
     private CrewService crews;
     private SkillService skills;
     private QuestService quests;
+    private HarborSpawn harbor;
 
     @Override
     public void onEnable() {
@@ -29,10 +30,11 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         crews = new CrewService(this);
         skills = new SkillService(this);
         quests = new QuestService(this);
+        harbor = new HarborSpawn(this);
 
         for (String command : new String[]{
                 "bayadmin", "bayisland", "bayprofile", "baypay", "bayinv",
-                "baycrew", "bayskill", "bayquest"}) {
+                "baycrew", "bayskill", "bayquest", "bayspawn"}) {
             PluginCommand cmd = getCommand(command);
             if (cmd != null) cmd.setExecutor(this);
         }
@@ -41,7 +43,8 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         getServer().getPluginManager().registerEvents(data, this);
         getServer().getPluginManager().registerEvents(quests, this);
 
-        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB)" : " (YAML)") + " + Kopfgeld-Quests");
+        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB)" : " (YAML)")
+                + " | Harbor + Admin-GUI + Quests");
     }
 
     @Override
@@ -56,10 +59,23 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
 
         if (name.equals("bayadmin")) {
             if (!(sender instanceof Player p) || !p.hasPermission("nexusbay.admin")) {
-                sender.sendMessage("§cNur Admins können das Panel öffnen.");
+                sender.sendMessage("§cNur Admins (Java-Menü). Permission: nexusbay.admin");
                 return true;
             }
             adminMenu.open(p);
+            return true;
+        }
+
+        if (name.equals("bayspawn")) {
+            if (!(sender instanceof Player p) || !p.hasPermission("nexusbay.admin")) {
+                sender.sendMessage("§cNur Admins.");
+                return true;
+            }
+            if (args.length >= 1 && args[0].equalsIgnoreCase("build")) {
+                harbor.buildAt(p);
+                return true;
+            }
+            sender.sendMessage("§e/bayspawn build §7– großen Hafen-Spawn an deiner Position bauen");
             return true;
         }
 
@@ -233,6 +249,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
     public CrewService crews() { return crews; }
     public SkillService skills() { return skills; }
     public QuestService quests() { return quests; }
+    public HarborSpawn harbor() { return harbor; }
 
     public void broadcast(String message) {
         Bukkit.broadcastMessage("§6§lNEXUS-BAY §8» §f" + ChatColor.translateAlternateColorCodes('&', message));
