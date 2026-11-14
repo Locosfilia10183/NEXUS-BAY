@@ -1,9 +1,9 @@
 name: NexusBay
-version: '1.2.1-quests'
+version: '1.2.2-bounty'
 main: de.nexusbay.core.NexusBay
 api-version: '1.21'
 authors: [NEXUS-BAY]
-description: Core RPG, crews, skills, quests and admin for the NEXUS-BAY pirate network
+description: Core RPG, bounty quests, islands and admin for NEXUS-BAY
 website: https://github.com/Locosfilia10183/NEXUS-BAY
 
 commands:
@@ -28,8 +28,8 @@ commands:
     description: Skill trees
     usage: /bayskill list <tree> | unlock <tree> <node>
   bayquest:
-    description: Quests / logbook
-    usage: /bayquest list | status | accept <code> | abandon <code>
+    description: Kopfgeld / Logbuch
+    usage: /bayquest list | status | accept | abandon
 
 permissions:
   nexusbay.admin:

@@ -7,9 +7,12 @@ settings:
   starting-coins: 250
   xp-per-level: 100
 
-# Database (Phase 1)
-# When enabled=true the plugin will use MariaDB instead of YAML.
-# Credentials should be loaded from /opt/nexus-bay/config/secrets.env in production.
+quests:
+  bounty-kills: 10
+  bounty-coins: 100
+  bounty-xp: 50
+
+# Database (optional)
 database:
   enabled: false
   host: localhost
@@ -25,6 +28,5 @@ spawn:
   y: 100
   z: 0.5
 
-# Runtime data (YAML fallback when database.enabled = false)
 islands: {}
 players: {}

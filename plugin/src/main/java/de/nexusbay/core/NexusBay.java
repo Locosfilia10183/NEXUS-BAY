@@ -30,8 +30,6 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         skills = new SkillService(this);
         quests = new QuestService(this);
 
-        if (dbOk) quests.ensureSeed();
-
         for (String command : new String[]{
                 "bayadmin", "bayisland", "bayprofile", "baypay", "bayinv",
                 "baycrew", "bayskill", "bayquest"}) {
@@ -41,8 +39,9 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
 
         getServer().getPluginManager().registerEvents(adminMenu, this);
         getServer().getPluginManager().registerEvents(data, this);
+        getServer().getPluginManager().registerEvents(quests, this);
 
-        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB + Crews/Skills/Quests)" : " (YAML storage)"));
+        getLogger().info("NEXUS-BAY Core enabled." + (dbOk ? " (MariaDB)" : " (YAML)") + " + Kopfgeld-Quests");
     }
 
     @Override
@@ -211,15 +210,17 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
                 for (String line : quests.status(p)) sender.sendMessage(line);
                 return true;
             }
-            if (args[0].equalsIgnoreCase("accept") && args.length >= 2) {
-                sender.sendMessage(quests.accept(p, args[1].toLowerCase()));
+            if (args[0].equalsIgnoreCase("accept")) {
+                if (args.length >= 2) sender.sendMessage(quests.accept(p, args[1].toLowerCase()));
+                else sender.sendMessage(quests.accept(p));
                 return true;
             }
-            if (args[0].equalsIgnoreCase("abandon") && args.length >= 2) {
-                sender.sendMessage(quests.abandon(p, args[1].toLowerCase()));
+            if (args[0].equalsIgnoreCase("abandon")) {
+                if (args.length >= 2) sender.sendMessage(quests.abandon(p, args[1].toLowerCase()));
+                else sender.sendMessage(quests.abandon(p));
                 return true;
             }
-            sender.sendMessage("§e/bayquest list | status | accept <code> | abandon <code>");
+            sender.sendMessage("§e/bayquest list | status | accept | abandon");
             return true;
         }
 
