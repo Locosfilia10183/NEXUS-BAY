@@ -18,11 +18,13 @@ Target runtime: Minecraft 1.20.1 Forge 47.x, Java 17, GeckoLib 4.4.9.
 
 ## Generator implementation sequence
 1. [x] Add an isolated `nexusbay:one_piece_ocean` world-preset scaffold at `data/nexusbay/worldgen/world_preset/one_piece_ocean.json`; it does not alter the existing save.
-2. [ ] Replace the scaffold's vanilla terrain noise with an ocean-dominant generator and controlled island landmasses. The current scaffold assigns the Deep Ocean biome but still uses vanilla Overworld terrain, so it does NOT yet meet the 85-90% ocean target and is not ready for live-world use.
-3. [ ] Verify ocean-heavy biome/terrain distribution and island spacing with seed-based tests.
-4. Add structure placement pools for ports, Marine bases, pirate outposts, and ruins.
-5. Add region progression and discovery/map metadata.
-6. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
+2. [x] Add a first experimental custom noise settings file and low-frequency island-mass noise; connect the One Piece preset to it.
+3. [ ] Validate the noise-settings registry and density functions in an actual Forge 1.20.1 client/server. CI compilation alone does not validate datapack worldgen JSON.
+4. [ ] Tune island frequency and land ratio against multiple seeds until the large-map target is approximately 85-90% ocean. Current land ratio is NOT measured or guaranteed.
+5. [ ] Replace the temporary fixed Deep Ocean biome with climate/region-based ocean and island biomes, then add beaches, vegetation, and varied island surfaces.
+6. Add structure placement pools for ports, Marine bases, pirate outposts, and ruins.
+7. Add region progression and discovery/map metadata.
+8. Test new-world creation, spawn safety, chunk borders, structure spacing, server restart, and compatibility with Mine Mine no Mi.
 
 ## Ships gameplay goals
 - Large custom ship entity with visible hull, deck, mast, sails, wheel, and collision bounds.
