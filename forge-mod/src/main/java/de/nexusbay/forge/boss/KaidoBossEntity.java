@@ -6,6 +6,8 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -41,6 +43,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_TRANSFORM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_transform");
     private static final RawAnimation DRAGON_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_idle");
     private static final RawAnimation DRAGON_MOVE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_move");
+    private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
@@ -84,6 +87,10 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "movement", 5, state -> {
+            if (getCurrentPhase() == 3) {
+                if (state.isMoving()) return state.setAndContinue(DRAGON_MOVE_ANIM);
+                return state.setAndContinue(DRAGON_IDLE_ANIM);
+            }
             if (state.isMoving()) return state.setAndContinue(WALK_ANIM);
             return state.setAndContinue(IDLE_ANIM);
         }));
@@ -92,7 +99,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("slam", SLAM_ANIM)
                 .triggerableAnim("kanabo", KANABO_ANIM)
                 .triggerableAnim("hybrid_transform", HYBRID_TRANSFORM_ANIM)
-                .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM));
+                .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM)
+                .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM));
     }
 
     @Override
@@ -195,7 +203,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         pendingAttack = BREATH_ATTACK;
         attackImpactDelay = 12; // 0.6 seconds: breath release after the wind-up
         attackLockTicks = 24;   // 1.2-second animation lock
-        triggerAnim("attack", "breath");
+        triggerAnim("attack", currentPhase == 3 ? "dragon_breath" : "breath");
     }
 
     private void startSlamAttack() {
@@ -208,15 +216,33 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private void applyBreathDamage() {
         Vec3 look = getLookAngle().normalize();
         Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
-        AABB area = getBoundingBox().expandTowards(look.scale(18.0D)).inflate(3.0D);
+        double range = currentPhase == 3 ? 26.0D : 18.0D;
+        double coneDot = currentPhase == 3 ? 0.66D : 0.72D;
+        AABB area = getBoundingBox().expandTowards(look.scale(range)).inflate(currentPhase == 3 ? 4.0D : 3.0D);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            // A visible, segmented flame stream follows the boss's facing direction.
+            for (double distance = 2.0D; distance <= range; distance += 2.0D) {
+                Vec3 point = origin.add(look.scale(distance));
+                double spread = currentPhase == 3 ? 0.65D + distance * 0.055D : 0.35D;
+                serverLevel.sendParticles(ParticleTypes.FLAME, point.x, point.y, point.z,
+                        currentPhase == 3 ? 12 : 7, spread, spread * 0.65D, spread, 0.015D);
+                serverLevel.sendParticles(ParticleTypes.LARGE_SMOKE, point.x, point.y, point.z,
+                        currentPhase == 3 ? 4 : 2, spread * 0.7D, spread * 0.5D, spread * 0.7D, 0.005D);
+                if (currentPhase == 3 && distance % 4.0D == 2.0D) {
+                    serverLevel.sendParticles(ParticleTypes.LAVA, point.x, point.y, point.z,
+                            2, spread * 0.35D, spread * 0.3D, spread * 0.35D, 0.0D);
+                }
+            }
+        }
 
         for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
                 entity -> entity != this && entity.isAlive())) {
             Vec3 direction = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D)
                     .subtract(origin).normalize();
-            if (look.dot(direction) > 0.72D && victim.distanceToSqr(this) <= 400.0D) {
-                victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 32.0F : 22.0F);
-                victim.setSecondsOnFire(5);
+            if (look.dot(direction) > coneDot && victim.distanceToSqr(this) <= range * range) {
+                victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 45.0F : 22.0F);
+                victim.setSecondsOnFire(currentPhase == 3 ? 8 : 5);
             }
         }
     }
