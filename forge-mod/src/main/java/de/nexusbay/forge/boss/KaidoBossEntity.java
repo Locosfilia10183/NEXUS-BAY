@@ -31,6 +31,11 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("animation.kaido.walk");
     private static final RawAnimation BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.breath");
     private static final RawAnimation SLAM_ANIM = RawAnimation.begin().thenPlay("animation.kaido.slam");
+
+    private static final int NO_ATTACK = 0;
+    private static final int BREATH_ATTACK = 1;
+    private static final int SLAM_ATTACK = 2;
+
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
     private final ServerBossEvent bossEvent = new ServerBossEvent(
@@ -38,9 +43,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             BossEvent.BossBarColor.RED,
             BossEvent.BossBarOverlay.PROGRESS
     );
+
     private int currentPhase = 1;
     private int breathCooldown = 0;
     private int slamCooldown = 0;
+    private int pendingAttack = NO_ATTACK;
+    private int attackImpactDelay = 0;
+    private int attackLockTicks = 0;
 
     public KaidoBossEntity(EntityType<? extends Monster> type, Level level) {
         super(type, level);
@@ -102,29 +111,71 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 bossEvent.setProgress(progress);
                 updatePhase();
             }
-            runBossCombat();
+
+            tickPendingAttack();
+            if (pendingAttack == NO_ATTACK) {
+                runBossCombat();
+            }
+        }
+    }
+
+    /**
+     * Runs the attack wind-up on the server. Damage is applied only when the
+     * animation reaches its impact frame, not when the animation is triggered.
+     */
+    private void tickPendingAttack() {
+        if (pendingAttack == NO_ATTACK) return;
+
+        if (attackImpactDelay > 0) {
+            attackImpactDelay--;
+            if (attackImpactDelay == 0) {
+                if (pendingAttack == BREATH_ATTACK) applyBreathDamage();
+                else if (pendingAttack == SLAM_ATTACK) applySlamDamage();
+            }
+        }
+
+        if (attackLockTicks > 0) attackLockTicks--;
+        if (attackLockTicks == 0) {
+            pendingAttack = NO_ATTACK;
         }
     }
 
     private void runBossCombat() {
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) return;
+
         double distanceSqr = distanceToSqr(target);
         if (distanceSqr >= 36.0D && distanceSqr <= 576.0D && breathCooldown <= 0) {
-            breatheFire();
+            startBreathAttack();
             breathCooldown = currentPhase == 3 ? 65 : 100;
+            return;
         }
+
         if (distanceSqr <= 64.0D && slamCooldown <= 0) {
-            groundSlam();
+            startSlamAttack();
             slamCooldown = currentPhase == 3 ? 75 : 110;
         }
     }
 
-    private void breatheFire() {
+    private void startBreathAttack() {
+        pendingAttack = BREATH_ATTACK;
+        attackImpactDelay = 12; // 0.6 seconds: breath release after the wind-up
+        attackLockTicks = 24;   // 1.2-second animation lock
         triggerAnim("attack", "breath");
+    }
+
+    private void startSlamAttack() {
+        pendingAttack = SLAM_ATTACK;
+        attackImpactDelay = 12; // 0.6 seconds: impact at the downward strike
+        attackLockTicks = 18;   // 0.9-second animation lock
+        triggerAnim("attack", "slam");
+    }
+
+    private void applyBreathDamage() {
         Vec3 look = getLookAngle().normalize();
         Vec3 origin = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
         AABB area = getBoundingBox().expandTowards(look.scale(18.0D)).inflate(3.0D);
+
         for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
                 entity -> entity != this && entity.isAlive())) {
             Vec3 direction = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D)
@@ -136,10 +187,10 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         }
     }
 
-    private void groundSlam() {
-        triggerAnim("attack", "slam");
+    private void applySlamDamage() {
         double radius = currentPhase == 3 ? 9.0D : 7.0D;
         AABB area = getBoundingBox().inflate(radius, 3.0D, radius);
+
         for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
                 entity -> entity != this && entity.isAlive())) {
             victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 38.0F : 26.0F);
@@ -184,6 +235,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
 
     @Override
     public void die(DamageSource source) {
+        pendingAttack = NO_ATTACK;
         bossEvent.removeAllPlayers();
         super.die(source);
     }

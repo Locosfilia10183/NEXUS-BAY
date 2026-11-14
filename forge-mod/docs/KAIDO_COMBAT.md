@@ -2,22 +2,21 @@
 
 ## Implemented
 
-- Server-side dragon-breath cone attack, triggered through GeckoLib controller `attack` / `breath`.
-- Server-side ground slam with knockback, triggered through `attack` / `slam`.
+- Server-side dragon-breath cone attack and ground slam with knockback.
+- GeckoLib attack triggers for breath and slam.
+- Damage is now delayed until the animation impact frame: 12 ticks (0.6 seconds) after the attack starts.
+- Breath animation lock: 24 ticks (1.2 seconds); slam animation lock: 18 ticks (0.9 seconds).
+- Only one special attack can run at a time, preventing breath and slam from overlapping.
 - Phase-aware damage and cooldowns; phase labels update the boss bar.
-- Boss bar health progress and player tracking.
+
+## Combat timing
+
+The server owns the attack state and damage timing. Clients receive the GeckoLib trigger; damage is not applied on the trigger tick. The current impact point is a tick-based approximation aligned with the authored animation pose. Fine alignment still requires in-game visual testing.
 
 ## Current limitations
 
-- Hit checks resolve immediately when the attack starts; there is no wind-up / impact-frame timing yet.
-- Attacks have no projectile entity, telegraph, particles, or sound effects.
-- Phase labels change at 65% and 30% health, but the geometry does not yet transform into hybrid or dragon forms.
-- The current model is a blockout and its texture atlas is an initial pass; UVs and in-game appearance still need visual verification.
-- CI compilation is not a substitute for an in-game client/server test.
-
-## Next steps
-
-1. Verify the texture atlas and refine the model proportions / UVs in Blockbench.
-2. Add attack wind-up and apply damage at the animation impact frame.
-3. Add hit, death, transformation, breath and kanabo-specific clips.
-4. Test boss-bar tracking, combat and animations with multiple players.
+- Attacks still use immediate area / cone hit checks at the impact tick, not custom projectile entities.
+- No attack telegraphs, particles, or sound effects yet.
+- Phase labels change at 65% and 30% health, but the rendered geometry does not yet transform into hybrid or dragon forms.
+- The model is a first-pass blockout and the texture atlas requires in-game UV verification.
+- CI compilation is not a substitute for a live Forge client/server test.
