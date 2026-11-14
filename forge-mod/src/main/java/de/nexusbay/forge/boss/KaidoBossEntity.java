@@ -25,6 +25,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -899,6 +901,38 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     }
 
     /**
+     * Temporary server-side reward implementation using renamed vanilla items.
+     * The dedicated NEXUS-BAY item registry can replace these placeholders later.
+     */
+    private void dropKaidoRewards() {
+        if (!(level() instanceof ServerLevel serverLevel)) return;
+        LivingEntity killer = getKillCredit();
+        if (killer == null) return;
+
+        dropNamedReward(serverLevel, Items.PRISMARINE_SHARD,
+                "§bKaidos Drachenschuppe", 1 + random.nextInt(4), 0.65D);
+        dropNamedReward(serverLevel, Items.BLAZE_ROD,
+                "§6Kanabo-Splitter", 1, 0.25D);
+        dropNamedReward(serverLevel, Items.TRIPWIRE_HOOK,
+                "§eWeltboss-Schlüssel", 1, 0.015D);
+        dropNamedReward(serverLevel, Items.CHORUS_FRUIT,
+                "§dAzurblauer Drachenfrucht-Kern", 1, 0.005D);
+
+        // A guaranteed trophy makes every successful world-boss defeat rewarding.
+        ItemStack trophy = new ItemStack(Items.NETHER_STAR);
+        trophy.setHoverName(Component.literal("§cTrophäe: Kaido, König der Bestien"));
+        spawnAtLocation(trophy);
+    }
+
+    private void dropNamedReward(ServerLevel serverLevel, net.minecraft.world.item.Item item,
+                                 String name, int count, double chance) {
+        if (random.nextDouble() > chance) return;
+        ItemStack stack = new ItemStack(item, count);
+        stack.setHoverName(Component.literal(name));
+        spawnAtLocation(stack);
+    }
+
+    /**
      * Server-side cinematic death burst. All effects are particles only:
      * the island terrain is never modified by Kaido's death.
      */
@@ -944,6 +978,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         if (!level().isClientSide) {
             triggerAnim("attack", "death");
             playDeathSequence();
+            dropKaidoRewards();
         }
         bossEvent.removeAllPlayers();
         super.die(source);
