@@ -46,6 +46,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_FLY_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_fly");
     private static final RawAnimation DRAGON_TAKEOFF_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_takeoff");
     private static final RawAnimation DRAGON_LAND_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_land");
+    private static final RawAnimation DRAGON_SKYFALL_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_skyfall");
     private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
     private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
@@ -63,6 +64,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final int RAGNAROK_ATTACK = 3;
     private static final int THUNDER_BAGUA_ATTACK = 4;
     private static final int BLAST_BREATH_ATTACK = 5;
+    private static final int DRAGON_SKYFALL_ATTACK = 6;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -78,6 +80,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int ragnarokCooldown = 0;
     private int thunderBaguaCooldown = 0;
     private int blastBreathCooldown = 0;
+    private int skyfallCooldown = 0;
+    private Vec3 skyfallTarget = Vec3.ZERO;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
@@ -143,7 +147,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("thunder_bagua", THUNDER_BAGUA_ANIM)
                 .triggerableAnim("blast_breath", BLAST_BREATH_ANIM)
                 .triggerableAnim("dragon_takeoff", DRAGON_TAKEOFF_ANIM)
-                .triggerableAnim("dragon_land", DRAGON_LAND_ANIM));
+                .triggerableAnim("dragon_land", DRAGON_LAND_ANIM)
+                .triggerableAnim("dragon_skyfall", DRAGON_SKYFALL_ANIM));
     }
 
     @Override
@@ -199,6 +204,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (ragnarokCooldown > 0) ragnarokCooldown--;
             if (thunderBaguaCooldown > 0) thunderBaguaCooldown--;
             if (blastBreathCooldown > 0) blastBreathCooldown--;
+            if (skyfallCooldown > 0) skyfallCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -236,7 +242,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             setNoGravity(true);
             getNavigation().stop();
             triggerAnim("attack", "dragon_takeoff");
-        } else if (dragonFlying && distanceSqr < 49.0D) {
+        } else if (dragonFlying && distanceSqr < 49.0D && pendingAttack != DRAGON_SKYFALL_ATTACK) {
             setDragonFlying(false);
             setNoGravity(false);
             triggerAnim("attack", "dragon_land");
@@ -246,9 +252,11 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (!dragonFlying) return;
 
         getNavigation().stop();
-        Vec3 destination = target.position().add(0.0D, 5.0D, 0.0D);
+        Vec3 destination = pendingAttack == DRAGON_SKYFALL_ATTACK
+                ? skyfallTarget : target.position().add(0.0D, 5.0D, 0.0D);
         Vec3 difference = destination.subtract(position());
-        Vec3 desiredVelocity = difference.normalize().scale(0.22D);
+        Vec3 desiredVelocity = difference.normalize().scale(
+                pendingAttack == DRAGON_SKYFALL_ATTACK ? 0.82D : 0.22D);
         Vec3 currentVelocity = getDeltaMovement();
         setDeltaMovement(
                 currentVelocity.x * 0.72D + desiredVelocity.x * 0.28D,
@@ -305,6 +313,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 else if (pendingAttack == RAGNAROK_ATTACK) applyRagnarokDamage();
                 else if (pendingAttack == THUNDER_BAGUA_ATTACK) applyThunderBaguaDamage();
                 else if (pendingAttack == BLAST_BREATH_ATTACK) applyBlastBreathDamage();
+                else if (pendingAttack == DRAGON_SKYFALL_ATTACK) applyDragonSkyfallDamage();
             }
         }
 
@@ -319,6 +328,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (target == null || !target.isAlive()) return;
 
         double distanceSqr = distanceToSqr(target);
+        if (currentPhase == 3 && isDragonFlying() && distanceSqr >= 49.0D
+                && distanceSqr <= 225.0D && skyfallCooldown <= 0) {
+            startDragonSkyfallAttack(target);
+            skyfallCooldown = 360;
+            return;
+        }
         if (currentPhase == 3 && distanceSqr >= 400.0D && distanceSqr <= 1600.0D
                 && blastBreathCooldown <= 0) {
             startBlastBreathAttack();
@@ -382,6 +397,60 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         attackImpactDelay = 24; // 1.2-second dragon breath charge-up
         attackLockTicks = 40;   // 2-second attack and recovery window
         triggerAnim("attack", "blast_breath");
+    }
+
+    private void startDragonSkyfallAttack(LivingEntity target) {
+        skyfallTarget = target.position();
+        pendingAttack = DRAGON_SKYFALL_ATTACK;
+        attackImpactDelay = 18; // dive wind-up and descent
+        attackLockTicks = 42;   // impact plus recovery
+        triggerAnim("attack", "dragon_skyfall");
+    }
+
+    private void applyDragonSkyfallDamage() {
+        double radius = 8.5D;
+        Vec3 impact = skyfallTarget;
+        AABB impactArea = new AABB(
+                impact.x - radius, impact.y - 3.0D, impact.z - radius,
+                impact.x + radius, impact.y + 4.0D, impact.z + radius
+        );
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                    impact.x, impact.y + 0.4D, impact.z, 2, 1.0D, 0.4D, 1.0D, 0.0D);
+            for (int i = 0; i < 48; i++) {
+                double angle = (Math.PI * 2.0D * i) / 48.0D;
+                double ringRadius = radius * (0.35D + (i % 4) * 0.16D);
+                double x = impact.x + Math.cos(angle) * ringRadius;
+                double z = impact.z + Math.sin(angle) * ringRadius;
+                serverLevel.sendParticles(ParticleTypes.CLOUD,
+                        x, impact.y + 0.15D, z, 3, 0.3D, 0.18D, 0.3D, 0.08D);
+                if (i % 2 == 0) {
+                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                            x, impact.y + 0.7D, z, 3, 0.2D, 0.6D, 0.2D, 0.12D);
+                }
+            }
+            serverLevel.sendParticles(ParticleTypes.FLAME,
+                    impact.x, impact.y + 0.5D, impact.z,
+                    65, 2.8D, 0.8D, 2.8D, 0.08D);
+        }
+
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, impactArea,
+                entity -> entity != this && entity.isAlive())) {
+            double distance = victim.position().distanceTo(impact);
+            if (distance <= radius) {
+                victim.hurt(damageSources().mobAttack(this), 85.0F);
+                double strength = Math.max(0.7D, (radius - distance) * 0.32D);
+                Vec3 push = victim.position().subtract(impact).normalize();
+                victim.push(push.x * strength, 1.0D + strength * 0.35D, push.z * strength);
+                victim.hurtMarked = true;
+            }
+        }
+
+        setDragonFlying(false);
+        setNoGravity(false);
+        setDeltaMovement(getDeltaMovement().x, Math.max(0.0D, getDeltaMovement().y), getDeltaMovement().z);
+        hasImpulse = true;
     }
 
     private void applyBreathDamage() {
