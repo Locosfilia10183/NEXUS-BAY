@@ -94,6 +94,14 @@ for island in islands:
                 f"{island.get('region')} bounds"
             )
 
+# Empty seas are reported as planning gaps, not auto-filled with invented islands.
+for region in region_list:
+    region_id = region.get("id")
+    if not any(island.get("region") == region_id for island in islands):
+        warnings.append(
+            f"region {region_id} has no island entries; confirm whether this sea is intentionally empty"
+        )
+
 # Overlapping design radii are surfaced for review, not rejected: some locations
 # may intentionally form archipelagos or linked island groups.
 for index, first in enumerate(islands):
