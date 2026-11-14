@@ -257,6 +257,31 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (!dragonFlying) return;
 
         getNavigation().stop();
+
+        // During Dragon Twister Kaido hovers in place while a visible vortex
+        // builds around his body. This prevents the flight steering from
+        // dragging the spinning animation away from its attack position.
+        if (pendingAttack == DRAGON_TWISTER_ATTACK) {
+            Vec3 velocity = getDeltaMovement();
+            setDeltaMovement(velocity.x * 0.55D, velocity.y * 0.55D, velocity.z * 0.55D);
+            hasImpulse = true;
+            if (tickCount % 2 == 0 && level() instanceof ServerLevel serverLevel) {
+                double angle = tickCount * 0.42D;
+                for (int i = 0; i < 3; i++) {
+                    double swirlAngle = angle + i * (Math.PI * 2.0D / 3.0D);
+                    double radius = 2.0D + (i % 2) * 0.65D;
+                    double x = getX() + Math.cos(swirlAngle) * radius;
+                    double z = getZ() + Math.sin(swirlAngle) * radius;
+                    double y = getY() + 1.0D + i * 1.1D;
+                    serverLevel.sendParticles(ParticleTypes.CLOUD,
+                            x, y, z, 5, 0.25D, 0.35D, 0.25D, 0.035D);
+                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                            x, y, z, 2, 0.12D, 0.2D, 0.12D, 0.04D);
+                }
+            }
+            return;
+        }
+
         Vec3 destination = pendingAttack == DRAGON_SKYFALL_ATTACK
                 ? skyfallTarget : target.position().add(0.0D, 5.0D, 0.0D);
         Vec3 difference = destination.subtract(position());
