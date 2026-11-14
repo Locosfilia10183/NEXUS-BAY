@@ -1209,6 +1209,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         dragonFlying = false;
         setNoGravity(false);
         if (!level().isClientSide) {
+            if (level() instanceof ServerLevel serverLevel) {
+                BossHomeData.get(serverLevel).markKaidoDefeated(serverLevel.getGameTime());
+            }
             triggerAnim("attack", "death");
             playDeathSequence();
             dropKaidoRewards();
