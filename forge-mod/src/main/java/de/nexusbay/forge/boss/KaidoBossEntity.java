@@ -44,6 +44,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_idle");
     private static final RawAnimation DRAGON_MOVE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.dragon_move");
     private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
+    private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
+    private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
@@ -101,7 +103,9 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("kanabo", KANABO_ANIM)
                 .triggerableAnim("hybrid_transform", HYBRID_TRANSFORM_ANIM)
                 .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM)
-                .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM));
+                .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM)
+                .triggerableAnim("hit_react", HIT_REACT_ANIM)
+                .triggerableAnim("death", DEATH_ANIM));
     }
 
     @Override
@@ -339,13 +343,24 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         boolean damaged = super.hurt(source, amount);
-        if (damaged && isDeadOrDying()) bossEvent.setProgress(0.0F);
+        if (damaged && !level().isClientSide) {
+            if (isDeadOrDying()) {
+                bossEvent.setProgress(0.0F);
+            } else if (pendingAttack == NO_ATTACK) {
+                triggerAnim("attack", "hit_react");
+            }
+        }
         return damaged;
     }
 
     @Override
     public void die(DamageSource source) {
         pendingAttack = NO_ATTACK;
+        attackImpactDelay = 0;
+        attackLockTicks = 0;
+        dragonFlying = false;
+        setNoGravity(false);
+        if (!level().isClientSide) triggerAnim("attack", "death");
         bossEvent.removeAllPlayers();
         super.die(source);
     }
