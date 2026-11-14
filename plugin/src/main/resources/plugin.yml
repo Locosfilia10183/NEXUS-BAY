@@ -1,27 +1,34 @@
 name: NexusBay
-version: 1.0.0
+version: '${project.version}'
 main: de.nexusbay.core.NexusBay
-api-version: '26.2'
+api-version: '1.21'
 authors: [NEXUS-BAY]
-description: Core RPG, islands and administration systems for NEXUS-BAY
+description: Core RPG, islands, economy and admin systems for the NEXUS-BAY pirate network
+website: https://github.com/Locosfilia10183/NEXUS-BAY
+
 commands:
   bayadmin:
     description: Opens the NEXUS-BAY administration panel
     permission: nexusbay.admin
+    usage: /bayadmin
   bayisland:
-    description: Creates and manages NEXUS-BAY islands
-    usage: /bayisland create <name>
-    permission: nexusbay.admin
+    description: Creates and manages islands
+    usage: /bayisland <create|visit|list> [name]
   bayprofile:
-    description: Shows your NEXUS-BAY RPG profile
+    description: Shows your pirate profile (level, XP, coins)
+    usage: /bayprofile
   baypay:
-    description: Sends bay coins to another player
+    description: Sends Bay-Coins to another player
     usage: /baypay <player> <amount>
   bayinv:
-    description: Opens a read-only player inventory inspection
+    description: Read-only inventory inspection
     usage: /bayinv <player>
     permission: nexusbay.admin
+
 permissions:
   nexusbay.admin:
-    description: Full NEXUS-BAY administration access
+    description: Full administration access
     default: op
+  nexusbay.player:
+    description: Basic player access
+    default: true
