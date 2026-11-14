@@ -238,6 +238,12 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (target == null || !target.isAlive()) return;
 
         double distanceSqr = distanceToSqr(target);
+        if (currentPhase == 2 && distanceSqr >= 16.0D && distanceSqr <= 100.0D
+                && ragnarokCooldown <= 0) {
+            startRagnarokAttack();
+            ragnarokCooldown = 240;
+            return;
+        }
         if (distanceSqr >= 36.0D && distanceSqr <= 576.0D && breathCooldown <= 0) {
             startBreathAttack();
             breathCooldown = currentPhase == 3 ? 65 : 100;
@@ -262,6 +268,13 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         attackImpactDelay = 12; // 0.6 seconds: impact at the downward strike
         attackLockTicks = 18;   // 0.9-second animation lock
         triggerAnim("attack", "slam");
+    }
+
+    private void startRagnarokAttack() {
+        pendingAttack = RAGNAROK_ATTACK;
+        attackImpactDelay = 24; // 1.2-second charge-up before the overhead strike
+        attackLockTicks = 36;   // 1.8-second recovery window
+        triggerAnim("attack", "ragnarok");
     }
 
     private void applyBreathDamage() {
@@ -294,6 +307,43 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (look.dot(direction) > coneDot && victim.distanceToSqr(this) <= range * range) {
                 victim.hurt(damageSources().mobAttack(this), currentPhase == 3 ? 45.0F : 22.0F);
                 victim.setSecondsOnFire(currentPhase == 3 ? 8 : 5);
+            }
+        }
+    }
+
+    private void applyRagnarokDamage() {
+        double radius = 11.0D;
+        AABB impactArea = getBoundingBox().inflate(radius, 4.0D, radius);
+
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                    getX(), getY() + 0.5D, getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            // Expanding ground shockwave; particles are visual only, damage is applied once below.
+            for (int ring = 1; ring <= 4; ring++) {
+                double ringRadius = ring * 2.5D;
+                for (int point = 0; point < 24; point++) {
+                    double angle = (Math.PI * 2.0D * point) / 24.0D;
+                    double x = getX() + Math.cos(angle) * ringRadius;
+                    double z = getZ() + Math.sin(angle) * ringRadius;
+                    serverLevel.sendParticles(ParticleTypes.CLOUD,
+                            x, getY() + 0.15D, z, 2, 0.25D, 0.12D, 0.25D, 0.04D);
+                    if (ring == 4 && point % 3 == 0) {
+                        serverLevel.sendParticles(ParticleTypes.CRIT,
+                                x, getY() + 0.5D, z, 4, 0.35D, 0.3D, 0.35D, 0.15D);
+                    }
+                }
+            }
+        }
+
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, impactArea,
+                entity -> entity != this && entity.isAlive())) {
+            double distance = victim.distanceTo(this);
+            if (distance <= radius) {
+                victim.hurt(damageSources().mobAttack(this), 65.0F);
+                Vec3 push = victim.position().subtract(position()).normalize();
+                double strength = Math.max(0.8D, (radius - distance) * 0.35D);
+                victim.push(push.x * strength, 0.9D + strength * 0.25D, push.z * strength);
+                victim.hurtMarked = true;
             }
         }
     }
