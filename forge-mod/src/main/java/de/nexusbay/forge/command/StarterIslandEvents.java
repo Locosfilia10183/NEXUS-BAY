@@ -30,12 +30,10 @@ public final class StarterIslandEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.getPersistentData().getBoolean(STARTER_SWORDS_GIVEN)) return;
 
-        giveOrDrop(player, new ItemStack(ModItems.WADO_ICHIMONJI.get()));
-        giveOrDrop(player, new ItemStack(ModItems.ENMA.get()));
-        giveOrDrop(player, new ItemStack(ModItems.SANDAI_KITETSU.get()));
+        giveOrDrop(player, new ItemStack(ModItems.SANTORYU.get()));
         player.getPersistentData().putBoolean(STARTER_SWORDS_GIVEN, true);
         player.sendSystemMessage(Component.literal("§6NEXUS-BAY §f– Willkommen, Pirat!"));
-        player.sendSystemMessage(Component.literal("§eDu hast Wado Ichimonji, Enma und Sandai Kitetsu erhalten."));
+        player.sendSystemMessage(Component.literal("§eDu hast Zoros kompletten Dreischwerter-Stil erhalten: Wado Ichimonji, Enma und Sandai Kitetsu in einer Waffe."));
     }
 
     private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
@@ -58,9 +56,7 @@ public final class StarterIslandEvents {
             return 0;
         }
 
-        player.getInventory().add(new ItemStack(ModItems.WADO_ICHIMONJI.get()));
-        player.getInventory().add(new ItemStack(ModItems.ENMA.get()));
-        player.getInventory().add(new ItemStack(ModItems.SANDAI_KITETSU.get()));
+        player.getInventory().add(new ItemStack(ModItems.SANTORYU.get()));
         player.getPersistentData().putBoolean(STARTED, true);
         player.getPersistentData().putInt(KILLS, 0);
 
