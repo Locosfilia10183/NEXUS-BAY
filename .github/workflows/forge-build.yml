@@ -5,11 +5,15 @@ on:
     branches: [forge-development]
     paths:
       - "forge-mod/**"
+      - "tools/**"
+      - "docs/**"
       - ".github/workflows/forge-build.yml"
   pull_request:
     branches: [forge-development]
     paths:
       - "forge-mod/**"
+      - "tools/**"
+      - "docs/**"
       - ".github/workflows/forge-build.yml"
   workflow_dispatch:
 
