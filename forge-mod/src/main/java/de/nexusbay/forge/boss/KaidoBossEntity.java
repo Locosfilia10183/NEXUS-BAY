@@ -18,8 +18,17 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class KaidoBossEntity extends Monster {
+public class KaidoBossEntity extends Monster implements GeoEntity {
+    private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.kaido.idle");
+    private static final RawAnimation WALK_ANIM = RawAnimation.begin().thenLoop("animation.kaido.walk");
+    private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
     private final ServerBossEvent bossEvent = new ServerBossEvent(
             Component.literal("KAIDO – KÖNIG DER BESTIEN"),
@@ -36,6 +45,19 @@ public class KaidoBossEntity extends Monster {
         this.setCustomName(Component.literal("§cKAIDO §6[WELTBOSS · LEVEL 250]"));
         this.setCustomNameVisible(true);
         this.setHealth((float) KAIDO_MAX_HEALTH);
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "movement", 5, state -> {
+            if (state.isMoving()) return state.setAndContinue(WALK_ANIM);
+            return state.setAndContinue(IDLE_ANIM);
+        }));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return geoCache;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
