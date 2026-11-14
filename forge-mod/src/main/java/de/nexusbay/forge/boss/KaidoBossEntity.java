@@ -65,6 +65,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
+    private boolean dragonFlying = false;
 
     @Override
     protected void defineSynchedData() {
@@ -154,10 +155,56 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 updatePhase();
             }
 
+            tickDragonFlight();
             tickPendingAttack();
             if (pendingAttack == NO_ATTACK) {
                 runBossCombat();
             }
+        }
+    }
+
+    /**
+     * In dragon form Kaido takes to the air when a target is far away,
+     * tracks it from above, and returns to normal gravity near the target.
+     */
+    private void tickDragonFlight() {
+        LivingEntity target = getTarget();
+        if (getCurrentPhase() != 3 || target == null || !target.isAlive()) {
+            if (dragonFlying) {
+                dragonFlying = false;
+                setNoGravity(false);
+            }
+            return;
+        }
+
+        double distanceSqr = distanceToSqr(target);
+        if (!dragonFlying && distanceSqr > 144.0D) {
+            dragonFlying = true;
+            setNoGravity(true);
+            getNavigation().stop();
+        } else if (dragonFlying && distanceSqr < 49.0D) {
+            dragonFlying = false;
+            setNoGravity(false);
+            return;
+        }
+
+        if (!dragonFlying) return;
+
+        getNavigation().stop();
+        Vec3 destination = target.position().add(0.0D, 5.0D, 0.0D);
+        Vec3 difference = destination.subtract(position());
+        Vec3 desiredVelocity = difference.normalize().scale(0.22D);
+        Vec3 currentVelocity = getDeltaMovement();
+        setDeltaMovement(
+                currentVelocity.x * 0.72D + desiredVelocity.x * 0.28D,
+                currentVelocity.y * 0.72D + desiredVelocity.y * 0.28D,
+                currentVelocity.z * 0.72D + desiredVelocity.z * 0.28D
+        );
+        hasImpulse = true;
+
+        if (tickCount % 4 == 0 && level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.CLOUD,
+                    getX(), getY() + 0.4D, getZ(), 3, 0.8D, 0.25D, 0.8D, 0.01D);
         }
     }
 
