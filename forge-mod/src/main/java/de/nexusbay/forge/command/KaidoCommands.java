@@ -19,7 +19,7 @@ import de.nexusbay.forge.registry.ModEntities;
  */
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
 public final class KaidoCommands {
-    private static final double ONIGASHIMA_X = 1472.5D;
+    private static final double ONIGASHIMA_X = 2752.5D;
     private static final double ONIGASHIMA_Y = 101.0D;
     private static final double ONIGASHIMA_Z = 1472.5D;
 
