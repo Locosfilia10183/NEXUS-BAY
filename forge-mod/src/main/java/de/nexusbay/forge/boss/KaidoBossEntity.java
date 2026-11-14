@@ -54,6 +54,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private static final RawAnimation RAGNAROK_ANIM = RawAnimation.begin().thenPlay("animation.kaido.ragnarok");
     private static final RawAnimation THUNDER_BAGUA_ANIM = RawAnimation.begin().thenPlay("animation.kaido.thunder_bagua");
     private static final RawAnimation BLAST_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.blast_breath");
+    private static final RawAnimation CONQUERORS_HAKI_ANIM = RawAnimation.begin().thenPlay("animation.kaido.conquerors_haki_burst");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_DRAGON_FLYING =
@@ -67,6 +68,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private static final int BLAST_BREATH_ATTACK = 5;
     private static final int DRAGON_SKYFALL_ATTACK = 6;
     private static final int DRAGON_TWISTER_ATTACK = 7;
+    private static final int CONQUERORS_HAKI_ATTACK = 8;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -84,6 +86,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
     private int blastBreathCooldown = 0;
     private int skyfallCooldown = 0;
     private int dragonTwisterCooldown = 0;
+    private int conquerorsHakiCooldown = 0;
     private Vec3 skyfallTarget = Vec3.ZERO;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
@@ -153,7 +156,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                 .triggerableAnim("dragon_takeoff", DRAGON_TAKEOFF_ANIM)
                 .triggerableAnim("dragon_land", DRAGON_LAND_ANIM)
                 .triggerableAnim("dragon_skyfall", DRAGON_SKYFALL_ANIM)
-                .triggerableAnim("dragon_twister", DRAGON_TWISTER_ANIM));
+                .triggerableAnim("dragon_twister", DRAGON_TWISTER_ANIM)
+                .triggerableAnim("conquerors_haki_burst", CONQUERORS_HAKI_ANIM));
     }
 
     @Override
@@ -211,6 +215,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
             if (blastBreathCooldown > 0) blastBreathCooldown--;
             if (skyfallCooldown > 0) skyfallCooldown--;
             if (dragonTwisterCooldown > 0) dragonTwisterCooldown--;
+            if (conquerorsHakiCooldown > 0) conquerorsHakiCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -346,6 +351,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                 else if (pendingAttack == BLAST_BREATH_ATTACK) applyBlastBreathDamage();
                 else if (pendingAttack == DRAGON_SKYFALL_ATTACK) applyDragonSkyfallDamage();
                 else if (pendingAttack == DRAGON_TWISTER_ATTACK) applyDragonTwisterDamage();
+                else if (pendingAttack == CONQUERORS_HAKI_ATTACK) applyConquerorsHakiBurstDamage();
             }
         }
 
@@ -362,6 +368,15 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         // Keep the boss facing its opponent before choosing a directional attack.
         getLookControl().setLookAt(target, 30.0F, 30.0F);
         double distanceSqr = distanceToSqr(target);
+
+        // Kaido unleashes Conqueror's Haki as a close-to-mid range pressure burst.
+        // The cooldown prevents the aura attack from crowding out his signature moves.
+        if (currentPhase >= 2 && distanceSqr >= 16.0D && distanceSqr <= 196.0D
+                && conquerorsHakiCooldown <= 0) {
+            startConquerorsHakiBurst();
+            conquerorsHakiCooldown = currentPhase == 3 ? 420 : 360;
+            return;
+        }
 
         // In dragon form Kaido alternates his aerial finishers instead of
         // repeatedly choosing the first available move in the same order.
@@ -460,6 +475,52 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         attackImpactDelay = 18; // dive wind-up and descent
         attackLockTicks = 42;   // impact plus recovery
         triggerAnim("attack", "dragon_skyfall");
+    }
+
+    private void startConquerorsHakiBurst() {
+        pendingAttack = CONQUERORS_HAKI_ATTACK;
+        attackImpactDelay = 22; // 1.1-second pressure build-up before the burst
+        attackLockTicks = 38;   // recovery window after the shockwave
+        getNavigation().stop();
+        triggerAnim("attack", "conquerors_haki_burst");
+    }
+
+    private void applyConquerorsHakiBurstDamage() {
+        double radius = currentPhase == 3 ? 15.0D : 11.0D;
+        float damage = currentPhase == 3 ? 82.0F : 58.0F;
+        AABB area = getBoundingBox().inflate(radius, 5.0D, radius);
+        if (level() instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
+                    getX(), getY() + getBbHeight() * 0.55D, getZ(), 1,
+                    0.4D, 0.4D, 0.4D, 0.0D);
+            for (int ring = 1; ring <= 4; ring++) {
+                double ringRadius = radius * ring / 4.0D;
+                for (int point = 0; point < 32; point++) {
+                    double angle = Math.PI * 2.0D * point / 32.0D + tickCount * 0.025D;
+                    double x = getX() + Math.cos(angle) * ringRadius;
+                    double z = getZ() + Math.sin(angle) * ringRadius;
+                    double y = getY() + 0.25D + (point % 4) * 0.45D;
+                    serverLevel.sendParticles(ParticleTypes.ELECTRIC_SPARK,
+                            x, y, z, 3, 0.18D, 0.35D, 0.18D, 0.06D);
+                    if (point % 2 == 0) {
+                        serverLevel.sendParticles(ParticleTypes.CRIT,
+                                x, y + 0.35D, z, 2, 0.12D, 0.25D, 0.12D, 0.08D);
+                    }
+                }
+            }
+        }
+
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, area,
+                entity -> entity != this && entity.isAlive())) {
+            double distance = victim.position().distanceTo(position());
+            if (distance <= radius) {
+                victim.hurt(damageSources().mobAttack(this), damage);
+                Vec3 away = victim.position().subtract(position()).normalize();
+                double strength = Math.max(0.8D, (radius - distance) * 0.24D);
+                victim.push(away.x * strength, 0.65D + strength * 0.22D, away.z * strength);
+                victim.hurtMarked = true;
+            }
+        }
     }
 
     private void startDragonTwisterAttack() {
