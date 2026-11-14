@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,6 +23,25 @@ public final class StarterIslandEvents {
     private static final String STARTED = "nexusbay_starter_started";
     private static final String KILLS = "nexusbay_starter_soldier_kills";
     private static final int REQUIRED_KILLS = 5;
+    private static final String STARTER_SWORDS_GIVEN = "nexusbay_starter_swords_given";
+
+    @SubscribeEvent
+    public static void onFirstJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.getPersistentData().getBoolean(STARTER_SWORDS_GIVEN)) return;
+
+        giveOrDrop(player, new ItemStack(ModItems.WADO_ICHIMONJI.get()));
+        giveOrDrop(player, new ItemStack(ModItems.ENMA.get()));
+        giveOrDrop(player, new ItemStack(ModItems.SANDAI_KITETSU.get()));
+        player.getPersistentData().putBoolean(STARTER_SWORDS_GIVEN, true);
+        player.sendSystemMessage(Component.literal("§6NEXUS-BAY §f– Willkommen, Pirat!"));
+        player.sendSystemMessage(Component.literal("§eDu hast Wado Ichimonji, Enma und Sandai Kitetsu erhalten."));
+    }
+
+    private static void giveOrDrop(ServerPlayer player, ItemStack stack) {
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
+    }
+
 
     private StarterIslandEvents() {}
 
