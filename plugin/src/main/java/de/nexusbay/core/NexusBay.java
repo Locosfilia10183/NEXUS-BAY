@@ -16,7 +16,7 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
         data = new PlayerData(this);
         islands = new IslandService(this);
         adminMenu = new AdminMenu(this);
-        for (String command : new String[]{"bayadmin","bayisland","bayprofile","baypay"}) {
+        for (String command : new String[]{"bayadmin","bayisland","bayprofile","baypay","bayinv"}) {
             PluginCommand cmd = getCommand(command);
             if (cmd != null) cmd.setExecutor(this);
         }
@@ -57,6 +57,12 @@ public final class NexusBay extends JavaPlugin implements CommandExecutor {
             sender.sendMessage("§7Level: §e" + data.level(p) + " §8| §7XP: §b" + data.xp(p) + "§7/§b" + data.nextLevelXp(p));
             sender.sendMessage("§7Bay-Coins: §6" + data.coins(p));
             return true;
+        }
+        if (name.equals("bayinv")) {
+            if (!(sender instanceof Player p) || !sender.hasPermission("nexusbay.admin") || args.length != 1) { sender.sendMessage("§e/bayinv <spieler>"); return true; }
+            Player target=Bukkit.getPlayerExact(args[0]);
+            if (target==null) { sender.sendMessage("§cSpieler muss online sein."); return true; }
+            adminMenu.inspect(p,target); return true;
         }
         if (name.equals("baypay")) {
             if (!(sender instanceof Player p) || args.length != 2) { sender.sendMessage("§e/baypay <spieler> <betrag>"); return true; }
