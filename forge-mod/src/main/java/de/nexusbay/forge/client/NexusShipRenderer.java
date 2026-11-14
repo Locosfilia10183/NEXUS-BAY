@@ -40,6 +40,9 @@ public final class NexusShipRenderer extends EntityRenderer<NexusShipEntity> {
         renderPart(model.mast, LOG, pose, buffers, packedLight);
         renderPart(model.sail, SAIL, pose, buffers, packedLight);
         renderPart(model.wheel, LOG, pose, buffers, packedLight);
+        renderPart(model.portRail, LOG, pose, buffers, packedLight);
+        renderPart(model.starboardRail, LOG, pose, buffers, packedLight);
+        renderPart(model.bow, WOOD, pose, buffers, packedLight);
 
         pose.popPose();
         super.render(entity, yaw, partialTick, pose, buffers, packedLight);
