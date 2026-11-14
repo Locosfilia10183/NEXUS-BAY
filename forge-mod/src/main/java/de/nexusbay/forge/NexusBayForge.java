@@ -1,12 +1,14 @@
 package de.nexusbay.forge;
 
+import de.nexusbay.forge.registry.ModEntities;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(NexusBayForge.MOD_ID)
 public final class NexusBayForge {
     public static final String MOD_ID = "nexusbay";
 
     public NexusBayForge() {
-        // Registries and gameplay systems are attached in dedicated modules.
+        ModEntities.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }
