@@ -46,12 +46,14 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private static final RawAnimation DRAGON_BREATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.dragon_breath");
     private static final RawAnimation HIT_REACT_ANIM = RawAnimation.begin().thenPlay("animation.kaido.hit_react");
     private static final RawAnimation DEATH_ANIM = RawAnimation.begin().thenPlay("animation.kaido.death");
+    private static final RawAnimation RAGNAROK_ANIM = RawAnimation.begin().thenPlay("animation.kaido.ragnarok");
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(KaidoBossEntity.class, EntityDataSerializers.INT);
 
     private static final int NO_ATTACK = 0;
     private static final int BREATH_ATTACK = 1;
     private static final int SLAM_ATTACK = 2;
+    private static final int RAGNAROK_ATTACK = 3;
 
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
     private static final double KAIDO_MAX_HEALTH = 60_000_000D;
@@ -64,6 +66,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
     private int currentPhase = 1;
     private int breathCooldown = 0;
     private int slamCooldown = 0;
+    private int ragnarokCooldown = 0;
     private int pendingAttack = NO_ATTACK;
     private int attackImpactDelay = 0;
     private int attackLockTicks = 0;
@@ -105,7 +108,8 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
                 .triggerableAnim("dragon_transform", DRAGON_TRANSFORM_ANIM)
                 .triggerableAnim("dragon_breath", DRAGON_BREATH_ANIM)
                 .triggerableAnim("hit_react", HIT_REACT_ANIM)
-                .triggerableAnim("death", DEATH_ANIM));
+                .triggerableAnim("death", DEATH_ANIM)
+                .triggerableAnim("ragnarok", RAGNAROK_ANIM));
     }
 
     @Override
@@ -152,6 +156,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
         if (!level().isClientSide) {
             if (breathCooldown > 0) breathCooldown--;
             if (slamCooldown > 0) slamCooldown--;
+            if (ragnarokCooldown > 0) ragnarokCooldown--;
             if (tickCount % 5 == 0) {
                 float progress = (float) Math.max(0.0D, Math.min(1.0D,
                         getHealth() / getMaxHealth()));
@@ -224,6 +229,7 @@ public class KaidoBossEntity extends Monster implements GeoEntity {
             if (attackImpactDelay == 0) {
                 if (pendingAttack == BREATH_ATTACK) applyBreathDamage();
                 else if (pendingAttack == SLAM_ATTACK) applySlamDamage();
+                else if (pendingAttack == RAGNAROK_ATTACK) applyRagnarokDamage();
             }
         }
 
