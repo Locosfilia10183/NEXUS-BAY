@@ -58,8 +58,9 @@ if [[ -z "$MC_VERSION" ]]; then
 fi
 [[ "$MC_VERSION" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || { echo "Ungültige Version."; exit 1; }
 
-read -rp "Gesamt-RAM für das Netzwerk in GB [$(( TOTAL_RAM_GB > 10 ? 8 : 6))]: " RAM_GB
-RAM_GB="${RAM_GB:-$((TOTAL_RAM_GB > 10 ? 8 : 6))}"
+DEFAULT_RAM=$((TOTAL_RAM_GB > 10 ? 8 : 6))
+read -rp "Gesamt-RAM für das Netzwerk in GB [$DEFAULT_RAM]: " RAM_GB
+RAM_GB="${RAM_GB:-$DEFAULT_RAM}"
 [[ "$RAM_GB" =~ ^[2-9][0-9]*$ ]] || { echo "Mindestens 2 GB angeben."; exit 1; }
 if [[ $RAM_GB -gt $TOTAL_RAM_GB ]]; then
   echo "Abbruch: Angegebener RAM ($RAM_GB GB) überschreitet System-RAM ($TOTAL_RAM_GB GB)."
@@ -75,7 +76,7 @@ if [[ -e "$INSTALL_DIR" ]] && [[ -n "$(find "$INSTALL_DIR" -mindepth 1 -maxdepth
   exit 1
 fi
 
-# RAM-Verteilung (einfache Heuristik)
+# RAM-Verteilung
 PROXY_RAM=1
 LOBBY_RAM=2
 SURVIVAL_RAM=$((RAM_GB - PROXY_RAM - LOBBY_RAM))
@@ -89,9 +90,9 @@ echo "RAM-Verteilung → Proxy: ${PROXY_RAM}G | Lobby: ${LOBBY_RAM}G | Survival:
 # --- Abhängigkeiten ---
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y ca-certificates curl gnupg jq git maven mariadb-server ufw 2>/dev/null || true
+apt-get install -y ca-certificates curl gnupg jq git maven mariadb-server 2>/dev/null || true
 
-# Java (Temurin 21 als sichere Wahl für aktuelle Paper)
+# Java
 if ! command -v java >/dev/null; then
   install -d -m 0755 /etc/apt/keyrings
   curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg
@@ -136,7 +137,6 @@ curl -fL "$GEYSER_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/Geyser-Velocity.jar" 
 curl -fL "$FLOODGATE_VELOCITY" -o "$INSTALL_DIR/proxy/plugins/floodgate-velocity.jar" || true
 curl -fL "$GEYSER_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/Geyser-Spigot.jar" || true
 curl -fL "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/lobby/plugins/floodgate-spigot.jar" || true
-# Survival bekommt Floodgate für UUID-Kompatibilität
 curl -fL "$FLOODGATE_SPIGOT" -o "$INSTALL_DIR/servers/survival/plugins/floodgate-spigot.jar" || true
 
 # --- Core Plugin bauen ---
@@ -179,10 +179,11 @@ connection-timeout = 5000
 read-timeout = 30000
 EOF
 
-# --- Paper server.properties & start scripts ---
+# --- Paper server.properties, eula, start.sh ---
 for server in lobby survival; do
   PORT=25566
   [[ "$server" == "survival" ]] && PORT=25567
+
   cat > "$INSTALL_DIR/servers/$server/server.properties" <<EOF
 motd=NEXUS-BAY $server
 server-port=$PORT
@@ -195,70 +196,12 @@ enable-command-block=false
 white-list=false
 spawn-protection=0
 EOF
+
   cat > "$INSTALL_DIR/servers/$server/eula.txt" <<EOF
 # By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).
 eula=false
 EOF
-  RAM_THIS=$LOBBY_RAM
-  [[ "$server" == "survival" ]] && RAM_THIS=$SURVIVAL_RAM
-  cat > "$INSTALL_DIR/servers/$server/start.sh" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "\$0")"
-exec $JAVA_BIN -Xms1G -Xmx${RAM_THIS}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-EOF
-  # Fix the heredoc escaping for start.sh
-done
 
-# Korrigiere start.sh (saubere Version)
-for server in lobby survival; do
-  RAM_THIS=$LOBBY_RAM
-  [[ "$server" == "survival" ]] && RAM_THIS=$SURVIVAL_RAM
-  cat > "$INSTALL_DIR/servers/$server/start.sh" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "\$0")"
-exec $JAVA_BIN -Xms1G -Xmx${RAM_THIS}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-EOF
-  # The above still has escaping issues in this context; write cleanly:
-done
-
-# Saubere start.sh Dateien
-cat > "$INSTALL_DIR/servers/lobby/start.sh" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "\$0")"
-exec $JAVA_BIN -Xms1G -Xmx${LOBBY_RAM}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-EOF
-
-cat > "$INSTALL_DIR/servers/survival/start.sh" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "\$0")"
-exec $JAVA_BIN -Xms1G -Xmx${SURVIVAL_RAM}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-EOF
-
-# Fix: the \$ is wrong. Rewrite properly without nested escaping problems.
-cat > "$INSTALL_DIR/servers/lobby/start.sh" <<'STARTLOBBY'
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")"
-exec JAVA_PLACEHOLDER -Xms1G -XmxLOBBY_RAM_PLACEHOLDERG -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-STARTLOBBY
-sed -i "s|JAVA_PLACEHOLDER|$JAVA_BIN|; s|LOBBY_RAM_PLACEHOLDER|$LOBBY_RAM|" "$INSTALL_DIR/servers/lobby/start.sh"
-
-cat > "$INSTALL_DIR/servers/survival/start.sh" <<'STARTSURV'
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")"
-exec JAVA_PLACEHOLDER -Xms1G -XmxSURVIVAL_RAM_PLACEHOLDERG -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
-STARTSURV
-sed -i "s|JAVA_PLACEHOLDER|$JAVA_BIN|; s|SURVIVAL_RAM_PLACEHOLDER|$SURVIVAL_RAM|" "$INSTALL_DIR/servers/survival/start.sh"
-
-chmod 750 "$INSTALL_DIR/servers/lobby/start.sh" "$INSTALL_DIR/servers/survival/start.sh"
-
-# Velocity modern forwarding paper config
-for server in lobby survival; do
   mkdir -p "$INSTALL_DIR/servers/$server/config"
   cat > "$INSTALL_DIR/servers/$server/config/paper-global.yml" <<EOF
 _version: 29
@@ -269,6 +212,23 @@ proxies:
     secret: "$FORWARDING_SECRET"
 EOF
 done
+
+# start.sh für Lobby und Survival (sauber)
+cat > "$INSTALL_DIR/servers/lobby/start.sh" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+cd "\$(dirname "\$0")"
+exec $JAVA_BIN -Xms1G -Xmx${LOBBY_RAM}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
+EOF
+
+cat > "$INSTALL_DIR/servers/survival/start.sh" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+cd "\$(dirname "\$0")"
+exec $JAVA_BIN -Xms1G -Xmx${SURVIVAL_RAM}G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar paper.jar --nogui
+EOF
+
+chmod 750 "$INSTALL_DIR/servers/lobby/start.sh" "$INSTALL_DIR/servers/survival/start.sh"
 
 # --- MariaDB ---
 echo "Konfiguriere MariaDB..."
@@ -297,7 +257,7 @@ chmod 600 "$INSTALL_DIR/config/secrets.env"
 # --- Scripts kopieren ---
 if [[ -d "$SCRIPT_DIR/scripts" ]]; then
   cp -a "$SCRIPT_DIR/scripts/." "$INSTALL_DIR/scripts/"
-  chmod 750 "$INSTALL_DIR/scripts/"*.sh
+  chmod 750 "$INSTALL_DIR/scripts/"*.sh 2>/dev/null || true
 fi
 
 # --- Systemd ---
@@ -384,8 +344,8 @@ chown -R "$SERVICE_USER:$SERVICE_USER" "$INSTALL_DIR"
 
 # --- Firewall (nur wenn UFW aktiv) ---
 if command -v ufw >/dev/null && ufw status 2>/dev/null | grep -q "Status: active"; then
-  ufw allow 25565/tcp comment 'NEXUS-BAY Java'
-  ufw allow 19132/udp comment 'NEXUS-BAY Bedrock'
+  ufw allow 25565/tcp comment 'NEXUS-BAY Java' || true
+  ufw allow 19132/udp comment 'NEXUS-BAY Bedrock' || true
 fi
 
 echo
@@ -407,7 +367,7 @@ echo "   sudo systemctl start nexus-bay-proxy nexus-bay-lobby nexus-bay-survival
 echo "3. Status prüfen:"
 echo "   sudo bash $INSTALL_DIR/scripts/status.sh"
 echo
-echo "Java-Verbindung:   DEINE_IP:25565"
+echo "Java-Verbindung:    DEINE_IP:25565"
 echo "Bedrock-Verbindung: DEINE_IP Port 19132"
 echo
 echo "Secrets liegen in: $INSTALL_DIR/config/secrets.env"
