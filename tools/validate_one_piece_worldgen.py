@@ -51,6 +51,7 @@ if noise.get("firstOctave") != -4 or not noise.get("amplitudes"):
     errors.append("Island mass noise parameters are incomplete")
 
 islands = catalog.get("islands", [])
+regions = {item.get("id"): item for item in catalog.get("regions", [])}
 profile_list = profiles.get("profiles", [])
 island_ids = [item.get("id") for item in islands]
 profile_ids = [item.get("islandId") for item in profile_list]
@@ -64,12 +65,48 @@ if set(island_ids) != set(profile_ids):
         + repr(sorted(set(island_ids) - set(profile_ids)))
         + "; unknown profiles=" + repr(sorted(set(profile_ids) - set(island_ids)))
     )
+warnings = []
 for island in islands:
+    island_id = island.get("id")
     center = island.get("center", {})
-    if not isinstance(center.get("x"), int) or not isinstance(center.get("z"), int):
-        errors.append(f"Island {island.get('id')} needs integer x/z coordinates")
-    if not isinstance(island.get("radius"), int) or island["radius"] <= 0:
-        errors.append(f"Island {island.get('id')} needs a positive radius")
+    x, z = center.get("x"), center.get("z")
+    radius = island.get("radius")
+    if not isinstance(x, int) or not isinstance(z, int):
+        errors.append(f"Island {island_id} needs integer x/z coordinates")
+        continue
+    if not isinstance(center.get("y"), int):
+        errors.append(f"Island {island_id} needs an integer planned center y")
+    if not isinstance(radius, int) or radius <= 0:
+        errors.append(f"Island {island_id} needs a positive radius")
+    region = regions.get(island.get("region"))
+    if region is None:
+        errors.append(f"Island {island_id} references unknown region {island.get('region')}")
+    else:
+        bounds = region.get("bounds", {})
+        if not (bounds.get("minX", x) <= x <= bounds.get("maxX", x)
+                and bounds.get("minZ", z) <= z <= bounds.get("maxZ", z)):
+            warnings.append(
+                f"{island_id} center ({x}, {z}) lies outside region "
+                f"{island.get('region')} bounds"
+            )
+
+# Overlapping design radii are surfaced for review, not rejected: some locations
+# may intentionally form archipelagos or linked island groups.
+for index, first in enumerate(islands):
+    a = first.get("center", {})
+    ar = first.get("radius", 0)
+    if not isinstance(a.get("x"), int) or not isinstance(a.get("z"), int):
+        continue
+    for second in islands[index + 1:]:
+        b = second.get("center", {})
+        br = second.get("radius", 0)
+        if not isinstance(b.get("x"), int) or not isinstance(b.get("z"), int):
+            continue
+        dx, dz = a["x"] - b["x"], a["z"] - b["z"]
+        if dx * dx + dz * dz < (ar + br) * (ar + br):
+            warnings.append(
+                f"{first.get('id')} and {second.get('id')} design radii overlap"
+            )
 
 if errors:
     for error in errors:
@@ -80,4 +117,7 @@ print(
     f"PASS: world preset structure, noise router, and {len(islands)} "
     f"island catalog/profile pairs validated."
 )
+for warning in warnings:
+    print("WARN:", warning)
+print(f"INFO: {len(warnings)} atlas layout warning(s) require design review.")
 print("NOTE: This does not prove Minecraft can decode the datapack or generate terrain.")
