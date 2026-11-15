@@ -63,50 +63,6 @@ public final class QuestGiverNpcEvents {
         if (islandId.isBlank()) return;
         event.setCanceled(true);
         event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
-        var data = IslandQuestData.get(player.serverLevel());
-        String activeId = data.active(player.getUUID());
-        if (!activeId.isBlank()) {
-            var active = IslandQuestCatalog.find(activeId).orElse(null);
-            if (active == null) {
-                player.sendSystemMessage(Component.literal("Dein Questfortschritt konnte nicht zugeordnet werden."));
-                return;
-            }
-            if (!active.islandId().equals(islandId)) {
-                player.sendSystemMessage(Component.literal("Du hast noch eine aktive Aufgabe auf " + IslandCatalog.find(active.islandId()).map(IslandCatalog.Destination::displayName).orElse(active.islandId()) + "."));
-                return;
-            }
-            int progress = data.progress(player.getUUID());
-            if (progress < active.requiredKills()) {
-                player.sendSystemMessage(Component.literal(active.title() + " — " + active.description()));
-                player.sendSystemMessage(Component.literal("Fortschritt: " + progress + "/" + active.requiredKills()));
-                return;
-            }
-            if (!data.claim(player.getUUID(), active.id())) return;
-            long balance = BeliLedger.get(player.serverLevel()).deposit(player.getUUID(), active.beliReward());
-            var fruits = FruitProfileData.get(player.serverLevel());
-            if (fruits.get(player.getUUID()) != null && active.fruitXpReward() > 0) {
-                fruits.addExperience(player.getUUID(), active.fruitXpReward());
-                de.nexusbay.forge.network.FruitNetwork.sync(player);
-            }
-            player.sendSystemMessage(Component.literal("Quest abgeschlossen: " + active.title()));
-            player.sendSystemMessage(Component.literal("Belohnung: +" + active.beliReward() + " Beli | Kontostand: " + balance));
-            if (active.fruitXpReward() > 0 && fruits.get(player.getUUID()) != null)
-                player.sendSystemMessage(Component.literal("+" + active.fruitXpReward() + " Frucht-Meisterschafts-XP"));
-            player.sendSystemMessage(Component.literal("Sprich erneut mit mir für deine nächste Aufgabe."));
-            return;
-        }
-        var next = IslandQuestCatalog.all().stream()
-                .filter(q -> q.islandId().equals(islandId))
-                .filter(q -> !data.completed(player.getUUID(), q.id()))
-                .findFirst().orElse(null);
-        if (next == null) {
-            player.sendSystemMessage(Component.literal("Du hast alle Aufgaben auf dieser Insel abgeschlossen. Gute Arbeit!"));
-            return;
-        }
-        if (!data.accept(player.getUUID(), next.id())) return;
-        player.sendSystemMessage(Component.literal("Ich habe eine Aufgabe für dich: " + next.title()));
-        player.sendSystemMessage(Component.literal(next.description()));
-        player.sendSystemMessage(Component.literal("Belohnung: " + next.beliReward() + " Beli"));
-        player.sendSystemMessage(Component.literal("Besiege die Gegner und sprich danach wieder mit mir."));
+        de.nexusbay.forge.network.QuestNetwork.open(player, islandId);
     }
 }
