@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 public final class FruitSkillCombat {
  private FruitSkillCombat(){}
  public static void cycle(ServerPlayer player){
+  if(player.getInventory().selected!=0)return;
   FruitProfileData.Profile profile=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   if(profile==null)return;
   int count=FruitSkillCatalog.unlocked(profile.fruitId(),profile.level()).size();
@@ -24,6 +25,7 @@ public final class FruitSkillCombat {
   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Ausgewählte Fähigkeit: "+FruitSkillCatalog.unlocked(profile.fruitId(),profile.level()).get(next).name()));
  }
  public static void activate(ServerPlayer player){
+  if(player.getInventory().selected!=0)return;
   FruitProfileData.Profile profile=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   if(profile==null)return;
   var skills=FruitSkillCatalog.unlocked(profile.fruitId(),profile.level());
