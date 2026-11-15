@@ -3,6 +3,7 @@ package de.nexusbay.forge.event;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
+import de.nexusbay.forge.boss.RobLucciBossEntity;
 import de.nexusbay.forge.registry.ModEntities;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +23,7 @@ public final class IslandBossSpawnEvents {
         if (player.tickCount % 40 != 0) return;
         trySpawnCrocodile(player, level);
         trySpawnEnel(player, level);
+        trySpawnLucci(player, level);
     }
     private static void trySpawnCrocodile(ServerPlayer player, ServerLevel level) {
         trySpawn(player, level, 1472.5D, 82.0D, 832.5D, 78.0D, ModEntities.CROCODILE.get(),
@@ -30,6 +32,10 @@ public final class IslandBossSpawnEvents {
     private static void trySpawnEnel(ServerPlayer player, ServerLevel level) {
         trySpawn(player, level, 2112.5D, 182.0D, 832.5D, 78.0D, ModEntities.ENEL.get(),
                 EnelBossEntity.class, "§eENEL §7ist auf Skypiea erschienen!");
+    }
+    private static void trySpawnLucci(ServerPlayer player, ServerLevel level) {
+        trySpawn(player, level, 2752.5D, 82.0D, 832.5D, 78.0D, ModEntities.ROB_LUCCI.get(),
+                RobLucciBossEntity.class, "§cROB LUCCI §7hat Enies Lobby betreten!");
     }
     private static <T extends Entity> void trySpawn(ServerPlayer player, ServerLevel level,
             double x, double y, double z, double triggerRadius, net.minecraft.world.entity.EntityType<T> type,
