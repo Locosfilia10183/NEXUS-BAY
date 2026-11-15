@@ -39,6 +39,11 @@ public final class ModItems {
     public static final RegistryObject<Item> WANO_SAMURAI_BOOTS = ITEMS.register("wano_samurai_boots",
             () -> new net.minecraft.world.item.ArmorItem(net.minecraft.world.item.ArmorMaterials.DIAMOND, net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> KAIDO_KANABO = ITEMS.register("kaido_kanabo",
+            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.NETHERITE, 7, -3.2F, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> AZURE_DRAGON_CORE = ITEMS.register("azure_dragon_core",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> THREE_SWORD_STYLE_KIT =
             ITEMS.register("three_sword_style_kit", () -> new Item(new Item.Properties().stacksTo(1)));
 
