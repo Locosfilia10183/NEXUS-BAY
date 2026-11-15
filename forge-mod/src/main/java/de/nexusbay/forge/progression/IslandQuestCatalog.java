@@ -82,7 +82,16 @@ public final class IslandQuestCatalog {
             new Quest("dressrosa_kingdom", "Retter von Dressrosa", "Besiege 285 feindliche Monster und befreie das Königreich.", "Dressrosa", 285, 520000, 104000),
             new Quest("zou_guardians", "Wächter des Elefantenreichs", "Besiege 130 feindliche Monster auf Zou.", "Zou", 130, 240000, 48000),
             new Quest("zou_invasion", "Schutz des Mokomo-Reichs", "Besiege 210 feindliche Monster und verteidige das Königreich.", "Zou", 210, 390000, 78000),
-            new Quest("zou_champion", "Beschützer von Zou", "Besiege 310 feindliche Monster und sichere das Land.", "Zou", 310, 600000, 120000)
+            new Quest("zou_champion", "Beschützer von Zou", "Besiege 310 feindliche Monster und sichere das Land.", "Zou", 310, 600000, 120000),
+            new Quest("whole_cake_sweets", "Gefahr im Süßigkeitenreich", "Besiege 145 feindliche Monster auf Whole Cake Island.", "WholeCakeIsland", 145, 280000, 56000),
+            new Quest("whole_cake_homies", "Aufruhr der Homies", "Besiege 230 feindliche Monster und sichere die Inselwege.", "WholeCakeIsland", 230, 450000, 90000),
+            new Quest("whole_cake_emperor", "Herausforderung im Süßigkeitenreich", "Besiege 340 feindliche Monster und überstehe die Bedrohung.", "WholeCakeIsland", 340, 700000, 140000),
+            new Quest("wano_raiders", "Unruhe in Wano", "Besiege 160 feindliche Monster im Land der Samurai.", "WanoKuni", 160, 320000, 64000),
+            new Quest("wano_resistance", "Unterstützung der Samurai", "Besiege 255 feindliche Monster und sichere die Dörfer.", "WanoKuni", 255, 520000, 104000),
+            new Quest("wano_shogun", "Befreier von Wano", "Besiege 375 feindliche Monster und befreie das Land.", "WanoKuni", 375, 820000, 164000),
+            new Quest("onigashima_raid", "Angriff auf Onigashima", "Besiege 180 feindliche Monster auf der Insel.", "Onigashima", 180, 380000, 76000),
+            new Quest("onigashima_raid_leader", "Durchbruch der Festung", "Besiege 290 feindliche Monster und dringe tiefer vor.", "Onigashima", 290, 620000, 124000),
+            new Quest("onigashima_conqueror", "Eroberer von Onigashima", "Besiege 420 feindliche Monster und bezwinge die Festung.", "Onigashima", 420, 1000000, 200000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
