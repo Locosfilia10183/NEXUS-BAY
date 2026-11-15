@@ -19,6 +19,13 @@ public final class ModItems {
     public static final RegistryObject<Item> DEVIL_FRUIT_CASE =
             ITEMS.register("devil_fruit_case", () -> new DevilFruitCaseItem(new Item.Properties().stacksTo(16)));
 
+    public static final RegistryObject<Item> MARINE_INSIGNIA = ITEMS.register("marine_insignia", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SKYPIEA_DIAL = ITEMS.register("skypiea_dial", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> FISHMAN_PEARL = ITEMS.register("fishman_pearl", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> WANO_STEEL = ITEMS.register("wano_steel", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ALCHEMY_REAGENT = ITEMS.register("alchemy_reagent", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> BERRY_TONIC = ITEMS.register("berry_tonic", () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6F).build())));
+
     public static final RegistryObject<Item> THREE_SWORD_STYLE_KIT =
             ITEMS.register("three_sword_style_kit", () -> new Item(new Item.Properties().stacksTo(1)));
 
