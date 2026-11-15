@@ -75,6 +75,11 @@ public final class IslandTerrainChunkEvents {
                     placeRockOutcrop(chunk, x, surfaceY + 1, z, sample.surfaceBlock(), seed);
                     touched = true;
                 }
+                if (sample.normalizedDistance() < 0.72D
+                        && vegetationRoll(x + 101, z - 73, seed) < landmarkChance(sample.islandId())) {
+                    placeIslandLandmark(chunk, x, surfaceY + 1, z, sample.islandId(), seed);
+                    touched = true;
+                }
                 touched = true;
             }
         }
@@ -84,6 +89,81 @@ public final class IslandTerrainChunkEvents {
     }
 
 
+
+
+    private static double landmarkChance(String islandId) {
+        return switch (islandId) {
+            case "Jaya", "DrumIsland", "Alabasta", "PunkHazard" -> 0.0009D;
+            default -> 0.0D;
+        };
+    }
+
+    private static void placeIslandLandmark(LevelChunk chunk, int x, int y, int z, String islandId, long seed) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        if (x < chunk.getPos().getMinBlockX() + 3 || x > chunk.getPos().getMaxBlockX() - 3
+                || z < chunk.getPos().getMinBlockZ() + 3 || z > chunk.getPos().getMaxBlockZ() - 3) return;
+
+        if (islandId.equals("Alabasta")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (ox * ox + oz * oz > 5) continue;
+                    pos.set(x + ox, y - 1, z + oz);
+                    chunk.setBlockState(pos, Blocks.SANDSTONE.defaultBlockState(), false);
+                    pos.set(x + ox, y, z + oz);
+                    chunk.setBlockState(pos, Blocks.WATER.defaultBlockState(), false);
+                }
+            }
+            pos.set(x, y, z);
+            chunk.setBlockState(pos, Blocks.WATER.defaultBlockState(), false);
+            return;
+        }
+
+        if (islandId.equals("DrumIsland")) {
+            int height = 5 + (int) (vegetationRoll(x + 47, z + 29, seed) * 8.0D);
+            for (int i = 0; i < height; i++) {
+                int width = Math.max(1, 3 - i / 3);
+                for (int ox = -width; ox <= width; ox++) {
+                    for (int oz = -width; oz <= width; oz++) {
+                        if (Math.abs(ox) + Math.abs(oz) > width + 1) continue;
+                        pos.set(x + ox, y + i, z + oz);
+                        if (pos.getY() < chunk.getMaxBuildHeight()) {
+                            chunk.setBlockState(pos, Blocks.PACKED_ICE.defaultBlockState(), false);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("PunkHazard")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (ox * ox + oz * oz > 5) continue;
+                    pos.set(x + ox, y, z + oz);
+                    chunk.setBlockState(pos, Blocks.MAGMA_BLOCK.defaultBlockState(), false);
+                    if (ox == 0 && oz == 0) {
+                        pos.set(x, y + 1, z);
+                        chunk.setBlockState(pos, Blocks.LAVA.defaultBlockState(), false);
+                    }
+                }
+            }
+            return;
+        }
+
+        BlockState ruin = Blocks.MOSSY_STONE_BRICKS.defaultBlockState();
+        for (int pillar = 0; pillar < 3; pillar++) {
+            int px = x + (pillar - 1) * 2;
+            int height = 2 + (int) (vegetationRoll(px, z + pillar, seed) * 3.0D);
+            for (int i = 0; i < height; i++) {
+                pos.set(px, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight()) chunk.setBlockState(pos, ruin, false);
+            }
+        }
+        for (int ox = -2; ox <= 2; ox++) {
+            pos.set(x + ox, y + 3, z);
+            if (pos.getY() < chunk.getMaxBuildHeight()) chunk.setBlockState(pos, ruin, false);
+        }
+    }
 
     private static void placeRockOutcrop(LevelChunk chunk, int x, int y, int z, String surfaceId, long seed) {
         BlockState rock = surfaceId.contains("sand") ? Blocks.SANDSTONE.defaultBlockState()
