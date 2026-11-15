@@ -46,7 +46,13 @@ public final class IslandQuestCatalog {
             new Quest("alabasta_guardian", "Retter von Alabasta", "Besiege 90 feindliche Monster und verteidige das Königreich.", "Alabasta", 90, 55000, 11000),
             new Quest("jaya_raiders", "Räuber von Jaya", "Besiege 38 feindliche Monster in Mock Town und Umgebung.", "Jaya", 38, 26000, 5200),
             new Quest("jaya_rivals", "Kampf um Jaya", "Besiege 65 feindliche Monster und sichere die Insel.", "Jaya", 65, 42000, 8500),
-            new Quest("jaya_champion", "Champion von Jaya", "Besiege 100 feindliche Monster und beweise deine Stärke.", "Jaya", 100, 65000, 13000)
+            new Quest("jaya_champion", "Champion von Jaya", "Besiege 100 feindliche Monster und beweise deine Stärke.", "Jaya", 100, 65000, 13000),
+            new Quest("skypiea_raiders", "Gefahr auf den Wolken", "Besiege 42 feindliche Monster auf Skypiea.", "Skypiea", 42, 34000, 6800),
+            new Quest("skypiea_sky_patrol", "Himmels-Patrouille", "Besiege 72 feindliche Monster und sichere die Himmelswege.", "Skypiea", 72, 55000, 11000),
+            new Quest("skypiea_guardian", "Beschützer des Himmels", "Besiege 110 feindliche Monster und verteidige Skypiea.", "Skypiea", 110, 85000, 17000),
+            new Quest("water7_dock_threat", "Gefahr an den Docks", "Besiege 45 feindliche Monster in Water 7.", "Water7", 45, 38000, 7600),
+            new Quest("water7_shipwrights", "Schutz der Schiffsbauer", "Besiege 78 feindliche Monster und sichere die Werften.", "Water7", 78, 62000, 12500),
+            new Quest("water7_defender", "Verteidiger von Water 7", "Besiege 120 feindliche Monster und schütze die Stadt.", "Water7", 120, 95000, 19000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
