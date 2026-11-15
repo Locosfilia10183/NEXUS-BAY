@@ -175,7 +175,7 @@ public final class IslandTerrainChunkEvents {
         return switch (islandId) {
             case "Jaya", "DrumIsland", "Alabasta", "PunkHazard",
                     "Skypiea", "EniesLobby", "ThrillerBark", "Sabaody",
-                    "Marineford", "WanoKuni", "Onigashima" -> 0.0009D;
+                    "Marineford", "WanoKuni", "Onigashima", "FishManIsland" -> 0.0009D;
             default -> 0.0D;
         };
     }
@@ -184,6 +184,35 @@ public final class IslandTerrainChunkEvents {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         if (x < chunk.getPos().getMinBlockX() + 3 || x > chunk.getPos().getMaxBlockX() - 3
                 || z < chunk.getPos().getMinBlockZ() + 3 || z > chunk.getPos().getMaxBlockZ() - 3) return;
+
+        if (islandId.equals("FishManIsland")) {
+            if (x < chunk.getPos().getMinBlockX() + 5 || x > chunk.getPos().getMaxBlockX() - 5
+                    || z < chunk.getPos().getMinBlockZ() + 5 || z > chunk.getPos().getMaxBlockZ() - 5) return;
+            int radius = 4;
+            for (int ox = -radius; ox <= radius; ox++) {
+                for (int oz = -radius; oz <= radius; oz++) {
+                    for (int oy = 0; oy <= radius; oy++) {
+                        double distanceSquared = ox * ox + oz * oz + oy * oy;
+                        pos.set(x + ox, y + oy, z + oz);
+                        if (distanceSquared >= 11.0D && distanceSquared <= 19.0D) {
+                            chunk.setBlockState(pos, Blocks.GLASS.defaultBlockState(), false);
+                        } else if (distanceSquared < 11.0D) {
+                            chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                        }
+                    }
+                    pos.set(x + ox, y - 1, z + oz);
+                    if (ox * ox + oz * oz <= radius * radius)
+                        chunk.setBlockState(pos, Blocks.PRISMARINE_BRICKS.defaultBlockState(), false);
+                }
+            }
+            for (int side : new int[]{-3, 3}) {
+                for (int oy = -1; oy <= 1; oy++) {
+                    pos.set(x + side, y + oy, z);
+                    chunk.setBlockState(pos, Blocks.SEA_LANTERN.defaultBlockState(), false);
+                }
+            }
+            return;
+        }
 
         if (islandId.equals("Alabasta")) {
             for (int ox = -2; ox <= 2; ox++) {
