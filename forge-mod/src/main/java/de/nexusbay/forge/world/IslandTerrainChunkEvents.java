@@ -8,7 +8,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.event.world.ChunkDataEvent;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -24,12 +25,13 @@ public final class IslandTerrainChunkEvents {
     private IslandTerrainChunkEvents() {}
 
     @SubscribeEvent
-    public static void onChunkLoad(ChunkEvent.Load event) {
+    public static void onChunkLoad(ChunkDataEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         if (!level.dimension().equals(ServerLevel.OVERWORLD)) return;
         if (!(event.getChunk() instanceof LevelChunk chunk)) return;
         if (chunk.getStatus().getChunkType() != net.minecraft.world.level.chunk.ChunkStatus.ChunkType.LEVELCHUNK) return;
-        if (chunk.getPersistentData().getBoolean(GENERATED_KEY)) return;
+        CompoundTag chunkData = event.getData();
+        if (chunkData.getBoolean(GENERATED_KEY)) return;
 
         ChunkPos chunkPos = chunk.getPos();
         long seed = level.getSeed();
@@ -65,7 +67,7 @@ public final class IslandTerrainChunkEvents {
             }
         }
 
-        chunk.getPersistentData().putBoolean(GENERATED_KEY, true);
+        chunkData.putBoolean(GENERATED_KEY, true);
         if (touched) chunk.setUnsaved(true);
     }
 
