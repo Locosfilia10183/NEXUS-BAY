@@ -33,8 +33,16 @@ public final class FruitSkillCombat {
   int selected=Math.floorMod(player.getPersistentData().getInt("NexusFruitSkillIndex"),skills.size());
   var skill=skills.get(selected);
   var item=ModItems.FRUIT_ITEMS.get(profile.fruitId());
-  if(item==null||player.getCooldowns().isOnCooldown(item.get()))return;
-  player.getCooldowns().addCooldown(item.get(),skill.cooldownTicks());
+  if(item==null)return;
+  String cooldownKey="NexusSkillReady_"+skill.id().replaceAll("[^A-Za-z0-9_]","_");
+  long now=player.serverLevel().getGameTime();
+  long readyAt=player.getPersistentData().getLong(cooldownKey);
+  if(now<readyAt){
+   long seconds=(readyAt-now+19L)/20L;
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Fähigkeit lädt noch: "+seconds+"s").withStyle(net.minecraft.ChatFormatting.GRAY));
+   return;
+  }
+  player.getPersistentData().putLong(cooldownKey,now+skill.cooldownTicks());
   Vec3 look=player.getLookAngle().normalize();
   boolean ultimate=switch(skill.id()){
    case "gear_second","raigo","flame_emperor","azure_dragon","Homies Sturm","Yasakani","Magmaeruption","Eiszeit","Fadenkäfig","ROOM","Drachenbrüllen" -> true;
@@ -65,6 +73,11 @@ public final class FruitSkillCombat {
   }
   if(skill.id().equals("Klingenhaut")||skill.id().equals("Schwergewicht"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,160,1));
   if(skill.id().equals("ROOM")||skill.id().equals("Seelenraub"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,120,1));
+  if(skill.id().equals("Feuerfliegen")||skill.id().equals("firefly"))player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,100,1));
+  if(skill.id().equals("Wachsfessel")||skill.id().equals("Fadenkäfig")||skill.id().equals("Eisenkäfig"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,100,0));
+  if(skill.id().equals("Gleitsturm")){player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,120,2));player.addEffect(new MobEffectInstance(MobEffects.JUMP,120,1));}
+  if(skill.id().equals("Flammenkaiser")||skill.id().equals("Magmaeruption")||skill.id().equals("Raigo"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,100,1));
+  if(skill.id().equals("Frostseele")||skill.id().equals("Eiszeit"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,120,1));
   if(skill.id().equals("lightning_travel")||skill.id().equals("Lichttritt")||skill.id().equals("Sprungfeder")){
    player.setDeltaMovement(player.getDeltaMovement().add(look.scale(1.35D)));
    player.hurtMarked=true;
