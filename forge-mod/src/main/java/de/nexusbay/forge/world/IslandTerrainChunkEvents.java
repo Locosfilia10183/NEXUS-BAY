@@ -45,7 +45,11 @@ public final class IslandTerrainChunkEvents {
                 int x = chunkPos.getMinBlockX() + dx;
                 int z = chunkPos.getMinBlockZ() + dz;
                 IslandTerrainSampler.ColumnSample sample = IslandTerrainSampler.sample(x, z, seed);
-                if (!sample.land()) continue;
+                if (!sample.land()) {
+                    applyOceanColumn(chunk, pos, x, z, level.getMinBuildHeight(), seed);
+                    touched = true;
+                    continue;
+                }
 
                 int surfaceY = sample.surfaceY();
                 BlockState surface = block(sample.surfaceBlock(), Blocks.GRASS_BLOCK.defaultBlockState());
@@ -90,6 +94,37 @@ public final class IslandTerrainChunkEvents {
 
 
 
+
+
+    private static void applyOceanColumn(LevelChunk chunk, BlockPos.MutableBlockPos pos,
+                                         int x, int z, int minBuildHeight, long seed) {
+        int floorY = IslandCatalog.OCEAN_FLOOR;
+        for (int y = minBuildHeight; y <= IslandCatalog.SEA_LEVEL; y++) {
+            pos.set(x, y, z);
+            BlockState state;
+            if (y < floorY - 1) {
+                state = Blocks.STONE.defaultBlockState();
+            } else if (y <= floorY) {
+                state = Blocks.GRAVEL.defaultBlockState();
+            } else {
+                state = Blocks.WATER.defaultBlockState();
+            }
+            chunk.setBlockState(pos, state, false);
+        }
+
+        // Sparse kelp on the seabed gives shallow ocean areas a little life.
+        if (vegetationRoll(x + 211, z - 137, seed) < 0.012D) {
+            pos.set(x, floorY + 1, z);
+            if (chunk.getBlockState(pos).isWater()) {
+                int height = 1 + (int) (vegetationRoll(x - 89, z + 53, seed) * 4.0D);
+                for (int i = 0; i < height; i++) {
+                    pos.set(x, floorY + 1 + i, z);
+                    if (!chunk.getBlockState(pos).isWater()) break;
+                    chunk.setBlockState(pos, Blocks.KELP.defaultBlockState(), false);
+                }
+            }
+        }
+    }
 
     private static double landmarkChance(String islandId) {
         return switch (islandId) {
