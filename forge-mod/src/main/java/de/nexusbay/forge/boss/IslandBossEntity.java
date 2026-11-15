@@ -122,8 +122,11 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
 
     @Override public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
-        if (hurt && !level().isClientSide && tickCount % 5 == 0) {
-            level().playSound(null, blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.45F, 1.6F);
+        if (hurt && !level().isClientSide) {
+            triggerAnim("combat", "hit");
+            if (tickCount % 5 == 0) {
+                level().playSound(null, blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.45F, 1.6F);
+            }
         }
         return hurt;
     }
