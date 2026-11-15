@@ -3,6 +3,8 @@ import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.progression.FruitProfileData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -12,7 +14,10 @@ public final class FruitNetwork {
  public static final SimpleChannel CHANNEL=NetworkRegistry.newSimpleChannel(new ResourceLocation(NexusBayForge.MOD_ID,"main"),()->VERSION,VERSION::equals,VERSION::equals);
  private static boolean registered;
  private FruitNetwork(){}
- public static void register(){if(registered)return;registered=true;CHANNEL.registerMessage(0,SyncFruit.class,SyncFruit::encode,SyncFruit::decode,(m,c)->c.get().enqueueWork(()->de.nexusbay.forge.client.FruitHudData.set(m.id,m.level,m.xp)));}
+ public static void register(){
+  if(registered)return;registered=true;
+  CHANNEL.registerMessage(0,SyncFruit.class,SyncFruit::encode,SyncFruit::decode,(m,c)->c.get().enqueueWork(()->DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->de.nexusbay.forge.client.FruitHudData.set(m.id,m.level,m.xp))));
+ }
  public static void sync(net.minecraft.server.level.ServerPlayer player){
   FruitProfileData.Profile p=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new SyncFruit(p==null?"":p.fruitId(),p==null?0:p.level(),p==null?0:p.experience()));
