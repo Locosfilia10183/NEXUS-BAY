@@ -146,8 +146,11 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
     @Override public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
         if (hurt && !level().isClientSide) {
-            if (source.getEntity() instanceof ServerPlayer player) {
-                playerDamage.merge(player.getUUID(), amount, Float::sum);
+            ServerPlayer attacker = source.getEntity() instanceof ServerPlayer player ? player
+                    : source.getEntity() instanceof net.minecraft.world.entity.projectile.Projectile projectile
+                    && projectile.getOwner() instanceof ServerPlayer player ? player : null;
+            if (attacker != null) {
+                playerDamage.merge(attacker.getUUID(), amount, Float::sum);
             }
             triggerAnim("combat", "hit");
             if (tickCount % 5 == 0) {
