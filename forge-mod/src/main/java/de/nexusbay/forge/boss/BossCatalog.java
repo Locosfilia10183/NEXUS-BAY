@@ -37,7 +37,7 @@ public final class BossCatalog {
                     java.util.List.of("golden_dial", "lightning_core", "golden_staff")),
             "rob_lucci", new BossDefinition("rob_lucci", "ROB LUCCI – CP0-MEISTER", 135, 210000D, 2.2D,
                     BossRank.LEGENDARY, "enieslobby", "rokushiki",
-                    java.util.List.of("shigan", "rankyaku", " soru", "rokuogan"),
+                    java.util.List.of("shigan", "rankyaku", "shigan_step", "rokuogan"),
                     java.util.List.of("cp0_mask", "rokushiki_manual")),
             "doflamingo", new BossDefinition("doflamingo", "DONQUIXOTE DOFLAMINGO", 190, 420000D, 2.8D,
                     BossRank.EMPEROR_ADMIRAL, "dressrosa", "ito_ito_no_mi",
@@ -65,5 +65,21 @@ public final class BossCatalog {
 
     public static Map<String, BossDefinition> all() {
         return BOSSES;
+    }
+
+    public static java.util.List<BossDefinition> forIsland(String islandId) {
+        if (islandId == null || islandId.isBlank()) {
+            return java.util.List.of();
+        }
+        return BOSSES.values().stream()
+                .filter(boss -> boss.islandId().equalsIgnoreCase(islandId))
+                .sorted(java.util.Comparator.comparingInt(BossDefinition::level))
+                .toList();
+    }
+
+    public static java.util.List<BossDefinition> orderedByLevel() {
+        return BOSSES.values().stream()
+                .sorted(java.util.Comparator.comparingInt(BossDefinition::level))
+                .toList();
     }
 }
