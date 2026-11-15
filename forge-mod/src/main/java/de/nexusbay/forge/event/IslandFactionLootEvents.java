@@ -20,7 +20,8 @@ public final class IslandFactionLootEvents {
         if (!(event.getEntity() instanceof Monster defeated)) return;
         String faction = defeated.getPersistentData().getString("nexusbay_faction");
         if (faction.isBlank()) return;
-        float chance = faction.equals("onigashima_beasts") ? 0.45F : 0.28F;
+        float chance = defeated.getPersistentData().getBoolean("nexusbay_elite") ? 0.85F
+                : (faction.equals("onigashima_beasts") ? 0.45F : 0.28F);
         if (defeated.getRandom().nextFloat() >= chance) return;
 
         ItemStack trophy;
