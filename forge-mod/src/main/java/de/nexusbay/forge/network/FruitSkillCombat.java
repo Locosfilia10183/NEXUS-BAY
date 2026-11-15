@@ -42,7 +42,23 @@ public final class FruitSkillCombat {
   double radius=ultimate?4.5D:1.6D;
   AABB area=player.getBoundingBox().expandTowards(look.scale(reach)).inflate(radius);
   float damage=Math.min(45.0F,6.0F+profile.level()*0.30F+(ultimate?12.0F:0.0F));
-  if(skill.id().equals("gear_second")||skill.id().equals("azure_dragon"))player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,240,1));
+  if(skill.id().equals("gear_second")){
+   player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,240,2));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,240,1));
+   player.getPersistentData().putInt("NexusFruitFormTicks",240);
+   player.getPersistentData().putString("NexusFruitForm","gear_second");
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("GEAR SECOND!").withStyle(net.minecraft.ChatFormatting.RED,net.minecraft.ChatFormatting.BOLD));
+  }
+  if(skill.id().equals("azure_dragon")){
+   player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,400,1));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,400,2));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,400,1));
+   player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE,400,0));
+   player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING,400,0));
+   player.getPersistentData().putInt("NexusFruitFormTicks",400);
+   player.getPersistentData().putString("NexusFruitForm","azure_dragon");
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("HIMMELSDRACHEN-FORM AKTIV!").withStyle(net.minecraft.ChatFormatting.AQUA,net.minecraft.ChatFormatting.BOLD));
+  }
   if(skill.id().equals("Klingenhaut")||skill.id().equals("Schwergewicht"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,160,1));
   if(skill.id().equals("ROOM")||skill.id().equals("Seelenraub"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,120,1));
   if(skill.id().equals("lightning_travel")||skill.id().equals("Lichttritt")||skill.id().equals("Sprungfeder")){
