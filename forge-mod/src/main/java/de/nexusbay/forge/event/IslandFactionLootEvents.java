@@ -20,7 +20,10 @@ public final class IslandFactionLootEvents {
         if (!(event.getEntity() instanceof Monster defeated)) return;
         String faction = defeated.getPersistentData().getString("nexusbay_faction");
         if (faction.isBlank()) return;
-        float chance = defeated.getPersistentData().getBoolean("nexusbay_elite") ? 0.85F
+        String rank = defeated.getPersistentData().getString("nexusbay_elite_rank");
+        float chance = rank.equals("Katastrophe") ? 1.0F
+                : rank.equals("Kommandant") ? 0.95F
+                : defeated.getPersistentData().getBoolean("nexusbay_elite") ? 0.85F
                 : (faction.equals("onigashima_beasts") ? 0.45F : 0.28F);
         if (defeated.getRandom().nextFloat() >= chance) return;
 
@@ -63,7 +66,7 @@ public final class IslandFactionLootEvents {
             }
         }
         trophy.setHoverName(Component.literal(name));
-        if (faction.equals("onigashima_beasts") && defeated.getRandom().nextFloat() < 0.20F) {
+        if ((faction.equals("onigashima_beasts") || rank.equals("Katastrophe")) && defeated.getRandom().nextFloat() < 0.35F) {
             trophy.setCount(2);
         }
         event.getDrops().add(new ItemEntity(defeated.level(), defeated.getX(), defeated.getY(),
