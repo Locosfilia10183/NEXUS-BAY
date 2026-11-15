@@ -52,7 +52,13 @@ public final class IslandQuestCatalog {
             new Quest("skypiea_guardian", "Beschützer des Himmels", "Besiege 110 feindliche Monster und verteidige Skypiea.", "Skypiea", 110, 85000, 17000),
             new Quest("water7_dock_threat", "Gefahr an den Docks", "Besiege 45 feindliche Monster in Water 7.", "Water7", 45, 38000, 7600),
             new Quest("water7_shipwrights", "Schutz der Schiffsbauer", "Besiege 78 feindliche Monster und sichere die Werften.", "Water7", 78, 62000, 12500),
-            new Quest("water7_defender", "Verteidiger von Water 7", "Besiege 120 feindliche Monster und schütze die Stadt.", "Water7", 120, 95000, 19000)
+            new Quest("water7_defender", "Verteidiger von Water 7", "Besiege 120 feindliche Monster und schütze die Stadt.", "Water7", 120, 95000, 19000),
+            new Quest("enies_lobby_invasion", "Angriff auf Enies Lobby", "Besiege 55 feindliche Monster auf der Gerichtsinsel.", "EniesLobby", 55, 52000, 10500),
+            new Quest("enies_lobby_rescue", "Rettung unter Beschuss", "Besiege 90 feindliche Monster und sichere den Weg durch die Festung.", "EniesLobby", 90, 85000, 17000),
+            new Quest("enies_lobby_judgment", "Urteil über Enies Lobby", "Besiege 140 feindliche Monster und bezwinge die Verteidigung.", "EniesLobby", 140, 130000, 26000),
+            new Quest("thriller_bark_shadows", "Schatten im Nebel", "Besiege 60 feindliche Monster auf Thriller Bark.", "ThrillerBark", 60, 60000, 12000),
+            new Quest("thriller_bark_survivors", "Überleben auf dem Geisterschiff", "Besiege 100 feindliche Monster und sichere den Friedhof.", "ThrillerBark", 100, 98000, 19500),
+            new Quest("thriller_bark_nightmare", "Albtraum von Thriller Bark", "Besiege 155 feindliche Monster und beende den Spuk.", "ThrillerBark", 155, 150000, 30000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
