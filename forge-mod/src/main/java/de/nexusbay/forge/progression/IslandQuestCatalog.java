@@ -76,7 +76,13 @@ public final class IslandQuestCatalog {
             new Quest("fishman_guardian", "Wächter der Fischmenscheninsel", "Besiege 245 feindliche Monster und verteidige die Insel.", "FishManIsland", 245, 375000, 75000),
             new Quest("punk_hazard_lab", "Gefahr im Forschungsgebiet", "Besiege 105 feindliche Monster auf Punk Hazard.", "PunkHazard", 105, 170000, 34000),
             new Quest("punk_hazard_elements", "Kampf durch Feuer und Eis", "Besiege 175 feindliche Monster und sichere beide Inselhälften.", "PunkHazard", 175, 275000, 55000),
-            new Quest("punk_hazard_survivor", "Überlebender von Punk Hazard", "Besiege 260 feindliche Monster und überstehe die Inselgefahren.", "PunkHazard", 260, 410000, 82000)
+            new Quest("punk_hazard_survivor", "Überlebender von Punk Hazard", "Besiege 260 feindliche Monster und überstehe die Inselgefahren.", "PunkHazard", 260, 410000, 82000),
+            new Quest("dressrosa_colosseum", "Unruhe im Kolosseum", "Besiege 120 feindliche Monster in Dressrosa.", "Dressrosa", 120, 210000, 42000),
+            new Quest("dressrosa_toys", "Geheimnis der Spielzeuge", "Besiege 195 feindliche Monster und sichere die Stadtviertel.", "Dressrosa", 195, 340000, 68000),
+            new Quest("dressrosa_kingdom", "Retter von Dressrosa", "Besiege 285 feindliche Monster und befreie das Königreich.", "Dressrosa", 285, 520000, 104000),
+            new Quest("zou_guardians", "Wächter des Elefantenreichs", "Besiege 130 feindliche Monster auf Zou.", "Zou", 130, 240000, 48000),
+            new Quest("zou_invasion", "Schutz des Mokomo-Reichs", "Besiege 210 feindliche Monster und verteidige das Königreich.", "Zou", 210, 390000, 78000),
+            new Quest("zou_champion", "Beschützer von Zou", "Besiege 310 feindliche Monster und sichere das Land.", "Zou", 310, 600000, 120000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
