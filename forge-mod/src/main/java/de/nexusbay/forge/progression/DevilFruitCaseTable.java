@@ -64,14 +64,15 @@ public final class DevilFruitCaseTable {
             }
         }
 
+        final Rarity selectedRarity = selected;
         List<Fruit> candidates = FRUITS.stream()
-                .filter(fruit -> fruit.rarity() == selected)
+                .filter(fruit -> fruit.rarity() == selectedRarity)
                 .toList();
 
         // Keep every rarity tier usable even if its pool is temporarily empty.
         if (candidates.isEmpty()) {
             candidates = FRUITS.stream()
-                    .filter(fruit -> fruit.rarity().ordinal() < selected.ordinal())
+                    .filter(fruit -> fruit.rarity().ordinal() < selectedRarity.ordinal())
                     .toList();
         }
         if (candidates.isEmpty()) throw new IllegalStateException("Devil fruit case pool is empty");
