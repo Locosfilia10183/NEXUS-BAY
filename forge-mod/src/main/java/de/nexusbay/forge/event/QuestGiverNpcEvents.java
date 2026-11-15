@@ -30,7 +30,7 @@ public final class QuestGiverNpcEvents {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
                 || player.tickCount % 40 != 0 || player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) return;
         ServerLevel level = player.serverLevel();
-        for (String islandId : new String[]{"FooshaVillage", "ShellsTown", "OrangeTown", "SyrupVillage", "Baratie", "ArlongPark", "Loguetown", "ReverseMountain", "WhiskeyPeak"}) {
+        for (String islandId : new String[]{"FooshaVillage", "ShellsTown", "OrangeTown", "SyrupVillage", "Baratie", "ArlongPark", "Loguetown", "ReverseMountain", "WhiskeyPeak", "LittleGarden", "DrumIsland"}) {
             var island = IslandCatalog.find(islandId).orElse(null);
             if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 128.0D * 128.0D) continue;
             BlockPos pos = new BlockPos(island.x(), island.safeY(), island.z());
