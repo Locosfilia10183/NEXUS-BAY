@@ -93,7 +93,9 @@ public final class IslandTerrainChunkEvents {
 
     private static double landmarkChance(String islandId) {
         return switch (islandId) {
-            case "Jaya", "DrumIsland", "Alabasta", "PunkHazard" -> 0.0009D;
+            case "Jaya", "DrumIsland", "Alabasta", "PunkHazard",
+                    "Skypiea", "EniesLobby", "ThrillerBark", "Sabaody",
+                    "Marineford", "WanoKuni", "Onigashima" -> 0.0009D;
             default -> 0.0D;
         };
     }
@@ -131,6 +133,98 @@ public final class IslandTerrainChunkEvents {
                         }
                     }
                 }
+            }
+            return;
+        }
+
+        if (islandId.equals("Skypiea")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) + Math.abs(oz) > 3) continue;
+                    pos.set(x + ox, y - 1, z + oz);
+                    chunk.setBlockState(pos, Blocks.QUARTZ_BRICKS.defaultBlockState(), false);
+                }
+            }
+            for (int i = 0; i < 5; i++) {
+                pos.set(x, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.QUARTZ_PILLAR.defaultBlockState(), false);
+            }
+            return;
+        }
+
+        if (islandId.equals("EniesLobby") || islandId.equals("Marineford")) {
+            BlockState fortress = islandId.equals("EniesLobby")
+                    ? Blocks.QUARTZ_BRICKS.defaultBlockState() : Blocks.STONE_BRICKS.defaultBlockState();
+            for (int side : new int[]{-2, 2}) {
+                for (int i = 0; i < 6; i++) {
+                    pos.set(x + side, y + i, z);
+                    if (pos.getY() < chunk.getMaxBuildHeight())
+                        chunk.setBlockState(pos, fortress, false);
+                }
+                pos.set(x + side, y + 6, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), false);
+            }
+            for (int ox = -2; ox <= 2; ox++) {
+                pos.set(x + ox, y + 3, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, fortress, false);
+            }
+            return;
+        }
+
+        if (islandId.equals("ThrillerBark")) {
+            for (int ox = -2; ox <= 2; ox += 2) {
+                for (int oz = -2; oz <= 2; oz += 2) {
+                    int height = 3 + (int) (vegetationRoll(x + ox, z + oz, seed) * 5.0D);
+                    for (int i = 0; i < height; i++) {
+                        pos.set(x + ox, y + i, z + oz);
+                        if (pos.getY() < chunk.getMaxBuildHeight())
+                            chunk.setBlockState(pos, Blocks.DEEPSLATE_BRICKS.defaultBlockState(), false);
+                    }
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("Sabaody")) {
+            int height = 7 + (int) (vegetationRoll(x + 61, z - 17, seed) * 8.0D);
+            for (int i = 0; i < height; i++) {
+                pos.set(x, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.MANGROVE_LOG.defaultBlockState(), false);
+            }
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) + Math.abs(oz) > 3) continue;
+                    pos.set(x + ox, y + height - 1, z + oz);
+                    if (pos.getY() < chunk.getMaxBuildHeight())
+                        chunk.setBlockState(pos, Blocks.MANGROVE_LEAVES.defaultBlockState()
+                                .setValue(LeavesBlock.PERSISTENT, true), false);
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("WanoKuni") || islandId.equals("Onigashima")) {
+            BlockState castle = islandId.equals("WanoKuni")
+                    ? Blocks.DEEPSLATE_TILES.defaultBlockState() : Blocks.BLACKSTONE_BRICKS.defaultBlockState();
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) == 2 || Math.abs(oz) == 2) {
+                        for (int i = 0; i < 5; i++) {
+                            pos.set(x + ox, y + i, z + oz);
+                            if (pos.getY() < chunk.getMaxBuildHeight())
+                                chunk.setBlockState(pos, castle, false);
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 3; i++) {
+                pos.set(x, y + 5 + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.DARK_OAK_LOG.defaultBlockState(), false);
             }
             return;
         }
