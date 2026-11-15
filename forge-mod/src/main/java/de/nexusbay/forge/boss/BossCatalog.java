@@ -30,7 +30,7 @@ public final class BossCatalog {
             "crocodile", new BossDefinition("crocodile", "CROCODILE – WÜSTENKÖNIG", 120, 180000D, 2.4D,
                     BossRank.LEGENDARY, "alabasta", "suna_suna_no_mi",
                     java.util.List.of("sand_blade", "desert_spada", "ground_dehydration", "sandstorm"),
-                    java.util.List.of("desert_hook", "dance_powder", "砂砂_core")),
+                    java.util.List.of("desert_hook", "dance_powder", "suna_suna_core")),
             "enel", new BossDefinition("enel", "ENEL – GOTT VON SKYPIEA", 150, 260000D, 2.7D,
                     BossRank.LEGENDARY, "skypiea", "goro_goro_no_mi",
                     java.util.List.of("lightning_spear", "el_thor", "mantra", "raigo"),
