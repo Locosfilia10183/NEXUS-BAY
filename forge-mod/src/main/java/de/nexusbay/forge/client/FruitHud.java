@@ -24,6 +24,7 @@ public final class FruitHud {
   long next=FruitHudData.level>=100?0:100L*FruitHudData.level*FruitHudData.level;
   g.drawString(mc.font,FruitHudData.level>=100?"Meisterschaft MAX":"Fortschritt: "+FruitHudData.experience+" / "+next+" XP",x+9,y+35,0xD8CBEA,false);
   var skill=FruitSkillCatalog.next(FruitHudData.fruitId,FruitHudData.level);
-  g.drawString(mc.font,skill==null?"Alle Skills freigeschaltet":"Nächster Skill: "+skill.name()+" (Lv. "+skill.requiredLevel()+")",x+9,y+50,0xF0D9FF,false);
+  String skillText=FruitSkillCatalog.forFruit(FruitHudData.fruitId).isEmpty()?"Fähigkeiten folgen":skill==null?"Alle Skills freigeschaltet":"Nächster Skill: "+skill.name()+" (Lv. "+skill.requiredLevel()+")";
+  g.drawString(mc.font,skillText,x+9,y+50,0xF0D9FF,false);
  }
 }
