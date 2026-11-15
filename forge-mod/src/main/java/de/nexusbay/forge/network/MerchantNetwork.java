@@ -49,10 +49,10 @@ public final class MerchantNetwork {
     private static String merchantName(String id){return switch(id){case "FooshaVillage"->"Makinos Markt";case "Loguetown"->"Loguetown-Waffenhändler";case "Alabasta"->"Wüstenbasar";case "Skypiea"->"Himmelswaren";case "FishManIsland"->"Händler der Fischmenschen";case "WanoKuni","Onigashima"->"Wano-Waffenschmied";case "PunkHazard"->"Labor-Ausrüster";default->"Händler von "+id;};}
     private static List<Offer> offers(String island) {
         return switch(island) {
-            case "ShellsTown","Marineford","EniesLobby" -> List.of(new Offer("marine_insignia","Marine-Abzeichen",180),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",2400),new Offer("berry_tonic","Beeren-Tonikum",90));
+            case "ShellsTown","Marineford","EniesLobby" -> List.of(new Offer("marine_insignia","Marine-Abzeichen",180),new Offer("seastone_saber","Seestein-Säbel",12500),new Offer("berry_tonic","Beeren-Tonikum",90));
             case "Skypiea","Jaya" -> List.of(new Offer("skypiea_dial","Himmels-Dial",650),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",2600),new Offer("berry_tonic","Beeren-Tonikum",100));
             case "FishManIsland","Sabaody" -> List.of(new Offer("fishman_pearl","Tiefsee-Perle",720),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",2800),new Offer("berry_tonic","Beeren-Tonikum",110));
-            case "WanoKuni","Onigashima" -> List.of(new Offer("wano_steel","Wano-Stahl",950),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",3200),new Offer("berry_tonic","Beeren-Tonikum",120));
+            case "WanoKuni","Onigashima" -> List.of(new Offer("wano_steel","Wano-Stahl",950),new Offer("oni_cleaver","Oni-Spalter",18000),new Offer("wano_samurai_helmet","Samurai-Helm",8500));
             case "PunkHazard","DrumIsland" -> List.of(new Offer("alchemy_reagent","Alchemie-Reagenz",500),new Offer("berry_tonic","Beeren-Tonikum",80),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",2700));
             default -> List.of(new Offer("berry_tonic","Beeren-Tonikum",75),new Offer("devil_fruit_case","Versiegelte Fruchtkiste",3000),new Offer("three_sword_style_kit","Drei-Schwerter-Stil-Kit",1200));
         };
