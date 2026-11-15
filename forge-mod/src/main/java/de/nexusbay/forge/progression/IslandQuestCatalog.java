@@ -19,7 +19,10 @@ public final class IslandQuestCatalog {
             new Quest("orange_champion", "Champion von Orange Town", "Besiege 25 feindliche Monster und werde zum Beschützer der Stadt.", "OrangeTown", 25, 3000, 900),
             new Quest("syrup_watch", "Wache im Dorf", "Besiege 10 feindliche Monster nahe Syrup Village.", "SyrupVillage", 10, 1200, 300),
             new Quest("syrup_threat", "Bedrohung im Wald", "Besiege 18 feindliche Monster und sichere die Wege.", "SyrupVillage", 18, 2400, 650),
-            new Quest("syrup_guardian", "Beschützer von Syrup", "Besiege 30 feindliche Monster und verteidige das Dorf.", "SyrupVillage", 30, 4200, 1200)
+            new Quest("syrup_guardian", "Beschützer von Syrup", "Besiege 30 feindliche Monster und verteidige das Dorf.", "SyrupVillage", 30, 4200, 1200),
+            new Quest("baratie_raiders", "Angriff auf das Baratie", "Besiege 12 feindliche Monster nahe dem schwimmenden Restaurant.", "Baratie", 12, 1800, 450),
+            new Quest("baratie_defense", "Schutz der Köche", "Besiege 22 feindliche Monster und verteidige die Besatzung.", "Baratie", 22, 3600, 900),
+            new Quest("baratie_vanguard", "Stärkste Bedrohung", "Besiege 35 feindliche Monster und sichere das Baratie.", "Baratie", 35, 6000, 1600)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
