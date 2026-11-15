@@ -36,6 +36,7 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final ServerBossEvent bossBar;
     private int specialCooldown = 100;
+    private int specialWarningTicks = 0;
     private int phase = 1;
     private final Map<UUID, Float> playerDamage = new HashMap<>();
 
@@ -102,9 +103,25 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
         bossBar.setProgress(Math.max(0.0F, ratio));
         if (specialCooldown > 0) specialCooldown--;
         LivingEntity target = getTarget();
-        if (target != null && target.isAlive() && specialCooldown <= 0 && distanceToSqr(target) <= 24.0D * 24.0D) {
-            performSpecial(target);
-            specialCooldown = phase == 3 ? 65 : phase == 2 ? 85 : 110;
+        if (specialWarningTicks > 0) {
+            specialWarningTicks--;
+            if (target != null && target.isAlive() && level() instanceof net.minecraft.server.level.ServerLevel server) {
+                server.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + 1.0D, target.getZ(), 5, 0.55D, 0.75D, 0.55D, 0.02D);
+            }
+            if (specialWarningTicks == 0) {
+                if (target != null && target.isAlive() && distanceToSqr(target) <= 30.0D * 30.0D) {
+                    performSpecial(target);
+                    specialCooldown = phase == 3 ? 65 : phase == 2 ? 85 : 110;
+                } else {
+                    specialCooldown = 20;
+                }
+            }
+        } else if (target != null && target.isAlive() && specialCooldown <= 0 && distanceToSqr(target) <= 24.0D * 24.0D) {
+            specialWarningTicks = 24;
+            level().playSound(null, blockPosition(), SoundEvents.NOTE_BLOCK_PLING, SoundSource.HOSTILE, 1.0F, 0.55F + phase * 0.2F);
+            if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + getBbHeight() * 0.7D, getZ(), 18, 1.0D, 0.8D, 1.0D, 0.08D);
+            }
         }
     }
 
