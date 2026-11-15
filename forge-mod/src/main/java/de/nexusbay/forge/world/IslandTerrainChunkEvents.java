@@ -115,11 +115,11 @@ public final class IslandTerrainChunkEvents {
         // Sparse kelp on the seabed gives shallow ocean areas a little life.
         if (vegetationRoll(x + 211, z - 137, seed) < 0.012D) {
             pos.set(x, floorY + 1, z);
-            if (chunk.getBlockState(pos).isWater()) {
+            if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
                 int height = 1 + (int) (vegetationRoll(x - 89, z + 53, seed) * 4.0D);
                 for (int i = 0; i < height; i++) {
                     pos.set(x, floorY + 1 + i, z);
-                    if (!chunk.getBlockState(pos).isWater()) break;
+                    if (chunk.getBlockState(pos).getBlock() != Blocks.WATER) break;
                     chunk.setBlockState(pos, Blocks.KELP.defaultBlockState(), false);
                 }
             }
