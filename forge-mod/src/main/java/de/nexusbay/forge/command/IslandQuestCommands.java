@@ -5,6 +5,7 @@ import de.nexusbay.forge.progression.BeliLedger;
 import de.nexusbay.forge.progression.FruitProfileData;
 import de.nexusbay.forge.progression.IslandQuestCatalog;
 import de.nexusbay.forge.progression.IslandQuestData;
+import de.nexusbay.forge.network.FruitNetwork;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -53,7 +54,7 @@ public final class IslandQuestCommands {
                 if (!data.claim(player.getUUID(), id)) return 0;
                 long balance = BeliLedger.get(player.serverLevel()).deposit(player.getUUID(), quest.beliReward());
                 var fruitData = FruitProfileData.get(player.serverLevel());
-                if (fruitData.get(player.getUUID()) != null && quest.fruitXpReward() > 0) fruitData.addExperience(player.getUUID(), quest.fruitXpReward());
+                if (fruitData.get(player.getUUID()) != null && quest.fruitXpReward() > 0) { fruitData.addExperience(player.getUUID(), quest.fruitXpReward()); FruitNetwork.sync(player); }
                 player.sendSystemMessage(Component.literal("Quest abgeschlossen: " + quest.title() + " | +" + quest.beliReward() + " Beli | Kontostand: " + balance));
                 return 1;
             }))
