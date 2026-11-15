@@ -18,15 +18,21 @@ public final class FruitNetwork {
   if(registered)return;registered=true;
   CHANNEL.registerMessage(0,SyncFruit.class,SyncFruit::encode,SyncFruit::decode,(m,c)->c.get().enqueueWork(()->DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->de.nexusbay.forge.client.FruitHudData.set(m.id,m.level,m.xp))));
   CHANNEL.registerMessage(1,UseFruitSkill.class,UseFruitSkill::encode,UseFruitSkill::decode,(m,c)->c.get().enqueueWork(()->{var player=c.get().getSender();if(player!=null)FruitSkillCombat.activate(player);}));
+  CHANNEL.registerMessage(2,CycleFruitSkill.class,CycleFruitSkill::encode,CycleFruitSkill::decode,(m,c)->c.get().enqueueWork(()->{var player=c.get().getSender();if(player!=null)FruitSkillCombat.cycle(player);}));
  }
  public static void sync(net.minecraft.server.level.ServerPlayer player){
   FruitProfileData.Profile p=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new SyncFruit(p==null?"":p.fruitId(),p==null?0:p.level(),p==null?0:p.experience()));
  }
  public static void requestSkill(){CHANNEL.sendToServer(new UseFruitSkill());}
+ public static void cycleSkill(){CHANNEL.sendToServer(new CycleFruitSkill());}
  private record UseFruitSkill(){
   static void encode(UseFruitSkill m,FriendlyByteBuf b){}
   static UseFruitSkill decode(FriendlyByteBuf b){return new UseFruitSkill();}
+ }
+ private record CycleFruitSkill(){
+  static void encode(CycleFruitSkill m,FriendlyByteBuf b){}
+  static CycleFruitSkill decode(FriendlyByteBuf b){return new CycleFruitSkill();}
  }
  private record SyncFruit(String id,int level,long xp){
   static void encode(SyncFruit m,FriendlyByteBuf b){b.writeUtf(m.id,64);b.writeVarInt(m.level);b.writeVarLong(m.xp);}
