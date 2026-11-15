@@ -32,7 +32,9 @@ public final class FruitSkillCombat {
   double radius=ultimate?4.5D:1.6D;
   AABB area=player.getBoundingBox().expandTowards(look.scale(reach)).inflate(radius);
   float damage=Math.min(45.0F,6.0F+profile.level()*0.30F+(ultimate?12.0F:0.0F));
-  if(skill.id().equals("gear_second"))player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,240,1));
+  if(skill.id().equals("gear_second")||skill.id().equals("azure_dragon"))player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,240,1));
+  if(skill.id().equals("Klingenhaut")||skill.id().equals("Schwergewicht"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,160,1));
+  if(skill.id().equals("ROOM")||skill.id().equals("Seelenraub"))player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,120,1));
   if(skill.id().equals("lightning_travel")||skill.id().equals("Lichttritt")||skill.id().equals("Sprungfeder")){
    player.setDeltaMovement(player.getDeltaMovement().add(look.scale(1.35D)));
    player.hurtMarked=true;
@@ -43,10 +45,14 @@ public final class FruitSkillCombat {
    target.hurt(player.damageSources().playerAttack(player),damage);
    switch(profile.fruitId()){
     case "mera_mera","magu_magu","uo_uo_seiryu" -> target.setSecondsOnFire(ultimate?8:4);
-    case "goro_goro" -> {target.knockback(ultimate?1.8D:1.2D,player.getX()-target.getX(),player.getZ()-target.getZ());target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,80,1));}
-    case "gomu_gomu","bane_bane","supa_supa" -> target.knockback(ultimate?2.0D:1.3D,player.getX()-target.getX(),player.getZ()-target.getZ());
-    case "hie_hie","yomi_yomi" -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,ultimate?160:80,ultimate?3:1));
-    case "ori_ori","doru_doru","ito_ito" -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,120,2));
+    case "goro_goro","pika_pika" -> {target.knockback(ultimate?1.8D:1.2D,player.getX()-target.getX(),player.getZ()-target.getZ());target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,80,1));}
+    case "gomu_gomu","bane_bane","supa_supa","bara_bara","bomu_bomu" -> target.knockback(ultimate?2.0D:1.3D,player.getX()-target.getX(),player.getZ()-target.getZ());
+    case "hie_hie","yomi_yomi" -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,ultimate?180:100,ultimate?3:1));
+    case "ori_ori","doru_doru","ito_ito" -> target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,160,2));
+    case "kilo_kilo" -> {target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,120,3));target.knockback(0.5D,player.getX()-target.getX(),player.getZ()-target.getZ());}
+    case "sube_sube" -> target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,100,1));
+    case "ope_ope" -> {target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS,140,2));target.addEffect(new MobEffectInstance(MobEffects.GLOWING,100,0));}
+    case "soru_soru" -> target.addEffect(new MobEffectInstance(MobEffects.WITHER,ultimate?100:50,1));
     default -> {}
    }
    hits++;
