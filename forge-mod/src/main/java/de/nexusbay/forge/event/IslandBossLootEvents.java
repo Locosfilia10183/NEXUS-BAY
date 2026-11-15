@@ -45,8 +45,8 @@ public final class IslandBossLootEvents {
         for (Map.Entry<UUID, Float> entry : boss.getPlayerDamageContributions().entrySet()) {
             if (entry.getValue() < boss.getMaxHealth() * 0.01F) continue;
             if (killer != null && killer.getUUID().equals(entry.getKey())) continue;
-            ServerPlayer participant = level.getPlayerByUUID(entry.getKey());
-            if (participant == null) continue;
+            net.minecraft.world.entity.player.Player onlinePlayer = level.getPlayerByUUID(entry.getKey());
+            if (!(onlinePlayer instanceof ServerPlayer participant)) continue;
             long share = killerBeli / 4L;
             BeliLedger.get(level).deposit(participant.getUUID(), share);
             participant.displayClientMessage(Component.literal("§aBOSS-TEILNAHME §7· §e+" + share + " Beli"), false);
