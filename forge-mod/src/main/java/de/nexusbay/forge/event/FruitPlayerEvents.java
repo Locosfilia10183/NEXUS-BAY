@@ -20,7 +20,18 @@ public final class FruitPlayerEvents {
  private FruitPlayerEvents(){}
  @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e){if(e.getEntity() instanceof ServerPlayer p)FruitNetwork.sync(p);}
  @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){
-  if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%10!=0)return;
+  if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p))return;
+  int formTicks=p.getPersistentData().getInt("NexusFruitFormTicks");
+  if(formTicks>0){
+   p.getPersistentData().putInt("NexusFruitFormTicks",formTicks-1);
+   if(p.tickCount%5==0){
+    String form=p.getPersistentData().getString("NexusFruitForm");
+    var particle="azure_dragon".equals(form)?net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH:net.minecraft.core.particles.ParticleTypes.FLAME;
+    p.serverLevel().sendParticles(particle,p.getX(),p.getY()+1.0D,p.getZ(),8,0.55D,0.65D,0.55D,0.02D);
+   }
+   if(formTicks==1){p.getPersistentData().remove("NexusFruitForm");p.sendSystemMessage(Component.literal("Deine Verwandlung ist beendet."));}
+  }
+  if(p.tickCount%10!=0)return;
   FruitProfileData.Profile profile=FruitProfileData.get(p.serverLevel()).get(p.getUUID());if(profile==null)return;
   var item=ModItems.FRUIT_ITEMS.get(profile.fruitId());if(item==null)return;
   ItemStack slot=p.getInventory().getItem(0);
