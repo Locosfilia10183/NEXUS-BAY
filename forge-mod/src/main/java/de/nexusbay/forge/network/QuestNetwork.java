@@ -33,7 +33,8 @@ public final class QuestNetwork {
         var data=IslandQuestData.get(p.serverLevel());var qs=IslandQuestCatalog.all().stream().filter(q->q.islandId().equals(islandId)).toList();
         int n=qs.size();String[] ids=new String[n],titles=new String[n],desc=new String[n];int[] kills=new int[n];long[] beli=new long[n],xp=new long[n];boolean[] done=new boolean[n];
         for(int i=0;i<n;i++){var q=qs.get(i);ids[i]=q.id();titles[i]=q.title();desc[i]=q.description();kills[i]=q.requiredKills();beli[i]=q.beliReward();xp[i]=q.fruitXpReward();done[i]=data.completed(p.getUUID(),q.id());}
-        var dialogue=QuestDialogueCatalog.find(islandId);\n        CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new OpenQuestScreen(islandId,island.displayName(),dialogue.name(),dialogue.greeting(),data.active(p.getUUID()),data.progress(p.getUUID()),ids,titles,desc,kills,beli,xp,done));
+        var dialogue=QuestDialogueCatalog.find(islandId);
+        CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new OpenQuestScreen(islandId,island.displayName(),dialogue.name(),dialogue.greeting(),data.active(p.getUUID()),data.progress(p.getUUID()),ids,titles,desc,kills,beli,xp,done));
     }
     private static void act(ServerPlayer p,String islandId,String questId,boolean claim){
         var island=IslandCatalog.find(islandId).orElse(null);if(island==null||p.distanceToSqr(island.x()+.5D,p.getY(),island.z()+.5D)>144)return;
