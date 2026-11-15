@@ -38,8 +38,10 @@ public final class FruitSkillCombat {
    case "gear_second","raigo","flame_emperor","azure_dragon","Homies Sturm","Yasakani","Magmaeruption","Eiszeit","Fadenkäfig","ROOM","Drachenbrüllen" -> true;
    default -> false;
   };
-  double reach=ultimate?9.0D:6.0D;
-  double radius=ultimate?4.5D:1.6D;
+  boolean beam=switch(skill.id()){case "pistol","lightning_bolt","fire_fist","dragon_roar","Yasakani","Lichttritt","Eislanze","Magmaschlag" -> true;default -> false;};
+  boolean areaBurst=switch(skill.id()){case "gatling","raigo","flame_emperor","azure_dragon","Homies Sturm","Magmaeruption","Eiszeit","Fadenkäfig","Bombenfeld","Körperregen" -> true;default -> false;};
+  double reach=beam?18.0D:ultimate?10.0D:6.0D;
+  double radius=areaBurst?5.0D:beam?1.25D:ultimate?3.5D:1.6D;
   AABB area=player.getBoundingBox().expandTowards(look.scale(reach)).inflate(radius);
   float damage=Math.min(45.0F,6.0F+profile.level()*0.30F+(ultimate?12.0F:0.0F));
   if(skill.id().equals("gear_second")){
@@ -67,7 +69,11 @@ public final class FruitSkillCombat {
   }
   int hits=0;
   for(LivingEntity target:player.serverLevel().getEntitiesOfClass(LivingEntity.class,area,e->e!=player&&e.isAlive()&&!e.isAlliedTo(player))){
-   if(target.position().distanceTo(player.position())>reach+radius)continue;
+   Vec3 offset=target.position().add(0,target.getBbHeight()*0.5D,0).subtract(player.getEyePosition());
+   double along=offset.dot(look);
+   if(along<0.0D||along>reach)continue;
+   double side=offset.subtract(look.scale(along)).length();
+   if(side>radius||(!beam&&!areaBurst&&side>2.0D))continue;
    target.hurt(player.damageSources().playerAttack(player),damage);
    switch(profile.fruitId()){
     case "mera_mera","magu_magu","uo_uo_seiryu" -> target.setSecondsOnFire(ultimate?8:4);
@@ -91,7 +97,8 @@ public final class FruitSkillCombat {
    case "doru_doru","ori_ori","ito_ito" -> ParticleTypes.WAX_ON;
    default -> ParticleTypes.CRIT;
   };
-  player.serverLevel().sendParticles(particle,player.getX()+look.x*2,player.getY()+1.0D+look.y,player.getZ()+look.z*2,ultimate?90:32,ultimate?1.8D:0.8D,ultimate?1.2D:0.6D,ultimate?1.8D:0.8D,0.08D);
+  if(beam){for(int step=2;step<=18;step+=2){Vec3 point=player.getEyePosition().add(look.scale(step));player.serverLevel().sendParticles(particle,point.x,point.y,point.z,10,0.35D,0.35D,0.35D,0.02D);}}
+  else player.serverLevel().sendParticles(particle,player.getX()+look.x*2,player.getY()+1.0D+look.y,player.getZ()+look.z*2,areaBurst?120:ultimate?90:32,areaBurst?2.8D:ultimate?1.8D:0.8D,areaBurst?2.0D:ultimate?1.2D:0.6D,areaBurst?2.8D:ultimate?1.8D:0.8D,0.08D);
   player.sendSystemMessage(net.minecraft.network.chat.Component.literal(skill.name()+"! Treffer: "+hits));
  }
 }
