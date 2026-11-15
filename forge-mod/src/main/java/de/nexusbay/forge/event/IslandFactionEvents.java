@@ -74,6 +74,8 @@ public final class IslandFactionEvents {
                 var speed = monster.getAttribute(Attributes.MOVEMENT_SPEED);
                 if (speed != null) speed.setBaseValue(speed.getBaseValue() * speedScale);
                 monster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, Integer.MAX_VALUE, resistance));
+                if (!rank.equals("Elite")) monster.addEffect(new MobEffectInstance(MobEffects.GLOWING, Integer.MAX_VALUE, 0));
+                if (rank.equals("Katastrophe")) monster.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, Integer.MAX_VALUE, 0));
                 String color = rank.equals("Katastrophe") ? "§c" : rank.equals("Kommandant") ? "§5" : "§6";
                 monster.setCustomName(Component.literal(color + rank + " §f" + faction.displayName()));
             } else if (!monster.hasCustomName()) {
