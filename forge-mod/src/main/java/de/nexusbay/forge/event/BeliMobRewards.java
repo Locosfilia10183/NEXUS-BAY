@@ -2,6 +2,7 @@ package de.nexusbay.forge.event;
 
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.progression.BeliLedger;
+import de.nexusbay.forge.progression.IslandFactionCatalog;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,6 +29,11 @@ public final class BeliMobRewards {
         long base = Math.max(3L, Math.min(250L, Math.round(health * 0.35D)));
         long variation = player.getRandom().nextInt((int) Math.max(2L, base / 2L + 1L));
         long reward = base + variation;
+        String islandId = defeated.getPersistentData().getString("nexusbay_faction_island");
+        IslandFactionCatalog.Faction faction = IslandFactionCatalog.find(islandId);
+        if (faction != null) {
+            reward = Math.round(reward * (1.0D + faction.recommendedLevel() / 100.0D));
+        }
 
         long balance = BeliLedger.get(player.serverLevel()).deposit(player.getUUID(), reward);
         player.displayClientMessage(Component.literal("+" + reward + " Beli  |  Kontostand: " + balance), true);
