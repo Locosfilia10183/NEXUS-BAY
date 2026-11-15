@@ -88,6 +88,7 @@ public final class IslandTerrainChunkEvents {
             }
         }
 
+        placeSettlementBuilding(chunk, chunkPos, seed);
         chunkData.putBoolean(GENERATED_KEY, true);
         if (touched) chunk.setUnsaved(true);
     }
@@ -95,6 +96,84 @@ public final class IslandTerrainChunkEvents {
 
 
 
+
+
+    private static void placeSettlementBuilding(LevelChunk chunk, ChunkPos chunkPos, long seed) {
+        int x = chunkPos.getMinBlockX() + 8;
+        int z = chunkPos.getMinBlockZ() + 8;
+        IslandTerrainSampler.ColumnSample sample = IslandTerrainSampler.sample(x, z, seed);
+        if (!sample.land() || sample.normalizedDistance() > 0.68D) return;
+        if (vegetationRoll(x + 701, z - 503, seed) > 0.16D) return;
+
+        String island = sample.islandId();
+        if (!switch (island) {
+            case "FooshaVillage", "ShellsTown", "OrangeTown", "SyrupVillage",
+                    "Loguetown", "Water7", "Alabasta", "Dressrosa", "WanoKuni" -> true;
+            default -> false;
+        }) return;
+
+        BlockState wall = switch (island) {
+            case "Alabasta" -> Blocks.SANDSTONE.defaultBlockState();
+            case "Loguetown", "Water7" -> Blocks.STONE_BRICKS.defaultBlockState();
+            case "WanoKuni" -> Blocks.DEEPSLATE_BRICKS.defaultBlockState();
+            case "Dressrosa" -> Blocks.PINK_TERRACOTTA.defaultBlockState();
+            default -> Blocks.OAK_PLANKS.defaultBlockState();
+        };
+        BlockState roof = switch (island) {
+            case "Alabasta" -> Blocks.CUT_SANDSTONE.defaultBlockState();
+            case "WanoKuni" -> Blocks.DARK_OAK_PLANKS.defaultBlockState();
+            case "Dressrosa" -> Blocks.MAGENTA_TERRACOTTA.defaultBlockState();
+            case "Loguetown", "Water7" -> Blocks.STONE_BRICK_SLAB.defaultBlockState();
+            default -> Blocks.SPRUCE_PLANKS.defaultBlockState();
+        };
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int baseY = sample.surfaceY();
+        int minX = chunkPos.getMinBlockX() + 4;
+        int maxX = chunkPos.getMinBlockX() + 11;
+        int minZ = chunkPos.getMinBlockZ() + 4;
+        int maxZ = chunkPos.getMinBlockZ() + 11;
+
+        for (int bx = minX; bx <= maxX; bx++) {
+            for (int bz = minZ; bz <= maxZ; bz++) {
+                int ground = IslandTerrainSampler.sample(bx, bz, seed).surfaceY();
+                if (!IslandTerrainSampler.sample(bx, bz, seed).land() || Math.abs(ground - baseY) > 3) return;
+            }
+        }
+
+        for (int bx = minX; bx <= maxX; bx++) {
+            for (int bz = minZ; bz <= maxZ; bz++) {
+                pos.set(bx, baseY, bz);
+                chunk.setBlockState(pos, Blocks.OAK_PLANKS.defaultBlockState(), false);
+                boolean edge = bx == minX || bx == maxX || bz == minZ || bz == maxZ;
+                for (int dy = 1; dy <= 4; dy++) {
+                    pos.set(bx, baseY + dy, bz);
+                    if (edge) {
+                        boolean doorway = bx == x && bz == maxZ && dy <= 2;
+                        chunk.setBlockState(pos, doorway ? Blocks.AIR.defaultBlockState() : wall, false);
+                    } else if (dy == 1) {
+                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                    }
+                }
+                pos.set(bx, baseY + 5, bz);
+                chunk.setBlockState(pos, roof, false);
+            }
+        }
+
+        for (int bx = minX + 1; bx < maxX; bx++) {
+            for (int bz = minZ + 1; bz < maxZ; bz++) {
+                pos.set(bx, baseY + 5, bz);
+                if ((bx + bz) % 2 == 0) chunk.setBlockState(pos, roof, false);
+            }
+        }
+
+        // A short approach path points toward the island's shoreline.
+        for (int step = 1; step <= 3; step++) {
+            pos.set(x, baseY, maxZ + step);
+            if (pos.getZ() <= chunkPos.getMaxBlockZ())
+                chunk.setBlockState(pos, Blocks.COBBLESTONE.defaultBlockState(), false);
+        }
+        chunk.setUnsaved(true);
+    }
 
     private static void applyOceanColumn(LevelChunk chunk, BlockPos.MutableBlockPos pos,
                                          int x, int z, int minBuildHeight, long seed) {
