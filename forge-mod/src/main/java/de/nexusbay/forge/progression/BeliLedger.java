@@ -22,7 +22,8 @@ public final class BeliLedger extends SavedData {
     public static BeliLedger get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
         return overworld.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(BeliLedger::new, BeliLedger::load),
+                BeliLedger::load,
+                BeliLedger::new,
                 DATA_NAME
         );
     }
