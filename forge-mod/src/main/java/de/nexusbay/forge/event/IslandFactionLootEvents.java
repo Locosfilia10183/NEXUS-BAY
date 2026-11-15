@@ -1,0 +1,71 @@
+package de.nexusbay.forge.event;
+
+import de.nexusbay.forge.NexusBayForge;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+/** Adds collectible, faction-themed trophies to island enemy drops. */
+@Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
+public final class IslandFactionLootEvents {
+    private IslandFactionLootEvents() {}
+
+    @SubscribeEvent
+    public static void onFactionDrop(LivingDropsEvent event) {
+        if (!(event.getEntity() instanceof Monster defeated)) return;
+        String faction = defeated.getPersistentData().getString("nexusbay_faction");
+        if (faction.isBlank()) return;
+        float chance = faction.equals("onigashima_beasts") ? 0.45F : 0.28F;
+        if (defeated.getRandom().nextFloat() >= chance) return;
+
+        ItemStack trophy;
+        String name;
+        switch (faction) {
+            case "foosha_bandits", "reverse_raiders" -> {
+                trophy = new ItemStack(Items.LEATHER); name = "Banditen-Trophäe";
+            }
+            case "shells_marine", "marineford_raiders", "enies_cp9" -> {
+                trophy = new ItemStack(Items.IRON_NUGGET); name = "Marine-Abzeichen";
+            }
+            case "arlong_fishmen", "fishman_raiders" -> {
+                trophy = new ItemStack(Items.PRISMARINE_SHARD); name = "Fischmenschen-Schuppe";
+            }
+            case "syrup_blackcat", "orange_pirates", "baratie_raiders", "loguetown_outlaws",
+                 "jaya_bellamy", "sabaody_slavers" -> {
+                trophy = new ItemStack(Items.GOLD_NUGGET); name = "Piraten-Kopfgeldmarke";
+            }
+            case "thriller_zombies", "impel_prisoners" -> {
+                trophy = new ItemStack(Items.ROTTEN_FLESH); name = "Schatten-Trophäe";
+            }
+            case "alabasta_rebels", "whiskey_hunters" -> {
+                trophy = new ItemStack(Items.GOLD_INGOT); name = "Wüsten-Kopfgeld";
+            }
+            case "skypiea_enforcers" -> {
+                trophy = new ItemStack(Items.GLOWSTONE_DUST); name = "Himmelskristall";
+            }
+            case "punk_hazards" -> {
+                trophy = new ItemStack(Items.SLIME_BALL); name = "Laborprobe";
+            }
+            case "wholecake_homies", "dressrosa_dons" -> {
+                trophy = new ItemStack(Items.AMETHYST_SHARD); name = "Unterwelt-Juwel";
+            }
+            case "wano_beasts", "onigashima_beasts" -> {
+                trophy = new ItemStack(Items.BLAZE_POWDER); name = "Bestien-Piraten-Marke";
+            }
+            default -> {
+                trophy = new ItemStack(Items.EMERALD); name = "Fraktions-Beute";
+            }
+        }
+        trophy.setHoverName(Component.literal(name));
+        if (faction.equals("onigashima_beasts") && defeated.getRandom().nextFloat() < 0.20F) {
+            trophy.setCount(2);
+        }
+        event.getDrops().add(new ItemEntity(defeated.level(), defeated.getX(), defeated.getY(),
+                defeated.getZ(), trophy));
+    }
+}
