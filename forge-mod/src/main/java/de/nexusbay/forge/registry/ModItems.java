@@ -51,6 +51,10 @@ public final class ModItems {
             () -> new Item(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> GORO_GORO_CORE = ITEMS.register("goro_goro_core",
             () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CP0_MASK = ITEMS.register("cp0_mask",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ROKUSHIKI_MANUAL = ITEMS.register("rokushiki_manual",
+            () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> THREE_SWORD_STYLE_KIT =
             ITEMS.register("three_sword_style_kit", () -> new Item(new Item.Properties().stacksTo(1)));
