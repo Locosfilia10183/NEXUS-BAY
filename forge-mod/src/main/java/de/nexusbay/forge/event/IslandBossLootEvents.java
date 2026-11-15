@@ -4,6 +4,7 @@ import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.progression.BeliLedger;
+import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -21,10 +22,10 @@ public final class IslandBossLootEvents {
         if (!(player.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
         if (event.getEntity() instanceof CrocodileBossEntity) {
             reward(player, level, 125000L, "CROCODILE BESIEGT", Items.GOLD_INGOT, 24,
-                    Items.NETHER_STAR, 1, Items.GOLDEN_SWORD, 1);
+                    ModItems.SAND_SAND_CORE.get(), 1, ModItems.CROCODILE_HOOK.get(), 1);
         } else if (event.getEntity() instanceof EnelBossEntity) {
             reward(player, level, 175000L, "ENEL BESIEGT", Items.GOLD_INGOT, 32,
-                    Items.NETHER_STAR, 2, Items.LIGHTNING_ROD, 4);
+                    ModItems.GORO_GORO_CORE.get(), 1, ModItems.ENEL_GOLDEN_STAFF.get(), 1);
         }
     }
     private static void reward(ServerPlayer player, net.minecraft.server.level.ServerLevel level, long beli,
