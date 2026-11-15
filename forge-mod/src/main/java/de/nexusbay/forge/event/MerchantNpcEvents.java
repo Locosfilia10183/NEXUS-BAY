@@ -66,6 +66,20 @@ public final class MerchantNpcEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void interact(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND
+                || !(event.getTarget() instanceof Villager merchant)
+                || !(event.getEntity() instanceof ServerPlayer player)) return;
+        String islandId = merchant.getTags().stream().filter(tag -> tag.startsWith(TAG_PREFIX))
+                .map(tag -> tag.substring(TAG_PREFIX.length())).findFirst().orElse("");
+        if (islandId.isBlank()) return;
+        event.setCanceled(true);
+        event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+        de.nexusbay.forge.network.MerchantNetwork.open(player, islandId,
+                merchant.getCustomName() == null ? "Inselhändler" : merchant.getCustomName().getString());
+    }
+
     private static VillagerProfession profession(String island) {
         return switch (island) {
             case "FooshaVillage", "Baratie", "WholeCakeIsland" -> VillagerProfession.BUTCHER;
