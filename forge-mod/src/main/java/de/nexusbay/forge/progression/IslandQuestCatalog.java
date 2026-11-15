@@ -64,7 +64,13 @@ public final class IslandQuestCatalog {
             new Quest("sabaody_supernova", "Prüfung der Supernova", "Besiege 175 feindliche Monster und werde zur Legende des Archipels.", "Sabaody", 175, 190000, 38000),
             new Quest("amazon_lily_intruders", "Eindringlinge auf Amazon Lily", "Besiege 75 feindliche Monster auf der Insel.", "AmazonLily", 75, 90000, 18000),
             new Quest("amazon_lily_defense", "Schutz der Kriegerinnen", "Besiege 125 feindliche Monster und verteidige die Insel.", "AmazonLily", 125, 145000, 29000),
-            new Quest("amazon_lily_champion", "Champion von Amazon Lily", "Besiege 190 feindliche Monster und beweise deine Stärke.", "AmazonLily", 190, 220000, 44000)
+            new Quest("amazon_lily_champion", "Champion von Amazon Lily", "Besiege 190 feindliche Monster und beweise deine Stärke.", "AmazonLily", 190, 220000, 44000),
+            new Quest("impel_down_escape", "Unruhe im Gefängnis", "Besiege 85 feindliche Monster in Impel Down.", "ImpelDown", 85, 110000, 22000),
+            new Quest("impel_down_blocks", "Sicherung der Gefängnisblöcke", "Besiege 140 feindliche Monster und sichere die Gefängnisgänge.", "ImpelDown", 140, 180000, 36000),
+            new Quest("impel_down_warden", "Herausforderung des Wärters", "Besiege 210 feindliche Monster und bezwinge die Gefängnisbedrohung.", "ImpelDown", 210, 270000, 54000),
+            new Quest("marineford_front", "Frontlinie von Marineford", "Besiege 95 feindliche Monster auf dem Schlachtfeld.", "Marineford", 95, 135000, 27000),
+            new Quest("marineford_defense", "Verteidigung des Hauptquartiers", "Besiege 155 feindliche Monster und halte die Stellung.", "Marineford", 155, 220000, 44000),
+            new Quest("marineford_war", "Legende der großen Schlacht", "Besiege 230 feindliche Monster und entscheide die Schlacht.", "Marineford", 230, 330000, 66000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
