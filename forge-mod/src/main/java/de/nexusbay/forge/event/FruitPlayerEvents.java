@@ -2,6 +2,10 @@ package de.nexusbay.forge.event;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.network.FruitNetwork;
 import de.nexusbay.forge.progression.FruitProfileData;
+import de.nexusbay.forge.progression.FruitSkillCatalog;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.monster.Monster;
 import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -37,8 +41,20 @@ public final class FruitPlayerEvents {
   }
  }
  @SubscribeEvent public static void kill(LivingDeathEvent e){
-  if(!(e.getSource().getEntity() instanceof ServerPlayer p))return;
-  FruitProfileData.Profile updated=FruitProfileData.get(p.serverLevel()).addExperience(p.getUUID(),25);
-  if(updated!=null)FruitNetwork.sync(p);
+  if(!(e.getEntity() instanceof Monster monster)||!(e.getSource().getEntity() instanceof ServerPlayer p))return;
+  FruitProfileData data=FruitProfileData.get(p.serverLevel());
+  FruitProfileData.Profile before=data.get(p.getUUID());
+  if(before==null)return;
+  long reward=Math.max(10L,Math.min(100L,10L+(long)(monster.getMaxHealth()/4.0F)));
+  FruitProfileData.Profile updated=data.addExperience(p.getUUID(),reward);
+  if(updated==null)return;
+  p.sendSystemMessage(Component.literal("+"+reward+" Frucht-Meisterschafts-XP").withStyle(ChatFormatting.LIGHT_PURPLE));
+  if(updated.level()>before.level()){
+   p.sendSystemMessage(Component.literal("Teufelsfrucht-Level gestiegen: "+before.level()+" → "+updated.level()).withStyle(ChatFormatting.GOLD,ChatFormatting.BOLD));
+   var unlocked=FruitSkillCatalog.forFruit(updated.fruitId()).stream()
+    .filter(skill->skill.requiredLevel()>before.level()&&skill.requiredLevel()<=updated.level()).toList();
+   for(var skill:unlocked)p.sendSystemMessage(Component.literal("Neue Fähigkeit freigeschaltet: "+skill.name()).withStyle(ChatFormatting.GREEN));
+  }
+  FruitNetwork.sync(p);
  }
 }
