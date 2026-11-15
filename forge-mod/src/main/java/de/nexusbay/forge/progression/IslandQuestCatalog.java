@@ -22,7 +22,10 @@ public final class IslandQuestCatalog {
             new Quest("syrup_guardian", "Beschützer von Syrup", "Besiege 30 feindliche Monster und verteidige das Dorf.", "SyrupVillage", 30, 4200, 1200),
             new Quest("baratie_raiders", "Angriff auf das Baratie", "Besiege 12 feindliche Monster nahe dem schwimmenden Restaurant.", "Baratie", 12, 1800, 450),
             new Quest("baratie_defense", "Schutz der Köche", "Besiege 22 feindliche Monster und verteidige die Besatzung.", "Baratie", 22, 3600, 900),
-            new Quest("baratie_vanguard", "Stärkste Bedrohung", "Besiege 35 feindliche Monster und sichere das Baratie.", "Baratie", 35, 6000, 1600)
+            new Quest("baratie_vanguard", "Stärkste Bedrohung", "Besiege 35 feindliche Monster und sichere das Baratie.", "Baratie", 35, 6000, 1600),
+            new Quest("arlong_scourge", "Terror im Arlong Park", "Besiege 15 feindliche Monster im Arlong Park.", "ArlongPark", 15, 2800, 700),
+            new Quest("arlong_resistance", "Widerstand des Dorfes", "Besiege 28 feindliche Monster und unterstütze die Bewohner.", "ArlongPark", 28, 5200, 1300),
+            new Quest("arlong_liberator", "Befreier von Arlong Park", "Besiege 45 feindliche Monster und beende den Terror.", "ArlongPark", 45, 8500, 2200)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
