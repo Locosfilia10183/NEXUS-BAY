@@ -14,12 +14,22 @@ import net.minecraft.world.phys.Vec3;
 /** Server-authoritative fruit skill combat with fruit- and skill-specific effects. */
 public final class FruitSkillCombat {
  private FruitSkillCombat(){}
+ public static void cycle(ServerPlayer player){
+  FruitProfileData.Profile profile=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
+  if(profile==null)return;
+  int count=FruitSkillCatalog.unlocked(profile.fruitId(),profile.level()).size();
+  if(count<2){player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Noch keine weitere Fähigkeit freigeschaltet."));return;}
+  int next=Math.floorMod(player.getPersistentData().getInt("NexusFruitSkillIndex")+1,count);
+  player.getPersistentData().putInt("NexusFruitSkillIndex",next);
+  player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Ausgewählte Fähigkeit: "+FruitSkillCatalog.unlocked(profile.fruitId(),profile.level()).get(next).name()));
+ }
  public static void activate(ServerPlayer player){
   FruitProfileData.Profile profile=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   if(profile==null)return;
   var skills=FruitSkillCatalog.unlocked(profile.fruitId(),profile.level());
   if(skills.isEmpty())return;
-  var skill=skills.get(skills.size()-1);
+  int selected=Math.floorMod(player.getPersistentData().getInt("NexusFruitSkillIndex"),skills.size());
+  var skill=skills.get(selected);
   var item=ModItems.FRUIT_ITEMS.get(profile.fruitId());
   if(item==null||player.getCooldowns().isOnCooldown(item.get()))return;
   player.getCooldowns().addCooldown(item.get(),skill.cooldownTicks());
