@@ -13,6 +13,7 @@ import org.lwjgl.glfw.GLFW;
 @Mod.EventBusSubscriber(modid=NexusBayForge.MOD_ID,bus=Mod.EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
 public final class FruitSkillKeybind {
  public static final KeyMapping USE_SKILL=new KeyMapping("key.nexusbay.use_fruit_skill",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_G,"key.categories.nexusbay");
+ public static final KeyMapping CYCLE_SKILL=new KeyMapping("key.nexusbay.cycle_fruit_skill",InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_H,"key.categories.nexusbay");
  private FruitSkillKeybind(){}
- @SubscribeEvent public static void register(RegisterKeyMappingsEvent event){event.register(USE_SKILL);}
+ @SubscribeEvent public static void register(RegisterKeyMappingsEvent event){event.register(USE_SKILL);event.register(CYCLE_SKILL);}
 }
