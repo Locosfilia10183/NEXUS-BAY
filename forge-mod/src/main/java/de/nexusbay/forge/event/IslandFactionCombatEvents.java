@@ -21,7 +21,7 @@ public final class IslandFactionCombatEvents {
         String faction=attacker.getPersistentData().getString("nexusbay_faction");
         if(faction.isBlank())return;
         event.setAmount(event.getAmount()*1.12F);
-        if(attacker.tickCount%80!=0)return;
+        if(attacker.getRandom().nextFloat()>=0.18F)return;
         switch(faction){
             case "arlong_fishmen","fishman_raiders" ->
                 victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,60,0));
