@@ -25,6 +25,6 @@ public final class IslandQuestEvents {
         if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 180.0D * 180.0D) return;
         int count = data.addKill(player.getUUID());
         player.sendSystemMessage(Component.literal("Quest: " + quest.title() + " — " + Math.min(count, quest.requiredKills()) + "/" + quest.requiredKills()));
-        if (count == quest.requiredKills()) player.sendSystemMessage(Component.literal("Questziel erreicht! Nutze /nexus quest claim."));
+        if (count == quest.requiredKills()) player.sendSystemMessage(Component.literal("Questziel erreicht! Kehre zum Questgeber auf dieser Insel zurück."));
     }
 }
