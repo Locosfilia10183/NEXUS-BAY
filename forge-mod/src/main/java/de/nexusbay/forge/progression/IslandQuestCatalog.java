@@ -70,7 +70,13 @@ public final class IslandQuestCatalog {
             new Quest("impel_down_warden", "Herausforderung des Wärters", "Besiege 210 feindliche Monster und bezwinge die Gefängnisbedrohung.", "ImpelDown", 210, 270000, 54000),
             new Quest("marineford_front", "Frontlinie von Marineford", "Besiege 95 feindliche Monster auf dem Schlachtfeld.", "Marineford", 95, 135000, 27000),
             new Quest("marineford_defense", "Verteidigung des Hauptquartiers", "Besiege 155 feindliche Monster und halte die Stellung.", "Marineford", 155, 220000, 44000),
-            new Quest("marineford_war", "Legende der großen Schlacht", "Besiege 230 feindliche Monster und entscheide die Schlacht.", "Marineford", 230, 330000, 66000)
+            new Quest("marineford_war", "Legende der großen Schlacht", "Besiege 230 feindliche Monster und entscheide die Schlacht.", "Marineford", 230, 330000, 66000),
+            new Quest("fishman_depths", "Gefahr aus der Tiefe", "Besiege 100 feindliche Monster auf Fish-Man Island.", "FishManIsland", 100, 155000, 31000),
+            new Quest("fishman_kingdom", "Schutz des Unterwasserreichs", "Besiege 165 feindliche Monster und sichere das Königreich.", "FishManIsland", 165, 250000, 50000),
+            new Quest("fishman_guardian", "Wächter der Fischmenscheninsel", "Besiege 245 feindliche Monster und verteidige die Insel.", "FishManIsland", 245, 375000, 75000),
+            new Quest("punk_hazard_lab", "Gefahr im Forschungsgebiet", "Besiege 105 feindliche Monster auf Punk Hazard.", "PunkHazard", 105, 170000, 34000),
+            new Quest("punk_hazard_elements", "Kampf durch Feuer und Eis", "Besiege 175 feindliche Monster und sichere beide Inselhälften.", "PunkHazard", 175, 275000, 55000),
+            new Quest("punk_hazard_survivor", "Überlebender von Punk Hazard", "Besiege 260 feindliche Monster und überstehe die Inselgefahren.", "PunkHazard", 260, 410000, 82000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
