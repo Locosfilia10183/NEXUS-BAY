@@ -209,7 +209,7 @@ public final class IslandTerrainChunkEvents {
 
         if (islandId.equals("WanoKuni") || islandId.equals("Onigashima")) {
             BlockState castle = islandId.equals("WanoKuni")
-                    ? Blocks.DEEPSLATE_TILES.defaultBlockState() : Blocks.BLACKSTONE_BRICKS.defaultBlockState();
+                    ? Blocks.DEEPSLATE_TILES.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
             for (int ox = -2; ox <= 2; ox++) {
                 for (int oz = -2; oz <= 2; oz++) {
                     if (Math.abs(ox) == 2 || Math.abs(oz) == 2) {
