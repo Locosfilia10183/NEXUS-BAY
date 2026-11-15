@@ -2,6 +2,7 @@ package de.nexusbay.forge.registry;
 
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.item.DevilFruitCaseItem;
+import de.nexusbay.forge.item.DevilFruitItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -35,7 +36,7 @@ public final class ModItems {
         for (var fruit : de.nexusbay.forge.progression.DevilFruitCaseTable.all()) {
             String itemId = fruit.id() + "_fruit";
             items.put(fruit.id(), ITEMS.register(itemId,
-                    () -> new Item(new Item.Properties().stacksTo(1))));
+                    () -> new DevilFruitItem(fruit.id(), fruit.displayName())));
         }
         return Map.copyOf(items);
     }
