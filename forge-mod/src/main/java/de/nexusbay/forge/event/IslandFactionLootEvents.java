@@ -71,5 +71,20 @@ public final class IslandFactionLootEvents {
         }
         event.getDrops().add(new ItemEntity(defeated.level(), defeated.getX(), defeated.getY(),
                 defeated.getZ(), trophy));
+
+        // Elite enemies can drop rare equipment in addition to their faction trophy.
+        if (!rank.isBlank() && defeated.getRandom().nextFloat() < (rank.equals("Katastrophe") ? 0.35F : 0.08F)) {
+            net.minecraft.world.item.Item rare = null;
+            if (faction.equals("onigashima_beasts") || faction.equals("wano_beasts")) {
+                rare = rank.equals("Katastrophe")
+                        ? de.nexusbay.forge.registry.ModItems.ONI_CLEAVER.get()
+                        : de.nexusbay.forge.registry.ModItems.WANO_SAMURAI_HELMET.get();
+            } else if (faction.equals("shells_marine") || faction.equals("marineford_raiders")
+                    || faction.equals("enies_cp9")) {
+                rare = de.nexusbay.forge.registry.ModItems.SEASTONE_SABER.get();
+            }
+            if (rare != null) event.getDrops().add(new ItemEntity(defeated.level(), defeated.getX(),
+                    defeated.getY(), defeated.getZ(), new ItemStack(rare)));
+        }
     }
 }
