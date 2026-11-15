@@ -105,7 +105,24 @@ public final class IslandTerrainChunkEvents {
             if (y < floorY - 1) {
                 state = Blocks.STONE.defaultBlockState();
             } else if (y <= floorY) {
-                state = Blocks.GRAVEL.defaultBlockState();
+                double seabedRoll = vegetationRoll(x + 401, z - 337, seed);
+                IslandCatalog.Destination fishMan = IslandCatalog.find("FishManIsland").orElse(null);
+                IslandCatalog.Destination punkHazard = IslandCatalog.find("PunkHazard").orElse(null);
+                double fishDistance = fishMan == null ? Double.MAX_VALUE
+                        : Math.hypot(x - fishMan.x(), z - fishMan.z());
+                double punkDistance = punkHazard == null ? Double.MAX_VALUE
+                        : Math.hypot(x - punkHazard.x(), z - punkHazard.z());
+                if (fishDistance >= 76.0D && fishDistance <= 145.0D && seabedRoll > 0.35D) {
+                    state = Blocks.PRISMARINE.defaultBlockState();
+                } else if (punkDistance >= 78.0D && punkDistance <= 150.0D && seabedRoll > 0.55D) {
+                    state = Blocks.BLACKSTONE.defaultBlockState();
+                } else if (seabedRoll < 0.16D) {
+                    state = Blocks.SAND.defaultBlockState();
+                } else if (seabedRoll > 0.91D) {
+                    state = Blocks.CLAY.defaultBlockState();
+                } else {
+                    state = Blocks.GRAVEL.defaultBlockState();
+                }
             } else {
                 state = Blocks.WATER.defaultBlockState();
             }
