@@ -166,6 +166,14 @@ public final class IslandTerrainChunkEvents {
             }
         }
 
+        // Simple furnishing makes generated houses usable as village interiors.
+        pos.set(x, baseY + 1, z);
+        chunk.setBlockState(pos, Blocks.BARREL.defaultBlockState(), false);
+        pos.set(x - 1, baseY + 1, z - 1);
+        chunk.setBlockState(pos, Blocks.CRAFTING_TABLE.defaultBlockState(), false);
+        pos.set(x, baseY + 4, z);
+        chunk.setBlockState(pos, Blocks.LANTERN.defaultBlockState(), false);
+
         // A short approach path points toward the island's shoreline.
         for (int step = 1; step <= 3; step++) {
             pos.set(x, baseY, maxZ + step);
