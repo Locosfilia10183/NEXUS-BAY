@@ -10,9 +10,10 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientModEvents {
     private ClientModEvents() {}
-
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.KAIDO.get(), KaidoRenderer::new);
+        event.registerEntityRenderer(ModEntities.CROCODILE.get(), CrocodileRenderer::new);
+        event.registerEntityRenderer(ModEntities.ENEL.get(), EnelRenderer::new);
     }
 }
