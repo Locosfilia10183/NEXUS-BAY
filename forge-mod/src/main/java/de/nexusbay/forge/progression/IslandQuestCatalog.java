@@ -25,7 +25,10 @@ public final class IslandQuestCatalog {
             new Quest("baratie_vanguard", "Stärkste Bedrohung", "Besiege 35 feindliche Monster und sichere das Baratie.", "Baratie", 35, 6000, 1600),
             new Quest("arlong_scourge", "Terror im Arlong Park", "Besiege 15 feindliche Monster im Arlong Park.", "ArlongPark", 15, 2800, 700),
             new Quest("arlong_resistance", "Widerstand des Dorfes", "Besiege 28 feindliche Monster und unterstütze die Bewohner.", "ArlongPark", 28, 5200, 1300),
-            new Quest("arlong_liberator", "Befreier von Arlong Park", "Besiege 45 feindliche Monster und beende den Terror.", "ArlongPark", 45, 8500, 2200)
+            new Quest("arlong_liberator", "Befreier von Arlong Park", "Besiege 45 feindliche Monster und beende den Terror.", "ArlongPark", 45, 8500, 2200),
+            new Quest("loguetown_watch", "Wache am Anfang und Ende", "Besiege 18 feindliche Monster in Loguetown.", "Loguetown", 18, 4200, 1000),
+            new Quest("loguetown_hunters", "Jagd auf Gesetzlose", "Besiege 32 feindliche Monster und halte die Straßen sicher.", "Loguetown", 32, 7800, 1800),
+            new Quest("loguetown_execution", "Unruhe am Richtplatz", "Besiege 50 feindliche Monster und sichere den Richtplatz.", "Loguetown", 50, 12500, 3000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
