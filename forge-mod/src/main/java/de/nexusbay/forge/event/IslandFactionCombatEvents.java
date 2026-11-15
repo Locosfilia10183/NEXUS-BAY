@@ -20,8 +20,23 @@ public final class IslandFactionCombatEvents {
                 || !(event.getEntity() instanceof ServerPlayer victim)) return;
         String faction=attacker.getPersistentData().getString("nexusbay_faction");
         if(faction.isBlank())return;
-        event.setAmount(event.getAmount()*1.12F);
-        if(attacker.getRandom().nextFloat()>=0.18F)return;
+        String rank = attacker.getPersistentData().getString("nexusbay_elite_rank");
+        float rankDamage = rank.equals("Katastrophe") ? 1.65F
+                : rank.equals("Kommandant") ? 1.35F
+                : attacker.getPersistentData().getBoolean("nexusbay_elite") ? 1.18F : 1.0F;
+        event.setAmount(event.getAmount() * 1.12F * rankDamage);
+        float specialChance = rank.equals("Katastrophe") ? 0.55F
+                : rank.equals("Kommandant") ? 0.35F
+                : attacker.getPersistentData().getBoolean("nexusbay_elite") ? 0.25F : 0.18F;
+        if (attacker.getRandom().nextFloat() >= specialChance) return;
+        if (rank.equals("Katastrophe")) {
+            victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1));
+            victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 1));
+            return;
+        }
+        if (rank.equals("Kommandant")) {
+            victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 0));
+        }
         switch(faction){
             case "arlong_fishmen","fishman_raiders" ->
                 victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,60,0));
