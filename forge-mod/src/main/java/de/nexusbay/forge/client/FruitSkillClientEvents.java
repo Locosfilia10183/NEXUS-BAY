@@ -15,5 +15,6 @@ public final class FruitSkillClientEvents {
  @SubscribeEvent public static void clientTick(TickEvent.ClientTickEvent event){
   if(event.phase!=TickEvent.Phase.END||Minecraft.getInstance().player==null)return;
   while(FruitSkillKeybind.USE_SKILL.consumeClick())FruitNetwork.requestSkill();
+  while(FruitSkillKeybind.CYCLE_SKILL.consumeClick())FruitNetwork.cycleSkill();
  }
 }
