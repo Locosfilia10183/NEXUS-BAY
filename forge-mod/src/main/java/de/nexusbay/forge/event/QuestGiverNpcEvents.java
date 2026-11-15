@@ -15,7 +15,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.LevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,11 +26,13 @@ public final class QuestGiverNpcEvents {
     private QuestGiverNpcEvents() {}
 
     @SubscribeEvent
-    public static void onLevelLoad(LevelEvent.Load event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || !level.dimension().equals(ServerLevel.OVERWORLD)) return;
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.serverLevel().getServer().overworld();
         var island = IslandCatalog.find("FooshaVillage").orElse(null);
         if (island == null) return;
         BlockPos pos = new BlockPos(island.x(), island.safeY(), island.z());
+        level.getChunkAt(pos);
         AABB search = new AABB(pos).inflate(12.0D, 8.0D, 12.0D);
         if (!level.getEntitiesOfClass(Villager.class, search, e -> e.getTags().contains(NPC_TAG)).isEmpty()) return;
         Villager npc = EntityType.VILLAGER.create(level);
