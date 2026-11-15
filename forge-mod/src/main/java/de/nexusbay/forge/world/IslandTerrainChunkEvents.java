@@ -112,6 +112,18 @@ public final class IslandTerrainChunkEvents {
             chunk.setBlockState(pos, state, false);
         }
 
+        // A coral belt surrounds Fish-Man Island beneath the sea surface.
+        IslandCatalog.Destination fishMan = IslandCatalog.find("FishManIsland").orElse(null);
+        if (fishMan != null) {
+            double dx = x - fishMan.x();
+            double dz = z - fishMan.z();
+            double distance = Math.sqrt(dx * dx + dz * dz);
+            if (distance >= 76.0D && distance <= 132.0D
+                    && vegetationRoll(x + 307, z - 251, seed) < 0.035D) {
+                placeCoralCluster(chunk, x, z, seed);
+            }
+        }
+
         // Sparse kelp on the seabed gives shallow ocean areas a little life.
         if (vegetationRoll(x + 211, z - 137, seed) < 0.012D) {
             pos.set(x, floorY + 1, z);
@@ -122,6 +134,39 @@ public final class IslandTerrainChunkEvents {
                     if (chunk.getBlockState(pos).getBlock() != Blocks.WATER) break;
                     chunk.setBlockState(pos, Blocks.KELP.defaultBlockState(), false);
                 }
+            }
+        }
+    }
+
+
+    private static void placeCoralCluster(LevelChunk chunk, int x, int z, long seed) {
+        int baseY = -27;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockState[] corals = new BlockState[] {
+                Blocks.TUBE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.BRAIN_CORAL_BLOCK.defaultBlockState(),
+                Blocks.BUBBLE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.FIRE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.HORN_CORAL_BLOCK.defaultBlockState()
+        };
+        int radius = 1 + (int) (vegetationRoll(x - 41, z + 67, seed) * 2.0D);
+        BlockState coral = corals[(int) (vegetationRoll(x + 13, z - 97, seed) * corals.length)];
+        for (int ox = -radius; ox <= radius; ox++) {
+            for (int oz = -radius; oz <= radius; oz++) {
+                if (ox * ox + oz * oz > radius * radius + 1) continue;
+                int px = x + ox;
+                int pz = z + oz;
+                if ((px >> 4) != chunk.getPos().x || (pz >> 4) != chunk.getPos().z) continue;
+                pos.set(px, baseY, pz);
+                if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
+                    chunk.setBlockState(pos, coral, false);
+                }
+            }
+        }
+        if (vegetationRoll(x + 73, z - 31, seed) < 0.45D) {
+            pos.set(x, baseY + 1, z);
+            if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
+                chunk.setBlockState(pos, Blocks.SEA_PICKLE.defaultBlockState(), false);
             }
         }
     }
