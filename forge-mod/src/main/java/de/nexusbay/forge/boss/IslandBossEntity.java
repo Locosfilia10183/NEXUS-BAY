@@ -118,7 +118,7 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
             }
         } else if (target != null && target.isAlive() && specialCooldown <= 0 && distanceToSqr(target) <= 24.0D * 24.0D) {
             specialWarningTicks = 24;
-            level().playSound(null, blockPosition(), SoundEvents.NOTE_BLOCK_PLING, SoundSource.HOSTILE, 1.0F, 0.55F + phase * 0.2F);
+            level().playSound(null, blockPosition(), SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.HOSTILE, 1.0F, 0.55F + phase * 0.2F);
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + getBbHeight() * 0.7D, getZ(), 18, 1.0D, 0.8D, 1.0D, 0.08D);
             }
