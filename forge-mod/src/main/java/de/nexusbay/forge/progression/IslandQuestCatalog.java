@@ -28,7 +28,13 @@ public final class IslandQuestCatalog {
             new Quest("arlong_liberator", "Befreier von Arlong Park", "Besiege 45 feindliche Monster und beende den Terror.", "ArlongPark", 45, 8500, 2200),
             new Quest("loguetown_watch", "Wache am Anfang und Ende", "Besiege 18 feindliche Monster in Loguetown.", "Loguetown", 18, 4200, 1000),
             new Quest("loguetown_hunters", "Jagd auf Gesetzlose", "Besiege 32 feindliche Monster und halte die Straßen sicher.", "Loguetown", 32, 7800, 1800),
-            new Quest("loguetown_execution", "Unruhe am Richtplatz", "Besiege 50 feindliche Monster und sichere den Richtplatz.", "Loguetown", 50, 12500, 3000)
+            new Quest("loguetown_execution", "Unruhe am Richtplatz", "Besiege 50 feindliche Monster und sichere den Richtplatz.", "Loguetown", 50, 12500, 3000),
+            new Quest("reverse_current", "Gegen die Strömung", "Besiege 20 feindliche Monster am Fuße des Reverse Mountain.", "ReverseMountain", 20, 6500, 1400),
+            new Quest("reverse_passage", "Sicherung der Passage", "Besiege 35 feindliche Monster entlang des Aufstiegs.", "ReverseMountain", 35, 10500, 2400),
+            new Quest("reverse_guardian", "Wächter des Aufstiegs", "Besiege 55 feindliche Monster und sichere den Weg zur Grand Line.", "ReverseMountain", 55, 16500, 3800),
+            new Quest("whiskey_bounty", "Kopfgeldjäger von Whiskey Peak", "Besiege 22 feindliche Monster auf der Insel.", "WhiskeyPeak", 22, 8000, 1800),
+            new Quest("whiskey_trap", "Die Falle der Jäger", "Besiege 40 feindliche Monster und überstehe den Hinterhalt.", "WhiskeyPeak", 40, 13500, 3000),
+            new Quest("whiskey_captain", "Kapitän der Kopfgeldjäger", "Besiege 65 feindliche Monster und zerschlage die Jagdtruppe.", "WhiskeyPeak", 65, 21000, 4800)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
