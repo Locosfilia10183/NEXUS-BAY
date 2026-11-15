@@ -24,7 +24,7 @@ public final class IslandQuestEvents {
         var island = IslandCatalog.find(quest.islandId()).orElse(null);
         if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 180.0D * 180.0D) return;
         int count = data.addKill(player.getUUID());
-        player.sendSystemMessage(Component.literal("Quest: " + quest.title() + " — " + Math.min(count, quest.requiredKills()) + "/" + quest.requiredKills()));
+        player.displayClientMessage(Component.literal("Quest: " + quest.title() + " — " + Math.min(count, quest.requiredKills()) + "/" + quest.requiredKills()), true);
         if (count == quest.requiredKills()) player.sendSystemMessage(Component.literal("Questziel erreicht! Kehre zum Questgeber auf dieser Insel zurück."));
     }
 }
