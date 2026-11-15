@@ -40,6 +40,10 @@ public final class QuestGiverNpcEvents {
         npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
         npc.setCustomName(Component.literal("Questgeber von Foosha"));
         npc.setCustomNameVisible(true);
+        npc.setNoAi(true);
+        npc.setInvulnerable(true);
+        npc.setSilent(true);
+        npc.setGlowingTag(true);
         npc.setPersistenceRequired();
         npc.addTag(NPC_TAG);
         level.addFreshEntity(npc);
@@ -47,10 +51,12 @@ public final class QuestGiverNpcEvents {
 
     @SubscribeEvent
     public static void interact(PlayerInteractEvent.EntityInteract event) {
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
         Entity target = event.getTarget();
         if (!(target instanceof Villager npc) || !npc.getTags().contains(NPC_TAG)
                 || !(event.getEntity() instanceof ServerPlayer player)) return;
         event.setCanceled(true);
+        event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
         var data = IslandQuestData.get(player.serverLevel());
         String activeId = data.active(player.getUUID());
         if (!activeId.isBlank()) {
