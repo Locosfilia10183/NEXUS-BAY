@@ -34,7 +34,13 @@ public final class IslandQuestCatalog {
             new Quest("reverse_guardian", "Wächter des Aufstiegs", "Besiege 55 feindliche Monster und sichere den Weg zur Grand Line.", "ReverseMountain", 55, 16500, 3800),
             new Quest("whiskey_bounty", "Kopfgeldjäger von Whiskey Peak", "Besiege 22 feindliche Monster auf der Insel.", "WhiskeyPeak", 22, 8000, 1800),
             new Quest("whiskey_trap", "Die Falle der Jäger", "Besiege 40 feindliche Monster und überstehe den Hinterhalt.", "WhiskeyPeak", 40, 13500, 3000),
-            new Quest("whiskey_captain", "Kapitän der Kopfgeldjäger", "Besiege 65 feindliche Monster und zerschlage die Jagdtruppe.", "WhiskeyPeak", 65, 21000, 4800)
+            new Quest("whiskey_captain", "Kapitän der Kopfgeldjäger", "Besiege 65 feindliche Monster und zerschlage die Jagdtruppe.", "WhiskeyPeak", 65, 21000, 4800),
+            new Quest("little_garden_hunt", "Jagd im Urwald", "Besiege 28 feindliche Monster im Dschungel von Little Garden.", "LittleGarden", 28, 12000, 2600),
+            new Quest("little_garden_survival", "Überleben der Giganteninsel", "Besiege 48 feindliche Monster und halte den Dschungel sicher.", "LittleGarden", 48, 19500, 4200),
+            new Quest("little_garden_champion", "Champion von Little Garden", "Besiege 75 feindliche Monster und beweise deine Stärke.", "LittleGarden", 75, 30000, 6500),
+            new Quest("drum_snow_patrol", "Patrouille im Schnee", "Besiege 30 feindliche Monster auf Drum Island.", "DrumIsland", 30, 15000, 3200),
+            new Quest("drum_medical_supply", "Sicherheit für die Versorgung", "Besiege 52 feindliche Monster und sichere die Wege.", "DrumIsland", 52, 24000, 5200),
+            new Quest("drum_defender", "Beschützer von Drum", "Besiege 80 feindliche Monster und verteidige die Insel.", "DrumIsland", 80, 38000, 8200)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
