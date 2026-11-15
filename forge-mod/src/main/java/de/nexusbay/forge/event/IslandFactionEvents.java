@@ -38,17 +38,44 @@ public final class IslandFactionEvents {
                     < (faction.id().equals("onigashima_beasts") ? 0.22F : 0.08F);
             if (elite) {
                 monster.getPersistentData().putBoolean("nexusbay_elite", true);
+                int level = faction.recommendedLevel();
+                String rank;
+                double healthScale;
+                double damageScale;
+                double speedScale;
+                int resistance;
+                if (level >= 100 && monster.getRandom().nextFloat() < 0.10F) {
+                    rank = "Katastrophe";
+                    healthScale = 5.0D;
+                    damageScale = 2.5D;
+                    speedScale = 1.25D;
+                    resistance = 1;
+                } else if (level >= 60 && monster.getRandom().nextFloat() < 0.30F) {
+                    rank = "Kommandant";
+                    healthScale = 3.5D;
+                    damageScale = 2.0D;
+                    speedScale = 1.20D;
+                    resistance = 1;
+                } else {
+                    rank = "Elite";
+                    healthScale = 2.5D;
+                    damageScale = 1.6D;
+                    speedScale = 1.15D;
+                    resistance = 0;
+                }
+                monster.getPersistentData().putString("nexusbay_elite_rank", rank);
                 var health = monster.getAttribute(Attributes.MAX_HEALTH);
                 if (health != null) {
-                    health.setBaseValue(Math.min(2048.0D, health.getBaseValue() * 2.5D));
+                    health.setBaseValue(Math.min(2048.0D, health.getBaseValue() * healthScale));
                     monster.setHealth(monster.getMaxHealth());
                 }
                 var damage = monster.getAttribute(Attributes.ATTACK_DAMAGE);
-                if (damage != null) damage.setBaseValue(damage.getBaseValue() * 1.6D);
+                if (damage != null) damage.setBaseValue(damage.getBaseValue() * damageScale);
                 var speed = monster.getAttribute(Attributes.MOVEMENT_SPEED);
-                if (speed != null) speed.setBaseValue(speed.getBaseValue() * 1.15D);
-                monster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, Integer.MAX_VALUE, 0));
-                monster.setCustomName(Component.literal("§6Elite §f" + faction.displayName()));
+                if (speed != null) speed.setBaseValue(speed.getBaseValue() * speedScale);
+                monster.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, Integer.MAX_VALUE, resistance));
+                String color = rank.equals("Katastrophe") ? "§c" : rank.equals("Kommandant") ? "§5" : "§6";
+                monster.setCustomName(Component.literal(color + rank + " §f" + faction.displayName()));
             } else if (!monster.hasCustomName()) {
                 monster.setCustomName(Component.literal(faction.displayName()));
             }
