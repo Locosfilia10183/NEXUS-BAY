@@ -28,12 +28,16 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class IslandBossEntity extends Monster implements GeoEntity, BossMob {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final ServerBossEvent bossBar;
     private int specialCooldown = 100;
     private int phase = 1;
+    private final Map<UUID, Float> playerDamage = new HashMap<>();
 
     protected IslandBossEntity(EntityType<? extends Monster> type, Level level, String title, float health,
                                double damage, double speed, BossEvent.BossBarColor color) {
@@ -120,9 +124,14 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
         target.hurt(damageSources().mobAttack(this), damage);
     }
 
+    public Map<UUID, Float> getPlayerDamageContributions() { return Map.copyOf(playerDamage); }
+
     @Override public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
         if (hurt && !level().isClientSide) {
+            if (source.getEntity() instanceof ServerPlayer player) {
+                playerDamage.merge(player.getUUID(), amount, Float::sum);
+            }
             triggerAnim("combat", "hit");
             if (tickCount % 5 == 0) {
                 level().playSound(null, blockPosition(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.45F, 1.6F);
