@@ -26,6 +26,19 @@ public final class ModItems {
     public static final RegistryObject<Item> ALCHEMY_REAGENT = ITEMS.register("alchemy_reagent", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> BERRY_TONIC = ITEMS.register("berry_tonic", () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6F).build())));
 
+    public static final RegistryObject<Item> SEASTONE_SABER = ITEMS.register("seastone_saber",
+            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.DIAMOND, 4, -2.3F, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ONI_CLEAVER = ITEMS.register("oni_cleaver",
+            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.NETHERITE, 5, -2.7F, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WANO_SAMURAI_HELMET = ITEMS.register("wano_samurai_helmet",
+            () -> new net.minecraft.world.item.ArmorItem(net.minecraft.world.item.ArmorMaterials.DIAMOND, net.minecraft.world.item.ArmorItem.Type.HELMET, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WANO_SAMURAI_CHESTPLATE = ITEMS.register("wano_samurai_chestplate",
+            () -> new net.minecraft.world.item.ArmorItem(net.minecraft.world.item.ArmorMaterials.DIAMOND, net.minecraft.world.item.ArmorItem.Type.CHESTPLATE, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WANO_SAMURAI_LEGGINGS = ITEMS.register("wano_samurai_leggings",
+            () -> new net.minecraft.world.item.ArmorItem(net.minecraft.world.item.ArmorMaterials.DIAMOND, net.minecraft.world.item.ArmorItem.Type.LEGGINGS, new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> WANO_SAMURAI_BOOTS = ITEMS.register("wano_samurai_boots",
+            () -> new net.minecraft.world.item.ArmorItem(net.minecraft.world.item.ArmorMaterials.DIAMOND, net.minecraft.world.item.ArmorItem.Type.BOOTS, new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> THREE_SWORD_STYLE_KIT =
             ITEMS.register("three_sword_style_kit", () -> new Item(new Item.Properties().stacksTo(1)));
 
