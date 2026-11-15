@@ -4,6 +4,7 @@ import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.boss.IslandBossEntity;
+import de.nexusbay.forge.boss.RobLucciBossEntity;
 import de.nexusbay.forge.progression.BeliLedger;
 import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.network.chat.Component;
@@ -37,6 +38,10 @@ public final class IslandBossLootEvents {
             killerBeli = 175000L;
             if (killer != null) rewardKiller(killer, level, killerBeli, "ENEL BESIEGT",
                     Items.GOLD_INGOT, 32, ModItems.GORO_GORO_CORE.get(), ModItems.ENEL_GOLDEN_STAFF.get());
+        } else if (boss instanceof RobLucciBossEntity) {
+            killerBeli = 220000L;
+            if (killer != null) rewardKiller(killer, level, killerBeli, "ROB LUCCI BESIEGT",
+                    Items.GOLD_INGOT, 36, ModItems.CP0_MASK.get(), ModItems.ROKUSHIKI_MANUAL.get());
         } else {
             return;
         }
