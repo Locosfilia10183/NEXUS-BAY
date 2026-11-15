@@ -40,7 +40,13 @@ public final class IslandQuestCatalog {
             new Quest("little_garden_champion", "Champion von Little Garden", "Besiege 75 feindliche Monster und beweise deine Stärke.", "LittleGarden", 75, 30000, 6500),
             new Quest("drum_snow_patrol", "Patrouille im Schnee", "Besiege 30 feindliche Monster auf Drum Island.", "DrumIsland", 30, 15000, 3200),
             new Quest("drum_medical_supply", "Sicherheit für die Versorgung", "Besiege 52 feindliche Monster und sichere die Wege.", "DrumIsland", 52, 24000, 5200),
-            new Quest("drum_defender", "Beschützer von Drum", "Besiege 80 feindliche Monster und verteidige die Insel.", "DrumIsland", 80, 38000, 8200)
+            new Quest("drum_defender", "Beschützer von Drum", "Besiege 80 feindliche Monster und verteidige die Insel.", "DrumIsland", 80, 38000, 8200),
+            new Quest("alabasta_rebels", "Unruhe im Wüstenreich", "Besiege 35 feindliche Monster in Alabasta.", "Alabasta", 35, 22000, 4500),
+            new Quest("alabasta_caravan", "Schutz der Karawanen", "Besiege 60 feindliche Monster und sichere die Handelswege.", "Alabasta", 60, 36000, 7200),
+            new Quest("alabasta_guardian", "Retter von Alabasta", "Besiege 90 feindliche Monster und verteidige das Königreich.", "Alabasta", 90, 55000, 11000),
+            new Quest("jaya_raiders", "Räuber von Jaya", "Besiege 38 feindliche Monster in Mock Town und Umgebung.", "Jaya", 38, 26000, 5200),
+            new Quest("jaya_rivals", "Kampf um Jaya", "Besiege 65 feindliche Monster und sichere die Insel.", "Jaya", 65, 42000, 8500),
+            new Quest("jaya_champion", "Champion von Jaya", "Besiege 100 feindliche Monster und beweise deine Stärke.", "Jaya", 100, 65000, 13000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
