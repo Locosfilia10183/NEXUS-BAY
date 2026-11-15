@@ -43,6 +43,14 @@ public final class ModItems {
             () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.NETHERITE, 7, -3.2F, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> AZURE_DRAGON_CORE = ITEMS.register("azure_dragon_core",
             () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> CROCODILE_HOOK = ITEMS.register("crocodile_hook",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> SAND_SAND_CORE = ITEMS.register("sand_sand_core",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> ENEL_GOLDEN_STAFF = ITEMS.register("enel_golden_staff",
+            () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<Item> GORO_GORO_CORE = ITEMS.register("goro_goro_core",
+            () -> new Item(new Item.Properties().stacksTo(1)));
 
     public static final RegistryObject<Item> THREE_SWORD_STYLE_KIT =
             ITEMS.register("three_sword_style_kit", () -> new Item(new Item.Properties().stacksTo(1)));
