@@ -14,47 +14,53 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/** Spawns the Foosha quest giver and handles all quest dialogue through NPC interaction. */
+/** Spawns island-specific quest givers only when a player visits their island. */
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
 public final class QuestGiverNpcEvents {
-    private static final String NPC_TAG = "nexusbay_foosha_quest_giver";
+    private static final String TAG_PREFIX = "nexusbay_questgiver_";
     private QuestGiverNpcEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel().getServer().overworld();
-        var island = IslandCatalog.find("FooshaVillage").orElse(null);
-        if (island == null) return;
-        BlockPos pos = new BlockPos(island.x(), island.safeY(), island.z());
-        level.getChunkAt(pos);
-        AABB search = new AABB(pos).inflate(12.0D, 8.0D, 12.0D);
-        if (!level.getEntitiesOfClass(Villager.class, search, e -> e.getTags().contains(NPC_TAG)).isEmpty()) return;
-        Villager npc = EntityType.VILLAGER.create(level);
-        if (npc == null) return;
-        npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
-        npc.setCustomName(Component.literal("Questgeber von Foosha"));
-        npc.setCustomNameVisible(true);
-        npc.setNoAi(true);
-        npc.setInvulnerable(true);
-        npc.setSilent(true);
-        npc.setGlowingTag(true);
-        npc.setPersistenceRequired();
-        npc.addTag(NPC_TAG);
-        level.addFreshEntity(npc);
+    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
+                || player.tickCount % 40 != 0 || player.level().dimension() != net.minecraft.world.level.Level.OVERWORLD) return;
+        ServerLevel level = player.serverLevel();
+        for (String islandId : new String[]{"FooshaVillage", "ShellsTown"}) {
+            var island = IslandCatalog.find(islandId).orElse(null);
+            if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 128.0D * 128.0D) continue;
+            BlockPos pos = new BlockPos(island.x(), island.safeY(), island.z());
+            level.getChunkAt(pos);
+            String tag = TAG_PREFIX + islandId;
+            AABB search = new AABB(pos).inflate(12.0D, 8.0D, 12.0D);
+            if (!level.getEntitiesOfClass(Villager.class, search, e -> e.getTags().contains(tag)).isEmpty()) continue;
+            Villager npc = EntityType.VILLAGER.create(level);
+            if (npc == null) continue;
+            npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
+            npc.setCustomName(Component.literal("Questgeber von " + island.displayName()));
+            npc.setCustomNameVisible(true);
+            npc.setNoAi(true);
+            npc.setInvulnerable(true);
+            npc.setSilent(true);
+            npc.setGlowingTag(true);
+            npc.setPersistenceRequired();
+            npc.addTag(tag);
+            level.addFreshEntity(npc);
+        }
     }
 
     @SubscribeEvent
     public static void interact(PlayerInteractEvent.EntityInteract event) {
-        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
-        Entity target = event.getTarget();
-        if (!(target instanceof Villager npc) || !npc.getTags().contains(NPC_TAG)
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND
+                || !(event.getTarget() instanceof Villager npc)
                 || !(event.getEntity() instanceof ServerPlayer player)) return;
+        String islandId = npc.getTags().stream().filter(tag -> tag.startsWith(TAG_PREFIX))
+                .map(tag -> tag.substring(TAG_PREFIX.length())).findFirst().orElse("");
+        if (islandId.isBlank()) return;
         event.setCanceled(true);
         event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
         var data = IslandQuestData.get(player.serverLevel());
@@ -62,13 +68,16 @@ public final class QuestGiverNpcEvents {
         if (!activeId.isBlank()) {
             var active = IslandQuestCatalog.find(activeId).orElse(null);
             if (active == null) {
-                player.sendSystemMessage(Component.literal("Dein Questfortschritt ist ungültig. Bitte sprich erneut mit mir."));
+                player.sendSystemMessage(Component.literal("Dein Questfortschritt konnte nicht zugeordnet werden."));
+                return;
+            }
+            if (!active.islandId().equals(islandId)) {
+                player.sendSystemMessage(Component.literal("Du hast noch eine aktive Aufgabe auf " + IslandCatalog.find(active.islandId()).map(IslandCatalog.Destination::displayName).orElse(active.islandId()) + "."));
                 return;
             }
             int progress = data.progress(player.getUUID());
             if (progress < active.requiredKills()) {
-                player.sendSystemMessage(Component.literal("Questgeber: " + active.title()));
-                player.sendSystemMessage(Component.literal(active.description()));
+                player.sendSystemMessage(Component.literal(active.title() + " — " + active.description()));
                 player.sendSystemMessage(Component.literal("Fortschritt: " + progress + "/" + active.requiredKills()));
                 return;
             }
@@ -87,16 +96,15 @@ public final class QuestGiverNpcEvents {
             return;
         }
         var next = IslandQuestCatalog.all().stream()
-                .filter(q -> q.islandId().equals("FooshaVillage"))
+                .filter(q -> q.islandId().equals(islandId))
                 .filter(q -> !data.completed(player.getUUID(), q.id()))
                 .findFirst().orElse(null);
         if (next == null) {
-            player.sendSystemMessage(Component.literal("Questgeber: Du hast alle Aufgaben von Foosha abgeschlossen. Gute Arbeit!"));
+            player.sendSystemMessage(Component.literal("Du hast alle Aufgaben auf dieser Insel abgeschlossen. Gute Arbeit!"));
             return;
         }
         if (!data.accept(player.getUUID(), next.id())) return;
-        player.sendSystemMessage(Component.literal("Questgeber von Foosha: Ich habe eine Aufgabe für dich!"));
-        player.sendSystemMessage(Component.literal(next.title()));
+        player.sendSystemMessage(Component.literal("Ich habe eine Aufgabe für dich: " + next.title()));
         player.sendSystemMessage(Component.literal(next.description()));
         player.sendSystemMessage(Component.literal("Belohnung: " + next.beliReward() + " Beli"));
         player.sendSystemMessage(Component.literal("Besiege die Gegner und sprich danach wieder mit mir."));
