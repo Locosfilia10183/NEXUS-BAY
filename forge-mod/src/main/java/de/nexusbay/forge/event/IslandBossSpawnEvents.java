@@ -18,7 +18,7 @@ public final class IslandBossSpawnEvents {
     private IslandBossSpawnEvents() {}
     @SubscribeEvent public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
-                || !(player.level() instanceof ServerLevel level) || level.dimension() != LevelKey.OVERWORLD) return;
+                || !(player.level() instanceof ServerLevel level) || level.dimension() != net.minecraft.world.level.Level.OVERWORLD) return;
         if (player.tickCount % 40 != 0) return;
         trySpawnCrocodile(player, level);
         trySpawnEnel(player, level);
@@ -45,6 +45,4 @@ public final class IslandBossSpawnEvents {
             player.displayClientMessage(Component.literal(message), false);
         }
     }
-    private static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> LevelKey =
-            net.minecraft.world.level.Level.OVERWORLD;
 }
