@@ -21,6 +21,8 @@ public final class IslandQuestEvents {
         String id = data.active(player.getUUID());
         var quest = IslandQuestCatalog.find(id).orElse(null);
         if (quest == null) return;
+        String factionIsland = event.getEntity().getPersistentData().getString("nexusbay_faction_island");
+        if (!quest.islandId().equals(factionIsland)) return;
         var island = IslandCatalog.find(quest.islandId()).orElse(null);
         if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 180.0D * 180.0D) return;
         int count = data.addKill(player.getUUID());
