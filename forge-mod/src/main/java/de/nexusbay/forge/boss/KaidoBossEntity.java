@@ -1140,6 +1140,17 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         ItemStack trophy = new ItemStack(Items.NETHER_STAR);
         trophy.setHoverName(Component.literal("§cTrophäe: Kaido, König der Bestien"));
         spawnAtLocation(trophy);
+
+        if (random.nextDouble() < 0.08D) {
+            ItemStack kanabo = new ItemStack(de.nexusbay.forge.registry.ModItems.KAIDO_KANABO.get());
+            kanabo.setHoverName(Component.literal("§6Hassaikai – Kaidos Kanabo"));
+            spawnAtLocation(kanabo);
+        }
+        if (random.nextDouble() < 0.025D) {
+            ItemStack core = new ItemStack(de.nexusbay.forge.registry.ModItems.AZURE_DRAGON_CORE.get());
+            core.setHoverName(Component.literal("§dAzurblauer Drachenkern"));
+            spawnAtLocation(core);
+        }
     }
 
     private void giveParticipationReward(ServerPlayer player) {
