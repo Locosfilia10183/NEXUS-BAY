@@ -70,6 +70,11 @@ public final class IslandTerrainChunkEvents {
                     placeVegetation(chunk, x, surfaceY + 1, z, sample.vegetation(), seed);
                     touched = true;
                 }
+                if (sample.normalizedDistance() < 0.9D
+                        && vegetationRoll(x + 31, z - 19, seed) < 0.018D) {
+                    placeRockOutcrop(chunk, x, surfaceY + 1, z, sample.surfaceBlock(), seed);
+                    touched = true;
+                }
                 touched = true;
             }
         }
@@ -78,6 +83,33 @@ public final class IslandTerrainChunkEvents {
         if (touched) chunk.setUnsaved(true);
     }
 
+
+
+    private static void placeRockOutcrop(LevelChunk chunk, int x, int y, int z, String surfaceId, long seed) {
+        BlockState rock = surfaceId.contains("sand") ? Blocks.SANDSTONE.defaultBlockState()
+                : surfaceId.contains("snow") ? Blocks.PACKED_ICE.defaultBlockState()
+                : surfaceId.contains("basalt") || surfaceId.contains("deepslate")
+                ? Blocks.BASALT.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
+        int radius = 1 + (int) (vegetationRoll(x - 13, z + 23, seed) * 2.0D);
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int ox = -radius; ox <= radius; ox++) {
+            for (int oz = -radius; oz <= radius; oz++) {
+                int px = x + ox;
+                int pz = z + oz;
+                if ((px >> 4) != chunk.getPos().x || (pz >> 4) != chunk.getPos().z) continue;
+                double distance = Math.sqrt(ox * ox + oz * oz);
+                if (distance > radius + 0.15D) continue;
+                int height = distance < 0.75D ? 2 : 1;
+                for (int dy = 0; dy < height; dy++) {
+                    pos.set(px, y + dy, pz);
+                    if (pos.getY() >= chunk.getMaxBuildHeight()) continue;
+                    if (chunk.getBlockState(pos).isAir()) {
+                        chunk.setBlockState(pos, rock, false);
+                    }
+                }
+            }
+        }
+    }
 
     private static double vegetationChance(String type) {
         return switch (type) {
