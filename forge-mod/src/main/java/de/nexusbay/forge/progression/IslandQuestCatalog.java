@@ -58,7 +58,13 @@ public final class IslandQuestCatalog {
             new Quest("enies_lobby_judgment", "Urteil über Enies Lobby", "Besiege 140 feindliche Monster und bezwinge die Verteidigung.", "EniesLobby", 140, 130000, 26000),
             new Quest("thriller_bark_shadows", "Schatten im Nebel", "Besiege 60 feindliche Monster auf Thriller Bark.", "ThrillerBark", 60, 60000, 12000),
             new Quest("thriller_bark_survivors", "Überleben auf dem Geisterschiff", "Besiege 100 feindliche Monster und sichere den Friedhof.", "ThrillerBark", 100, 98000, 19500),
-            new Quest("thriller_bark_nightmare", "Albtraum von Thriller Bark", "Besiege 155 feindliche Monster und beende den Spuk.", "ThrillerBark", 155, 150000, 30000)
+            new Quest("thriller_bark_nightmare", "Albtraum von Thriller Bark", "Besiege 155 feindliche Monster und beende den Spuk.", "ThrillerBark", 155, 150000, 30000),
+            new Quest("sabaody_bounty", "Kopfgeldjagd auf Sabaody", "Besiege 70 feindliche Monster im Archipel.", "Sabaody", 70, 78000, 15500),
+            new Quest("sabaody_chaos", "Chaos im Archipel", "Besiege 115 feindliche Monster und sichere die Groves.", "Sabaody", 115, 125000, 25000),
+            new Quest("sabaody_supernova", "Prüfung der Supernova", "Besiege 175 feindliche Monster und werde zur Legende des Archipels.", "Sabaody", 175, 190000, 38000),
+            new Quest("amazon_lily_intruders", "Eindringlinge auf Amazon Lily", "Besiege 75 feindliche Monster auf der Insel.", "AmazonLily", 75, 90000, 18000),
+            new Quest("amazon_lily_defense", "Schutz der Kriegerinnen", "Besiege 125 feindliche Monster und verteidige die Insel.", "AmazonLily", 125, 145000, 29000),
+            new Quest("amazon_lily_champion", "Champion von Amazon Lily", "Besiege 190 feindliche Monster und beweise deine Stärke.", "AmazonLily", 190, 220000, 44000)
     );
     private IslandQuestCatalog() {}
     public static List<Quest> all() { return QUESTS; }
