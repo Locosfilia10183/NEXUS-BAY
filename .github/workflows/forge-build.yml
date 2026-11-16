@@ -13,6 +13,9 @@ on:
       - ".github/workflows/forge-build.yml"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,3 +45,12 @@ jobs:
           name: nexus-bay-forge
           path: forge-mod/build/libs/*.jar
           if-no-files-found: error
+
+      - name: Publish installable GitHub release
+        if: success() && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nexusbay-build-${{ github.run_number }}
+          name: NEXUS-BAY Build ${{ github.run_number }}
+          generate_release_notes: true
+          files: forge-mod/build/libs/nexus-bay-forge-*.jar
