@@ -5,7 +5,7 @@ REPO="Locosfilia10183/NEXUS-BAY"
 SERVICE="${NEXUS_BAY_SERVICE:-nexus-bay}"
 SERVER_DIR="${NEXUS_BAY_DIR:-/opt/nexus-bay}"
 PLUGIN_FILE="$SERVER_DIR/plugins/NEXUS-BAY-Core.jar"
-API="https://api.github.com/repos/$REPO/releases/latest"
+API="https://api.github.com/repos/$REPO/releases?per_page=100"
 TMP_DIR="$(mktemp -d)"
 cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
@@ -27,12 +27,15 @@ CURRENT="$(unzip -p "$PLUGIN_FILE" plugin.yml 2>/dev/null | sed -n 's/^version: 
 echo "NEXUS-BAY Updateverwaltung"
 echo "Installierte Version: $CURRENT"
 
-curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: NEXUS-BAY-Updater/1.0" "$API" -o "$TMP_DIR/release.json"
+# Nur stabile Server-Releases verwenden; Forge-Releases dürfen den Server-Updater nicht blockieren.
+curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: NEXUS-BAY-Updater/1.1" "$API" -o "$TMP_DIR/releases.json"
+jq '[.[] | select(.draft == false and .prerelease == false and (.tag_name | startswith("server-v")))] | sort_by(.created_at) | last // empty' "$TMP_DIR/releases.json" > "$TMP_DIR/release.json"
+[[ -s "$TMP_DIR/release.json" ]] || fail "Kein stabiler NEXUS-BAY-Server-Release gefunden."
 RELEASE_TAG="$(jq -r '.tag_name // empty' "$TMP_DIR/release.json")"
 LATEST="$(jq -r '.assets[] | select(.name=="update-manifest.json") | .browser_download_url' "$TMP_DIR/release.json" | head -n1)"
-[[ -n "$LATEST" && "$LATEST" != "null" ]] || fail "Die neueste GitHub-Version enthält kein Update-Manifest."
+[[ -n "$LATEST" && "$LATEST" != "null" ]] || fail "Der neueste Server-Release enthält kein Update-Manifest."
 
-curl -fsSL -H "User-Agent: NEXUS-BAY-Updater/1.0" "$LATEST" -o "$TMP_DIR/update-manifest.json"
+curl -fsSL -H "User-Agent: NEXUS-BAY-Updater/1.1" "$LATEST" -o "$TMP_DIR/update-manifest.json"
 VERSION="$(jq -r '.version // empty' "$TMP_DIR/update-manifest.json")"
 EXPECTED_SHA="$(jq -r '.sha256 // empty' "$TMP_DIR/update-manifest.json")"
 ASSET_NAME="$(jq -r '.asset // "NEXUS-BAY-Core.jar"' "$TMP_DIR/update-manifest.json")"
@@ -57,7 +60,7 @@ echo "Status: Update verfügbar ($CURRENT -> $VERSION)."
 command -v systemctl >/dev/null 2>&1 || fail "systemctl nicht gefunden."
 command -v install >/dev/null 2>&1 || fail "install nicht gefunden."
 
-curl -fL -H "User-Agent: NEXUS-BAY-Updater/1.0" "$ASSET_URL" -o "$TMP_DIR/$ASSET_NAME"
+curl -fL -H "User-Agent: NEXUS-BAY-Updater/1.1" "$ASSET_URL" -o "$TMP_DIR/$ASSET_NAME"
 ACTUAL_SHA="$(sha256sum "$TMP_DIR/$ASSET_NAME" | awk '{print $1}')"
 [[ "$ACTUAL_SHA" == "$EXPECTED_SHA" ]] || fail "SHA-256-Prüfung fehlgeschlagen – Installation abgebrochen."
 NEW_VERSION="$(unzip -p "$TMP_DIR/$ASSET_NAME" plugin.yml 2>/dev/null | sed -n 's/^version: *//p' | head -n1 | tr -d "'\"")"
