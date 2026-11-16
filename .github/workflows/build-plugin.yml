@@ -73,6 +73,8 @@ jobs:
           tag_name: server-v${{ steps.meta.outputs.version }}-build-${{ github.run_number }}
           name: NEXUS-BAY Server ${{ steps.meta.outputs.version }} (Build ${{ github.run_number }})
           generate_release_notes: true
+          draft: false
+          prerelease: false
           files: |
             plugin/target/NEXUS-BAY-Core.jar
             update-manifest.json
