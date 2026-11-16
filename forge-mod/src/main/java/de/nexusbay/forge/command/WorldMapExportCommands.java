@@ -34,6 +34,7 @@ public final class WorldMapExportCommands {
     private static final int SAMPLE_STEP = 16;
     private static final int ISLAND_SCAN_RADIUS = 96;
     private static long lastExportTick = Long.MIN_VALUE;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger("NEXUS-BAY");
 
     private WorldMapExportCommands() {}
 
@@ -131,7 +132,7 @@ public final class WorldMapExportCommands {
                 Files.move(temporary, output, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException exception) {
-            NexusBayForge.LOGGER.error("NEXUS-BAY map snapshot could not be written", exception);
+            LOGGER.error("NEXUS-BAY map snapshot could not be written", exception);
         }
     }
 }
