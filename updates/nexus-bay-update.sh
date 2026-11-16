@@ -14,11 +14,18 @@ fail() { echo "FEHLER: $*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || fail "Programm fehlt: $1"; }
 for tool in curl jq unzip sha256sum; do need "$tool"; done
 
-[[ "${1:-check}" == "check" || "${1:-}" == "install" ]] || {
-  echo "Verwendung: sudo nexus-bay-update [check|install]"
+[[ "${1:-check}" == "check" || "${1:-}" == "install" || "${1:-}" == "history" ]] || {
+  echo "Verwendung: nexus-bay-update [check|install|history]"
   exit 2
 }
 ACTION="${1:-check}"
+
+if [[ "$ACTION" == "history" ]]; then
+  curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: NEXUS-BAY-Updater/1.1" "$API" -o "$TMP_DIR/releases.json"
+  echo "NEXUS-BAY Server – letzte stabile Releases"
+  jq -r '[.[] | select(.draft == false and .prerelease == false and (.tag_name | startswith("server-v")))] | sort_by(.created_at) | reverse | .[:10] | .[] | [.name, .published_at, .tag_name] | @tsv' "$TMP_DIR/releases.json"
+  exit 0
+fi
 
 [[ -f "$PLUGIN_FILE" ]] || fail "Core-Plugin nicht gefunden: $PLUGIN_FILE"
 CURRENT="$(unzip -p "$PLUGIN_FILE" plugin.yml 2>/dev/null | sed -n 's/^version: *//p' | head -n1 | tr -d "'\"")"
