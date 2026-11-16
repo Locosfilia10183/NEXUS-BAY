@@ -25,6 +25,44 @@ public class KizaruBossEntity extends IslandBossEntity {
 
     @Override protected String animationKey() { return "kizaru"; }
 
+    private int lightParryCooldown = 0;
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (lightParryCooldown > 0) lightParryCooldown--;
+    }
+
+    @Override
+    public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+        LivingEntity attacker = source.getEntity() instanceof LivingEntity living ? living : null;
+        boolean directMelee = attacker != null && source.getDirectEntity() == attacker
+                && attacker != this && !(attacker instanceof IslandBossEntity);
+        if (!level().isClientSide && directMelee && lightParryCooldown <= 0
+                && getHealth() / Math.max(1.0F, getMaxHealth()) < 0.90F
+                && random.nextFloat() < 0.28F) {
+            lightParryCooldown = 70;
+            triggerAnim("combat", "sword_slash");
+            boolean survived = super.hurt(source, Math.max(1.0F, amount * 0.18F));
+            attacker.hurt(damageSources().mobAttack(this), 38.0F);
+            Vec3 away = attacker.position().subtract(position()).normalize();
+            attacker.knockback(1.15D, -away.x, -away.z);
+            if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                Vec3 center = position().add(0.0D, getBbHeight() * 0.65D, 0.0D);
+                server.sendParticles(ParticleTypes.END_ROD, center.x, center.y, center.z,
+                        24, 0.55D, 0.7D, 0.55D, 0.035D);
+                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x, center.y, center.z,
+                        18, 0.45D, 0.55D, 0.45D, 0.06D);
+                Vec3 clash = attacker.getBoundingBox().getCenter();
+                server.sendParticles(ParticleTypes.FLASH, clash.x, clash.y, clash.z, 1, 0, 0, 0, 0);
+            }
+            level().playSound(null, blockPosition(), SoundEvents.SHIELD_BLOCK,
+                    SoundSource.HOSTILE, 1.2F, 1.75F);
+            return survived;
+        }
+        return super.hurt(source, amount);
+    }
+
     @Override protected void performSpecial(LivingEntity target) {
         int phase = phase();
         if (phase == 1) {
