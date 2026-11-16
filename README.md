@@ -38,6 +38,23 @@ sudo systemctl start nexus-bay
 sudo systemctl status nexus-bay
 ```
 
+## Update management
+
+Successful NEXUS-BAY Core builds are versioned from `plugin/src/main/resources/plugin.yml`, packaged by GitHub Actions and published as server-update releases with an SHA-256 checksum and `update-manifest.json`. The Maven package version is checked against the plugin version before a release can be published.
+
+The installer places the update utility at `/usr/local/bin/nexus-bay-update`:
+
+```bash
+sudo nexus-bay-update check
+sudo nexus-bay-update install
+```
+
+- `check` reads the installed plugin version, finds the newest stable GitHub release and reports whether an update exists. It does not change the server.
+- `install` downloads the matching release, verifies its SHA-256 and embedded plugin version, backs up the current JAR, replaces it and restarts the service. If the service fails to start, it restores the previous JAR.
+- Update target defaults to `/opt/nexus-bay/plugins/NEXUS-BAY-Core.jar` and service `nexus-bay`. Advanced installs can override these with `NEXUS_BAY_DIR` and `NEXUS_BAY_SERVICE`.
+
+This first update channel manages the NEXUS-BAY Core plugin only. Paper, Geyser, Floodgate and the full server installation remain unchanged; automated full-server upgrades will be added separately with dedicated backups and compatibility checks.
+ 
 ## Connect
 - Java: `YOUR_VPS_IP:25565` (or a DNS name pointing to the VPS)
 - Bedrock: DNS name or `YOUR_VPS_IP`, port `19132`
