@@ -38,7 +38,7 @@ curl -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --
 chmod 644 /etc/apt/keyrings/adoptium.gpg
 echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb $(. /etc/os-release && echo $VERSION_CODENAME) main" > /etc/apt/sources.list.d/adoptium.list
 apt-get update
-apt-get install -y curl jq ca-certificates git maven temurin-25-jdk
+apt-get install -y curl jq unzip ca-certificates git maven temurin-25-jdk
 JAVA_BIN="$(command -v java)"
 BUILDS="$(curl -fsSL -H 'User-Agent: NEXUS-BAY/1.0 (server installer)' "$PAPER_API/projects/paper/versions/$MC_VERSION/builds")"
 BUILD="$(echo "$BUILDS" | jq -r '[.[] | select(.channel == "STABLE")] | first | .id // empty')"
