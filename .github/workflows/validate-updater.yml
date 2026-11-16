@@ -1,0 +1,28 @@
+name: Validate NEXUS-BAY updater scripts
+
+on:
+  push:
+    branches: [forge-development]
+    paths:
+      - "updates/**"
+      - "install.sh"
+      - ".github/workflows/validate-updater.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shell-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Validate shell syntax
+        run: |
+          bash -n install.sh
+          bash -n updates/nexus-bay-update.sh
+      - name: Check required updater dependencies are installed
+        run: |
+          grep -qE 'apt-get install -y .*unzip' install.sh
+          grep -q 'for tool in curl jq unzip sha256sum' updates/nexus-bay-update.sh
