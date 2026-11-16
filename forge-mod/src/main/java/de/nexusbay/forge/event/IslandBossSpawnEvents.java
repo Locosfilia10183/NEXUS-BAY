@@ -4,6 +4,7 @@ import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.boss.RobLucciBossEntity;
+import de.nexusbay.forge.boss.KizaruBossEntity;
 import de.nexusbay.forge.registry.ModEntities;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +25,7 @@ public final class IslandBossSpawnEvents {
         trySpawnCrocodile(player, level);
         trySpawnEnel(player, level);
         trySpawnLucci(player, level);
+        trySpawnKizaru(player, level);
     }
     private static void trySpawnCrocodile(ServerPlayer player, ServerLevel level) {
         trySpawn(player, level, 1472.5D, 82.0D, 832.5D, 78.0D, ModEntities.CROCODILE.get(),
@@ -36,6 +38,10 @@ public final class IslandBossSpawnEvents {
     private static void trySpawnLucci(ServerPlayer player, ServerLevel level) {
         trySpawn(player, level, 2752.5D, 82.0D, 832.5D, 78.0D, ModEntities.ROB_LUCCI.get(),
                 RobLucciBossEntity.class, "§cROB LUCCI §7hat Enies Lobby betreten!");
+    }
+    private static void trySpawnKizaru(ServerPlayer player, ServerLevel level) {
+        trySpawn(player, level, 832.5D, 82.0D, 1152.5D, 78.0D, ModEntities.KIZARU.get(),
+                KizaruBossEntity.class, "§eADMIRAL KIZARU §7ist auf Sabaody erschienen!");
     }
     private static <T extends Entity> void trySpawn(ServerPlayer player, ServerLevel level,
             double x, double y, double z, double triggerRadius, net.minecraft.world.entity.EntityType<T> type,
