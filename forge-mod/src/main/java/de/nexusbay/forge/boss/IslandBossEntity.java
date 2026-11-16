@@ -81,6 +81,7 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
                 .triggerableAnim("special", RawAnimation.begin().thenPlay("animation." + animationKey() + ".special"))
                 .triggerableAnim("sword_slash", RawAnimation.begin().thenPlay("animation." + animationKey() + ".sword_slash"))
                 .triggerableAnim("sword_draw", RawAnimation.begin().thenPlay("animation." + animationKey() + ".sword_draw"))
+                .triggerableAnim("light_speed", RawAnimation.begin().thenPlay("animation." + animationKey() + ".light_speed"))
                 .triggerableAnim("hit", RawAnimation.begin().thenPlay("animation." + animationKey() + ".hit")));
     }
 
