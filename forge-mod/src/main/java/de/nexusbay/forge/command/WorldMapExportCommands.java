@@ -4,23 +4,18 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.world.IslandCatalog;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import com.mojang.brigadier.Command;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,31 +24,33 @@ import java.nio.file.Path;
 import java.time.Instant;
 
 /**
- * Read-only atlas snapshot exporter. It only inspects chunks that are already
- * loaded; it never requests a chunk load and never changes blocks or world data.
+ * Automatic, read-only world-map snapshot writer.
+ * Runs every 20 seconds while the server is online. It only inspects chunks
+ * that are already loaded and never requests chunk loads or edits world data.
  */
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
 public final class WorldMapExportCommands {
-    private static final int SAMPLE_STEP = 8;
-    private static final int ISLAND_SCAN_RADIUS = 112;
+    private static final long EXPORT_INTERVAL_TICKS = 400L;
+    private static final int SAMPLE_STEP = 16;
+    private static final int ISLAND_SCAN_RADIUS = 96;
+    private static long lastExportTick = Long.MIN_VALUE;
 
     private WorldMapExportCommands() {}
 
     @SubscribeEvent
-    public static void register(RegisterCommandsEvent event) {
-        event.getDispatcher().register(net.minecraft.commands.Commands.literal("nexusmap")
-                .requires(source -> source.hasPermission(2))
-                .then(net.minecraft.commands.Commands.literal("export")
-                        .executes(context -> export(context.getSource().getServer(), context.getSource()))));
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        MinecraftServer server = event.getServer();
+        ServerLevel overworld = server.getLevel(Level.OVERWORLD);
+        if (overworld == null) return;
+
+        long tick = overworld.getGameTime();
+        if (tick - lastExportTick < EXPORT_INTERVAL_TICKS) return;
+        lastExportTick = tick;
+        writeSnapshot(server, overworld);
     }
 
-    private static int export(MinecraftServer server, CommandSourceStack source) {
-        ServerLevel level = server.getLevel(Level.OVERWORLD);
-        if (level == null) {
-            source.sendFailure(Component.literal("Overworld nicht gefunden."));
-            return 0;
-        }
-
+    private static void writeSnapshot(MinecraftServer server, ServerLevel level) {
         JsonObject root = new JsonObject();
         root.addProperty("schema", 1);
         root.addProperty("generatedAt", Instant.now().toString());
@@ -94,7 +91,8 @@ public final class WorldMapExportCommands {
                     }
 
                     BlockPos surfacePos = new BlockPos(x, surfaceY - 1, z);
-                    String blockId = BuiltInRegistries.BLOCK.getKey(chunk.getBlockState(surfacePos).getBlock()).toString();
+                    String blockId = BuiltInRegistries.BLOCK.getKey(
+                            chunk.getBlockState(surfacePos).getBlock()).toString();
                     JsonObject point = new JsonObject();
                     point.addProperty("islandId", island.id());
                     point.addProperty("x", x);
@@ -118,25 +116,22 @@ public final class WorldMapExportCommands {
             players.add(marker);
         }
         root.add("players", players);
-
         root.addProperty("loadedTerrainSamples", loadedSamples);
         root.addProperty("unloadedTerrainSamplesSkipped", skippedSamples);
 
         Path output = server.getWorldPath(LevelResource.ROOT).resolve("nexusbay-map.json");
         try {
-            Files.writeString(output, root.toString(), StandardCharsets.UTF_8);
+            Files.createDirectories(output.getParent());
+            Path temporary = output.resolveSibling("nexusbay-map.json.tmp");
+            Files.writeString(temporary, root.toString(), StandardCharsets.UTF_8);
+            try {
+                Files.move(temporary, output, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+                Files.move(temporary, output, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException exception) {
-            source.sendFailure(Component.literal("Kartenexport fehlgeschlagen: " + exception.getMessage()));
-            return 0;
+            NexusBayForge.LOGGER.error("NEXUS-BAY map snapshot could not be written", exception);
         }
-
-        Path finalOutput = output;
-        int finalLoadedSamples = loadedSamples;
-        int finalSkippedSamples = skippedSamples;
-        source.sendSuccess(() -> Component.literal("NEXUS-BAY-Kartensnapshot gespeichert: "
-                + finalOutput.toAbsolutePath() + " | " + finalLoadedSamples
-                + " echte Terrain-Punkte | " + finalSkippedSamples
-                + " nicht geladene Punkte übersprungen. Welt wurde nicht verändert."), false);
-        return Command.SINGLE_SUCCESS;
     }
 }
