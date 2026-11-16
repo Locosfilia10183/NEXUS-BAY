@@ -26,7 +26,6 @@ public class KizaruBossEntity extends IslandBossEntity {
     @Override protected String animationKey() { return "kizaru"; }
 
     @Override protected void performSpecial(LivingEntity target) {
-        triggerAnim("combat", phase() == 2 ? "sword_slash" : "special");
         int phase = phase();
         if (phase == 1) {
             triggerAnim("combat", "light_speed");
@@ -45,7 +44,7 @@ public class KizaruBossEntity extends IslandBossEntity {
             target.hurt(damageSources().mobAttack(this), 125.0F);
             target.knockback(1.0D, getX() - target.getX(), getZ() - target.getZ());
         } else if (phase == 2) {
-            triggerAnim("combat", "sword_draw");
+            triggerAnim("combat", "sword_slash");
             // Ama no Murakumo: a long blade of light sweeps through a broad frontal arc.
             Vec3 forward = target.position().subtract(position()).normalize();
             AABB lane = getBoundingBox().expandTowards(forward.scale(20.0D)).inflate(4.0D, 2.0D, 4.0D);
@@ -65,7 +64,7 @@ public class KizaruBossEntity extends IslandBossEntity {
                 }
             }
         } else {
-            triggerAnim("combat", "light_speed");
+            triggerAnim("combat", "special");
             // Yasakani no Magatama: a radial barrage of light projectiles around the marked target.
             Vec3 center = target.position();
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
