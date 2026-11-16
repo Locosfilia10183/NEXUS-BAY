@@ -130,7 +130,7 @@ public class KizaruBossEntity extends IslandBossEntity {
                 }
             }
         } else {
-            triggerAnim("combat", "special");
+            triggerAnim("combat", "ultimate");
             // Yasakani no Magatama: a radial barrage of light projectiles around the marked target.
             Vec3 center = target.position();
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
