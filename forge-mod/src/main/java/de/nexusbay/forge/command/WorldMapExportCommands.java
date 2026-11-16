@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.world.IslandCatalog;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -43,17 +44,13 @@ public final class WorldMapExportCommands {
         event.getDispatcher().register(net.minecraft.commands.Commands.literal("nexusmap")
                 .requires(source -> source.hasPermission(2))
                 .then(net.minecraft.commands.Commands.literal("export")
-                        .executes(context -> export(context.getSource().getServer(),
-                                context.getSource()::sendSuccess,
-                                context.getSource()::sendFailure))));
+                        .executes(context -> export(context.getSource().getServer(), context.getSource()))));
     }
 
-    private static int export(MinecraftServer server,
-                              java.util.function.Consumer<java.util.function.Supplier<Component>> success,
-                              java.util.function.Consumer<Component> failure) {
+    private static int export(MinecraftServer server, CommandSourceStack source) {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         if (level == null) {
-            failure.accept(Component.literal("Overworld nicht gefunden."));
+            source.sendFailure(Component.literal("Overworld nicht gefunden."));
             return 0;
         }
 
@@ -129,17 +126,17 @@ public final class WorldMapExportCommands {
         try {
             Files.writeString(output, root.toString(), StandardCharsets.UTF_8);
         } catch (IOException exception) {
-            failure.accept(Component.literal("Kartenexport fehlgeschlagen: " + exception.getMessage()));
+            source.sendFailure(Component.literal("Kartenexport fehlgeschlagen: " + exception.getMessage()));
             return 0;
         }
 
         Path finalOutput = output;
         int finalLoadedSamples = loadedSamples;
         int finalSkippedSamples = skippedSamples;
-        success.accept(() -> Component.literal("NEXUS-BAY-Kartensnapshot gespeichert: "
+        source.sendSuccess(() -> Component.literal("NEXUS-BAY-Kartensnapshot gespeichert: "
                 + finalOutput.toAbsolutePath() + " | " + finalLoadedSamples
                 + " echte Terrain-Punkte | " + finalSkippedSamples
-                + " nicht geladene Punkte übersprungen. Welt wurde nicht verändert."));
+                + " nicht geladene Punkte übersprungen. Welt wurde nicht verändert."), false);
         return Command.SINGLE_SUCCESS;
     }
 }
