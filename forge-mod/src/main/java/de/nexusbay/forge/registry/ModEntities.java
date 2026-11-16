@@ -5,6 +5,7 @@ import de.nexusbay.forge.boss.KaidoBossEntity;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.boss.RobLucciBossEntity;
+import de.nexusbay.forge.boss.KizaruBossEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -35,6 +36,11 @@ public final class ModEntities {
             ENTITY_TYPES.register("rob_lucci", () -> EntityType.Builder
                     .of(RobLucciBossEntity::new, MobCategory.MONSTER).sized(1.1F, 2.9F)
                     .clientTrackingRange(12).build("rob_lucci"));
+
+    public static final RegistryObject<EntityType<KizaruBossEntity>> KIZARU =
+            ENTITY_TYPES.register("kizaru", () -> EntityType.Builder
+                    .of(KizaruBossEntity::new, MobCategory.MONSTER).sized(1.25F, 3.15F)
+                    .clientTrackingRange(14).build("kizaru"));
 
     private ModEntities() {}
     public static void register(IEventBus modBus) { ENTITY_TYPES.register(modBus); }
