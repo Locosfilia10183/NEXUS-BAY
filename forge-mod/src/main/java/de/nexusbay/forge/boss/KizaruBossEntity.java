@@ -29,6 +29,7 @@ public class KizaruBossEntity extends IslandBossEntity {
         triggerAnim("combat", phase() == 2 ? "sword_slash" : "special");
         int phase = phase();
         if (phase == 1) {
+            triggerAnim("combat", "light_speed");
             // Yata no Kagami: a visible light path, then Kizaru reappears beside the target.
             Vec3 direction = target.position().subtract(position()).normalize();
             Vec3 destination = target.position().subtract(direction.scale(2.4D));
@@ -37,12 +38,14 @@ public class KizaruBossEntity extends IslandBossEntity {
                     Vec3 point = position().lerp(destination, i / 14.0D);
                     server.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 1.0D, point.z, 7, 0.12D, 0.12D, 0.12D, 0.01D);
                     server.sendParticles(ParticleTypes.FIREWORK, point.x, point.y + 1.0D, point.z, 2, 0.08D, 0.08D, 0.08D, 0.0D);
+                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, point.x, point.y + 1.15D, point.z, 3, 0.18D, 0.2D, 0.18D, 0.02D);
                 }
             }
             teleportTo(destination.x, destination.y, destination.z);
             target.hurt(damageSources().mobAttack(this), 125.0F);
             target.knockback(1.0D, getX() - target.getX(), getZ() - target.getZ());
         } else if (phase == 2) {
+            triggerAnim("combat", "sword_draw");
             // Ama no Murakumo: a long blade of light sweeps through a broad frontal arc.
             Vec3 forward = target.position().subtract(position()).normalize();
             AABB lane = getBoundingBox().expandTowards(forward.scale(20.0D)).inflate(4.0D, 2.0D, 4.0D);
@@ -62,6 +65,7 @@ public class KizaruBossEntity extends IslandBossEntity {
                 }
             }
         } else {
+            triggerAnim("combat", "light_speed");
             // Yasakani no Magatama: a radial barrage of light projectiles around the marked target.
             Vec3 center = target.position();
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
