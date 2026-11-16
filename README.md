@@ -45,10 +45,12 @@ Successful NEXUS-BAY Core builds are versioned from `plugin/src/main/resources/p
 The installer places the update utility at `/usr/local/bin/nexus-bay-update`:
 
 ```bash
+sudo nexus-bay-update history
 sudo nexus-bay-update check
 sudo nexus-bay-update install
 ```
 
+- `history` lists the latest 10 stable NEXUS-BAY server releases from GitHub.
 - `check` reads the installed plugin version, finds the newest stable GitHub release and reports whether an update exists. It does not change the server.
 - `install` downloads the matching release, verifies its SHA-256 and embedded plugin version, backs up the current JAR, replaces it and restarts the service. If the service fails to start, it restores the previous JAR.
 - Update target defaults to `/opt/nexus-bay/plugins/NEXUS-BAY-Core.jar` and service `nexus-bay`. Advanced installs can override these with `NEXUS_BAY_DIR` and `NEXUS_BAY_SERVICE`.
