@@ -52,6 +52,10 @@ curl -fL "https://download.geysermc.org/v2/projects/geyser/versions/latest/build
 curl -fL "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot" -o "$INSTALL_DIR/plugins/floodgate-spigot.jar"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ -f "$SCRIPT_DIR/updates/nexus-bay-update.sh" ]]; then
+  install -m 755 "$SCRIPT_DIR/updates/nexus-bay-update.sh" /usr/local/bin/nexus-bay-update
+  echo "NEXUS-BAY Updateverwaltung installiert: nexus-bay-update check|install"
+fi
 if [[ -f "$SCRIPT_DIR/plugin/pom.xml" ]]; then
   echo "Baue NEXUS-BAY RPG/Admin-Plugin..."
   mvn -B -f "$SCRIPT_DIR/plugin/pom.xml" clean package
