@@ -26,7 +26,7 @@ public class KizaruBossEntity extends IslandBossEntity {
     @Override protected String animationKey() { return "kizaru"; }
 
     @Override protected void performSpecial(LivingEntity target) {
-        triggerAnim("combat", "special");
+        triggerAnim("combat", phase() == 2 ? "sword_slash" : "special");
         int phase = phase();
         if (phase == 1) {
             // Yata no Kagami: a visible light path, then Kizaru reappears beside the target.
