@@ -57,10 +57,21 @@ public class KizaruBossEntity extends IslandBossEntity {
                 }
             }
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                Vec3 side = new Vec3(-forward.z, 0.0D, forward.x);
+                // Bright curved blade trail: a wide golden-white crescent in front of Kizaru.
+                for (int arc = 0; arc <= 24; arc++) {
+                    double angle = -1.05D + (2.10D * arc / 24.0D);
+                    Vec3 point = position().add(forward.scale(7.0D + Math.cos(angle) * 5.0D))
+                            .add(side.scale(Math.sin(angle) * 5.0D));
+                    double y = getY() + 1.35D + Math.sin(angle) * 1.2D;
+                    server.sendParticles(ParticleTypes.END_ROD, point.x, y, point.z, 5, 0.06D, 0.08D, 0.06D, 0.01D);
+                    server.sendParticles(ParticleTypes.FIREWORK, point.x, y, point.z, 2, 0.04D, 0.05D, 0.04D, 0.0D);
+                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, point.x, y, point.z, 3, 0.09D, 0.1D, 0.09D, 0.02D);
+                }
                 for (int step = 1; step <= 10; step++) {
                     Vec3 point = position().add(forward.scale(step * 2.0D));
-                    server.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 1.0D, point.z, 16, 0.45D, 0.55D, 0.45D, 0.02D);
-                    server.sendParticles(ParticleTypes.SWEEP_ATTACK, point.x, point.y + 1.0D, point.z, 4, 0.3D, 0.3D, 0.3D, 0.0D);
+                    server.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 1.0D, point.z, 12, 0.3D, 0.4D, 0.3D, 0.02D);
+                    server.sendParticles(ParticleTypes.SWEEP_ATTACK, point.x, point.y + 1.0D, point.z, 3, 0.25D, 0.25D, 0.25D, 0.0D);
                 }
             }
         } else {
@@ -74,6 +85,13 @@ public class KizaruBossEntity extends IslandBossEntity {
                     double z = center.z + Math.sin(angle) * 7.0D;
                     server.sendParticles(ParticleTypes.END_ROD, x, center.y + 1.0D, z, 5, 0.16D, 0.16D, 0.16D, 0.03D);
                     server.sendParticles(ParticleTypes.FIREWORK, x, center.y + 1.0D, z, 2, 0.08D, 0.08D, 0.08D, 0.0D);
+                    // Each light bead leaves a visible trail toward the impact center.
+                    for (int trail = 1; trail <= 5; trail++) {
+                        double t = trail / 6.0D;
+                        double tx = x + (center.x - x) * t;
+                        double tz = z + (center.z - z) * t;
+                        server.sendParticles(ParticleTypes.END_ROD, tx, center.y + 1.0D, tz, 2, 0.05D, 0.08D, 0.05D, 0.01D);
+                    }
                 }
             }
             AABB blast = new AABB(center.x - 9, center.y - 4, center.z - 9, center.x + 9, center.y + 5, center.z + 9);
