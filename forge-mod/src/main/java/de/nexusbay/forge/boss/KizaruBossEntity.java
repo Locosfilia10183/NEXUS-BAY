@@ -134,25 +134,44 @@ public class KizaruBossEntity extends IslandBossEntity {
             // Yasakani no Magatama: a radial barrage of light projectiles around the marked target.
             Vec3 center = target.position();
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
-                for (int i = 0; i < 24; i++) {
-                    double angle = Math.PI * 2.0D * i / 24.0D;
-                    double x = center.x + Math.cos(angle) * 7.0D;
-                    double z = center.z + Math.sin(angle) * 7.0D;
-                    server.sendParticles(ParticleTypes.END_ROD, x, center.y + 1.0D, z, 5, 0.16D, 0.16D, 0.16D, 0.03D);
-                    server.sendParticles(ParticleTypes.FIREWORK, x, center.y + 1.0D, z, 2, 0.08D, 0.08D, 0.08D, 0.0D);
-                    // Each light bead leaves a visible trail toward the impact center.
-                    for (int trail = 1; trail <= 5; trail++) {
-                        double t = trail / 6.0D;
-                        double tx = x + (center.x - x) * t;
-                        double tz = z + (center.z - z) * t;
-                        server.sendParticles(ParticleTypes.END_ROD, tx, center.y + 1.0D, tz, 2, 0.05D, 0.08D, 0.05D, 0.01D);
+                // Three expanding rings announce Kizaru's final light detonation.
+                for (int ring = 1; ring <= 3; ring++) {
+                    double radius = ring * 4.5D;
+                    for (int i = 0; i < 40; i++) {
+                        double angle = Math.PI * 2.0D * i / 40.0D;
+                        double x = center.x + Math.cos(angle) * radius;
+                        double z = center.z + Math.sin(angle) * radius;
+                        server.sendParticles(ParticleTypes.END_ROD, x, center.y + 0.15D * ring, z,
+                                3, 0.08D, 0.12D, 0.08D, 0.015D);
+                        if (i % 2 == 0) {
+                            server.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, center.y + 0.15D * ring, z,
+                                    2, 0.06D, 0.1D, 0.06D, 0.025D);
+                        }
                     }
                 }
+                // A towering column marks the center of the explosion.
+                for (int height = 0; height <= 10; height++) {
+                    double y = center.y + height * 0.8D;
+                    server.sendParticles(ParticleTypes.END_ROD, center.x, y, center.z,
+                            10, 0.45D, 0.18D, 0.45D, 0.015D);
+                    server.sendParticles(ParticleTypes.FIREWORK, center.x, y, center.z,
+                            4, 0.3D, 0.15D, 0.3D, 0.0D);
+                }
+                server.sendParticles(ParticleTypes.FLASH, center.x, center.y + 2.0D, center.z,
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+                server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y + 1.0D, center.z,
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
             }
-            AABB blast = new AABB(center.x - 9, center.y - 4, center.z - 9, center.x + 9, center.y + 5, center.z + 9);
+            AABB blast = new AABB(center.x - 14, center.y - 5, center.z - 14, center.x + 14, center.y + 11, center.z + 14);
             for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class, blast,
                     entity -> entity != this && !(entity instanceof IslandBossEntity) && entity.isAlive())) {
-                victim.hurt(damageSources().mobAttack(this), 185.0F);
+                double horizontalDistance = victim.position().subtract(center).horizontalDistance();
+                if (horizontalDistance <= 14.0D) {
+                    victim.hurt(damageSources().mobAttack(this), 235.0F);
+                    Vec3 push = victim.position().subtract(center).normalize();
+                    victim.knockback(1.8D, -push.x, -push.z);
+                    victim.push(0.0D, 0.55D, 0.0D);
+                }
             }
         }
         level().playSound(null, blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.0F, phase == 3 ? 1.6F : 1.25F);
