@@ -16,5 +16,6 @@ public final class ClientModEvents {
         event.registerEntityRenderer(ModEntities.CROCODILE.get(), CrocodileRenderer::new);
         event.registerEntityRenderer(ModEntities.ENEL.get(), EnelRenderer::new);
         event.registerEntityRenderer(ModEntities.ROB_LUCCI.get(), RobLucciRenderer::new);
+        event.registerEntityRenderer(ModEntities.KIZARU.get(), KizaruRenderer::new);
     }
 }
