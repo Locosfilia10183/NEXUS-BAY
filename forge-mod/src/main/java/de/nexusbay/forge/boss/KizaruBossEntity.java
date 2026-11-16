@@ -29,20 +29,37 @@ public class KizaruBossEntity extends IslandBossEntity {
         int phase = phase();
         if (phase == 1) {
             triggerAnim("combat", "light_speed");
-            // Yata no Kagami: a visible light path, then Kizaru reappears beside the target.
+            // Yata no Kagami: three rapid light-speed passes leave afterimages around the target.
             Vec3 direction = target.position().subtract(position()).normalize();
-            Vec3 destination = target.position().subtract(direction.scale(2.4D));
+            if (direction.lengthSqr() < 0.001D) direction = new Vec3(0.0D, 0.0D, 1.0D);
+            Vec3 side = new Vec3(-direction.z, 0.0D, direction.x);
+            Vec3 center = target.position();
+            Vec3[] passes = new Vec3[] {
+                    center.add(side.scale(3.2D)).subtract(direction.scale(1.8D)),
+                    center.subtract(side.scale(3.2D)).subtract(direction.scale(1.8D)),
+                    center.subtract(direction.scale(2.4D))
+            };
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
-                for (int i = 1; i <= 14; i++) {
-                    Vec3 point = position().lerp(destination, i / 14.0D);
-                    server.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 1.0D, point.z, 7, 0.12D, 0.12D, 0.12D, 0.01D);
-                    server.sendParticles(ParticleTypes.FIREWORK, point.x, point.y + 1.0D, point.z, 2, 0.08D, 0.08D, 0.08D, 0.0D);
-                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, point.x, point.y + 1.15D, point.z, 3, 0.18D, 0.2D, 0.18D, 0.02D);
+                Vec3 origin = position();
+                for (int i = 1; i <= 18; i++) {
+                    Vec3 point = origin.lerp(passes[0], i / 18.0D);
+                    server.sendParticles(ParticleTypes.END_ROD, point.x, point.y + 1.0D, point.z, 6, 0.1D, 0.12D, 0.1D, 0.01D);
+                    server.sendParticles(ParticleTypes.ELECTRIC_SPARK, point.x, point.y + 1.15D, point.z, 3, 0.15D, 0.18D, 0.15D, 0.02D);
+                }
+                for (Vec3 pass : passes) {
+                    server.sendParticles(ParticleTypes.FIREWORK, pass.x, pass.y + 1.0D, pass.z, 12, 0.35D, 0.5D, 0.35D, 0.02D);
+                    server.sendParticles(ParticleTypes.END_ROD, pass.x, pass.y + 1.0D, pass.z, 18, 0.25D, 0.4D, 0.25D, 0.02D);
                 }
             }
-            teleportTo(destination.x, destination.y, destination.z);
-            target.hurt(damageSources().mobAttack(this), 125.0F);
-            target.knockback(1.0D, getX() - target.getX(), getZ() - target.getZ());
+            for (Vec3 pass : passes) {
+                teleportTo(pass.x, pass.y, pass.z);
+                target.hurt(damageSources().mobAttack(this), 48.0F);
+                target.knockback(0.45D, getX() - target.getX(), getZ() - target.getZ());
+            }
+            if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                server.sendParticles(ParticleTypes.FLASH, getX(), getY() + 1.0D, getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                server.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.0D, getZ(), 28, 0.45D, 0.5D, 0.45D, 0.08D);
+            }
         } else if (phase == 2) {
             triggerAnim("combat", "sword_slash");
             // Ama no Murakumo: a long blade of light sweeps through a broad frontal arc.
