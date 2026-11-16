@@ -68,12 +68,13 @@ mkdir -p "$BACKUP_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP="$BACKUP_DIR/NEXUS-BAY-Core-$CURRENT-$STAMP.jar"
 cp -a "$PLUGIN_FILE" "$BACKUP"
-OWNER="$(stat -c '%u:%g' "$PLUGIN_FILE")"
+OWNER="$(stat -c '%u' "$PLUGIN_FILE")"
+GROUP="$(stat -c '%g' "$PLUGIN_FILE")"
 MODE="$(stat -c '%a' "$PLUGIN_FILE")"
 
 echo "Backup erstellt: $BACKUP"
 systemctl stop "$SERVICE"
-if ! install -o "$OWNER" -g "${OWNER#*:}" -m "$MODE" "$TMP_DIR/$ASSET_NAME" "$PLUGIN_FILE"; then
+if ! install -o "$OWNER" -g "$GROUP" -m "$MODE" "$TMP_DIR/$ASSET_NAME" "$PLUGIN_FILE"; then
   cp -a "$BACKUP" "$PLUGIN_FILE"
   systemctl start "$SERVICE" || true
   fail "Neue Plugin-Datei konnte nicht installiert werden; Backup wiederhergestellt."
