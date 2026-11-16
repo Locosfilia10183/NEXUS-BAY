@@ -26,6 +26,9 @@ public final class ModItems {
     public static final RegistryObject<Item> ALCHEMY_REAGENT = ITEMS.register("alchemy_reagent", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> BERRY_TONIC = ITEMS.register("berry_tonic", () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6F).build())));
 
+    public static final RegistryObject<Item> LIGHT_SABER = ITEMS.register("light_saber",
+            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.NETHERITE, 6, -2.1F, new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> SEASTONE_SABER = ITEMS.register("seastone_saber",
             () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.DIAMOND, 4, -2.3F, new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> ONI_CLEAVER = ITEMS.register("oni_cleaver",
