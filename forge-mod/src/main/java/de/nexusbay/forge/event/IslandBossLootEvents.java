@@ -5,6 +5,7 @@ import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.boss.IslandBossEntity;
 import de.nexusbay.forge.boss.RobLucciBossEntity;
+import de.nexusbay.forge.boss.KizaruBossEntity;
 import de.nexusbay.forge.progression.BeliLedger;
 import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.network.chat.Component;
