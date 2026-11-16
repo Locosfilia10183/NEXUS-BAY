@@ -3,6 +3,7 @@ package de.nexusbay.forge.registry;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.item.DevilFruitCaseItem;
 import de.nexusbay.forge.item.DevilFruitItem;
+import de.nexusbay.forge.item.LightSaberItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -27,7 +28,7 @@ public final class ModItems {
     public static final RegistryObject<Item> BERRY_TONIC = ITEMS.register("berry_tonic", () -> new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(6).saturationMod(0.6F).build())));
 
     public static final RegistryObject<Item> LIGHT_SABER = ITEMS.register("light_saber",
-            () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.NETHERITE, 6, -2.1F, new Item.Properties().stacksTo(1)));
+            () -> new LightSaberItem(net.minecraft.world.item.Tiers.NETHERITE, 6, -2.1F, new Item.Properties().stacksTo(1).durability(1600)));
 
     public static final RegistryObject<Item> SEASTONE_SABER = ITEMS.register("seastone_saber",
             () -> new net.minecraft.world.item.SwordItem(net.minecraft.world.item.Tiers.DIAMOND, 4, -2.3F, new Item.Properties().stacksTo(1)));
