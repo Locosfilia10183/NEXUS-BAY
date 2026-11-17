@@ -1,0 +1,33 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="nexusbay"
+version="0.1.0"
+displayName="NEXUS-BAY"
+authors="NEXUS-BAY"
+description='''
+NEXUS-BAY pirate RPG systems for Minecraft Forge 1.20.1.
+'''
+
+[[dependencies.nexusbay]]
+modId="forge"
+mandatory=true
+versionRange="[47.2.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.nexusbay]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.nexusbay]]
+modId="geckolib"
+mandatory=true
+versionRange="[4.4.9,)"
+ordering="AFTER"
+side="BOTH"

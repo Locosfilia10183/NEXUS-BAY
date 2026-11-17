@@ -1,0 +1,11 @@
+{
+  "id": "sword_yoru",
+  "display_name": "Yoru – Schwarzes Schwert",
+  "type": "SWORD",
+  "skills": [
+    {"id":"black_blade_slash","display_name":"Schwarzer Klingenschnitt","required_level":1,"mastery_xp_cost":0,"cooldown_ticks":35,"animation_id":"yoru_slash"},
+    {"id":"flying_slash","display_name":"Fliegender Schnitt","required_level":8,"mastery_xp_cost":700,"cooldown_ticks":120,"animation_id":"yoru_flying_slash"},
+    {"id":"black_cross","display_name":"Schwarzes Kreuz","required_level":20,"mastery_xp_cost":2200,"cooldown_ticks":260,"animation_id":"yoru_black_cross"},
+    {"id":"worlds_strongest_slash","display_name":"Welten-Spalter","required_level":40,"mastery_xp_cost":7000,"cooldown_ticks":900,"animation_id":"yoru_world_slash"}
+  ]
+}

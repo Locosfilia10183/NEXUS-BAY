@@ -1,0 +1,80 @@
+name: Build and publish NEXUS-BAY Core updates
+
+on:
+  push:
+    branches: [forge-development]
+    paths:
+      - "plugin/**"
+      - ".github/workflows/build-plugin.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Build NEXUS-BAY Core
+        run: mvn -B -f plugin/pom.xml clean package
+
+      - name: Read version and create update manifest
+        id: meta
+        shell: bash
+        run: |
+          VERSION="$(sed -n 's/^version: *//p' plugin/src/main/resources/plugin.yml | head -n1 | tr -d "'\"")"
+          POM_VERSION="$(sed -n 's:.*<artifactId>nexusbay-core</artifactId><version>\([^<]*\)</version>.*:\1:p' plugin/pom.xml)"
+          test -n "$VERSION"
+          test "$VERSION" = "$POM_VERSION"
+          JAR="plugin/target/NEXUS-BAY-Core.jar"
+          test -s "$JAR"
+          SHA256="$(sha256sum "$JAR" | awk '{print $1}')"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          python3 - "$VERSION" "$SHA256" "$GITHUB_SHA" > update-manifest.json <<'PY'
+          import json, sys, datetime
+          version, sha256, commit = sys.argv[1:]
+          print(json.dumps({
+            "product": "NEXUS-BAY-Core",
+            "version": version,
+            "minecraft": "Paper 26.2+",
+            "channel": "stable",
+            "asset": "NEXUS-BAY-Core.jar",
+            "sha256": sha256,
+            "commit": commit,
+            "minimumUpdater": "1.0.0",
+            "publishedAt": datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }, indent=2))
+          PY
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-bay-core-${{ steps.meta.outputs.version }}
+          path: |
+            plugin/target/NEXUS-BAY-Core.jar
+            update-manifest.json
+          if-no-files-found: error
+
+      - name: Publish server update release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: server-v${{ steps.meta.outputs.version }}-build-${{ github.run_number }}
+          name: NEXUS-BAY Server ${{ steps.meta.outputs.version }} (Build ${{ github.run_number }})
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            plugin/target/NEXUS-BAY-Core.jar
+            update-manifest.json

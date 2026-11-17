@@ -1,0 +1,574 @@
+package de.nexusbay.forge.world;
+
+import de.nexusbay.forge.NexusBayForge;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.level.ChunkDataEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+/**
+ * Applies the NEXUS-BAY island sampler to newly loaded full overworld chunks.
+ * Generated columns are stamped in chunk NBT to avoid rebuilding them on reload.
+ */
+@Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID)
+public final class IslandTerrainChunkEvents {
+    private static final String GENERATED_KEY = "nexusbay_island_terrain_v1";
+    private static final int SEA_LEVEL = 63;
+
+    private IslandTerrainChunkEvents() {}
+
+    @SubscribeEvent
+    public static void onChunkLoad(ChunkDataEvent.Load event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        if (!level.dimension().equals(ServerLevel.OVERWORLD)) return;
+        if (!(event.getChunk() instanceof LevelChunk chunk)) return;
+        if (chunk.getStatus().getChunkType() != net.minecraft.world.level.chunk.ChunkStatus.ChunkType.LEVELCHUNK) return;
+        CompoundTag chunkData = event.getData();
+        if (chunkData.getBoolean(GENERATED_KEY)) return;
+
+        ChunkPos chunkPos = chunk.getPos();
+        long seed = level.getSeed();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        boolean touched = false;
+
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = chunkPos.getMinBlockX() + dx;
+                int z = chunkPos.getMinBlockZ() + dz;
+                IslandTerrainSampler.ColumnSample sample = IslandTerrainSampler.sample(x, z, seed);
+                if (!sample.land()) {
+                    applyOceanColumn(chunk, pos, x, z, level.getMinBuildHeight(), seed);
+                    touched = true;
+                    continue;
+                }
+
+                int surfaceY = sample.surfaceY();
+                BlockState surface = block(sample.surfaceBlock(), Blocks.GRASS_BLOCK.defaultBlockState());
+                BlockState subsurface = block(sample.subsurfaceBlock(), Blocks.DIRT.defaultBlockState());
+
+                for (int y = level.getMinBuildHeight(); y <= Math.max(SEA_LEVEL, surfaceY); y++) {
+                    pos.set(x, y, z);
+                    BlockState state;
+                    if (y > surfaceY) {
+                        state = y <= SEA_LEVEL ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                    } else if (y == surfaceY) {
+                        state = surface;
+                    } else if (y >= surfaceY - 4) {
+                        state = subsurface;
+                    } else {
+                        state = Blocks.STONE.defaultBlockState();
+                    }
+                    chunk.setBlockState(pos, state, false);
+                }
+                if (sample.normalizedDistance() < 0.82D
+                        && vegetationRoll(x, z, seed) < vegetationChance(sample.vegetation())) {
+                    placeVegetation(chunk, x, surfaceY + 1, z, sample.vegetation(), seed);
+                    touched = true;
+                }
+                if (sample.normalizedDistance() < 0.9D
+                        && vegetationRoll(x + 31, z - 19, seed) < 0.018D) {
+                    placeRockOutcrop(chunk, x, surfaceY + 1, z, sample.surfaceBlock(), seed);
+                    touched = true;
+                }
+                if (sample.normalizedDistance() < 0.72D
+                        && vegetationRoll(x + 101, z - 73, seed) < landmarkChance(sample.islandId())) {
+                    placeIslandLandmark(chunk, x, surfaceY + 1, z, sample.islandId(), seed);
+                    touched = true;
+                }
+                touched = true;
+            }
+        }
+
+        placeSettlementBuilding(chunk, chunkPos, seed);
+        chunkData.putBoolean(GENERATED_KEY, true);
+        if (touched) chunk.setUnsaved(true);
+    }
+
+
+
+
+
+
+    private static void placeSettlementBuilding(LevelChunk chunk, ChunkPos chunkPos, long seed) {
+        int x = chunkPos.getMinBlockX() + 8;
+        int z = chunkPos.getMinBlockZ() + 8;
+        IslandTerrainSampler.ColumnSample sample = IslandTerrainSampler.sample(x, z, seed);
+        if (!sample.land() || sample.normalizedDistance() > 0.68D) return;
+        if (vegetationRoll(x + 701, z - 503, seed) > 0.16D) return;
+
+        String island = sample.islandId();
+        if (!switch (island) {
+            case "FooshaVillage", "ShellsTown", "OrangeTown", "SyrupVillage",
+                    "Loguetown", "Water7", "Alabasta", "Dressrosa", "WanoKuni" -> true;
+            default -> false;
+        }) return;
+
+        BlockState wall = switch (island) {
+            case "Alabasta" -> Blocks.SANDSTONE.defaultBlockState();
+            case "Loguetown", "Water7" -> Blocks.STONE_BRICKS.defaultBlockState();
+            case "WanoKuni" -> Blocks.DEEPSLATE_BRICKS.defaultBlockState();
+            case "Dressrosa" -> Blocks.PINK_TERRACOTTA.defaultBlockState();
+            default -> Blocks.OAK_PLANKS.defaultBlockState();
+        };
+        BlockState roof = switch (island) {
+            case "Alabasta" -> Blocks.CUT_SANDSTONE.defaultBlockState();
+            case "WanoKuni" -> Blocks.DARK_OAK_PLANKS.defaultBlockState();
+            case "Dressrosa" -> Blocks.MAGENTA_TERRACOTTA.defaultBlockState();
+            case "Loguetown", "Water7" -> Blocks.STONE_BRICK_SLAB.defaultBlockState();
+            default -> Blocks.SPRUCE_PLANKS.defaultBlockState();
+        };
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        int baseY = sample.surfaceY();
+        int minX = chunkPos.getMinBlockX() + 4;
+        int maxX = chunkPos.getMinBlockX() + 11;
+        int minZ = chunkPos.getMinBlockZ() + 4;
+        int maxZ = chunkPos.getMinBlockZ() + 11;
+
+        for (int bx = minX; bx <= maxX; bx++) {
+            for (int bz = minZ; bz <= maxZ; bz++) {
+                int ground = IslandTerrainSampler.sample(bx, bz, seed).surfaceY();
+                if (!IslandTerrainSampler.sample(bx, bz, seed).land() || Math.abs(ground - baseY) > 3) return;
+            }
+        }
+
+        for (int bx = minX; bx <= maxX; bx++) {
+            for (int bz = minZ; bz <= maxZ; bz++) {
+                pos.set(bx, baseY, bz);
+                chunk.setBlockState(pos, Blocks.OAK_PLANKS.defaultBlockState(), false);
+                boolean edge = bx == minX || bx == maxX || bz == minZ || bz == maxZ;
+                for (int dy = 1; dy <= 4; dy++) {
+                    pos.set(bx, baseY + dy, bz);
+                    if (edge) {
+                        boolean doorway = bx == x && bz == maxZ && dy <= 2;
+                        chunk.setBlockState(pos, doorway ? Blocks.AIR.defaultBlockState() : wall, false);
+                    } else if (dy == 1) {
+                        chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                    }
+                }
+                pos.set(bx, baseY + 5, bz);
+                chunk.setBlockState(pos, roof, false);
+            }
+        }
+
+        for (int bx = minX + 1; bx < maxX; bx++) {
+            for (int bz = minZ + 1; bz < maxZ; bz++) {
+                pos.set(bx, baseY + 5, bz);
+                if ((bx + bz) % 2 == 0) chunk.setBlockState(pos, roof, false);
+            }
+        }
+
+        // Simple furnishing makes generated houses usable as village interiors.
+        pos.set(x, baseY + 1, z);
+        chunk.setBlockState(pos, Blocks.BARREL.defaultBlockState(), false);
+        pos.set(x - 1, baseY + 1, z - 1);
+        chunk.setBlockState(pos, Blocks.CRAFTING_TABLE.defaultBlockState(), false);
+        pos.set(x, baseY + 4, z);
+        chunk.setBlockState(pos, Blocks.LANTERN.defaultBlockState(), false);
+
+        // A short approach path points toward the island's shoreline.
+        for (int step = 1; step <= 3; step++) {
+            pos.set(x, baseY, maxZ + step);
+            if (pos.getZ() <= chunkPos.getMaxBlockZ())
+                chunk.setBlockState(pos, Blocks.COBBLESTONE.defaultBlockState(), false);
+        }
+        chunk.setUnsaved(true);
+    }
+
+    private static void applyOceanColumn(LevelChunk chunk, BlockPos.MutableBlockPos pos,
+                                         int x, int z, int minBuildHeight, long seed) {
+        int floorY = IslandCatalog.OCEAN_FLOOR;
+        for (int y = minBuildHeight; y <= IslandCatalog.SEA_LEVEL; y++) {
+            pos.set(x, y, z);
+            BlockState state;
+            if (y < floorY - 1) {
+                state = Blocks.STONE.defaultBlockState();
+            } else if (y <= floorY) {
+                double seabedRoll = vegetationRoll(x + 401, z - 337, seed);
+                IslandCatalog.Destination fishMan = IslandCatalog.find("FishManIsland").orElse(null);
+                IslandCatalog.Destination punkHazard = IslandCatalog.find("PunkHazard").orElse(null);
+                double fishDistance = fishMan == null ? Double.MAX_VALUE
+                        : Math.hypot(x - fishMan.x(), z - fishMan.z());
+                double punkDistance = punkHazard == null ? Double.MAX_VALUE
+                        : Math.hypot(x - punkHazard.x(), z - punkHazard.z());
+                if (fishDistance >= 76.0D && fishDistance <= 145.0D && seabedRoll > 0.35D) {
+                    state = Blocks.PRISMARINE.defaultBlockState();
+                } else if (punkDistance >= 78.0D && punkDistance <= 150.0D && seabedRoll > 0.55D) {
+                    state = Blocks.BLACKSTONE.defaultBlockState();
+                } else if (seabedRoll < 0.16D) {
+                    state = Blocks.SAND.defaultBlockState();
+                } else if (seabedRoll > 0.91D) {
+                    state = Blocks.CLAY.defaultBlockState();
+                } else {
+                    state = Blocks.GRAVEL.defaultBlockState();
+                }
+            } else {
+                state = Blocks.WATER.defaultBlockState();
+            }
+            chunk.setBlockState(pos, state, false);
+        }
+
+        // A coral belt surrounds Fish-Man Island beneath the sea surface.
+        IslandCatalog.Destination fishMan = IslandCatalog.find("FishManIsland").orElse(null);
+        if (fishMan != null) {
+            double dx = x - fishMan.x();
+            double dz = z - fishMan.z();
+            double distance = Math.sqrt(dx * dx + dz * dz);
+            if (distance >= 76.0D && distance <= 132.0D
+                    && vegetationRoll(x + 307, z - 251, seed) < 0.035D) {
+                placeCoralCluster(chunk, x, z, seed);
+            }
+        }
+
+        // Sparse kelp on the seabed gives shallow ocean areas a little life.
+        if (vegetationRoll(x + 211, z - 137, seed) < 0.012D) {
+            pos.set(x, floorY + 1, z);
+            if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
+                int height = 1 + (int) (vegetationRoll(x - 89, z + 53, seed) * 4.0D);
+                for (int i = 0; i < height; i++) {
+                    pos.set(x, floorY + 1 + i, z);
+                    if (chunk.getBlockState(pos).getBlock() != Blocks.WATER) break;
+                    chunk.setBlockState(pos, Blocks.KELP.defaultBlockState(), false);
+                }
+            }
+        }
+    }
+
+
+    private static void placeCoralCluster(LevelChunk chunk, int x, int z, long seed) {
+        int baseY = -27;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockState[] corals = new BlockState[] {
+                Blocks.TUBE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.BRAIN_CORAL_BLOCK.defaultBlockState(),
+                Blocks.BUBBLE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.FIRE_CORAL_BLOCK.defaultBlockState(),
+                Blocks.HORN_CORAL_BLOCK.defaultBlockState()
+        };
+        int radius = 1 + (int) (vegetationRoll(x - 41, z + 67, seed) * 2.0D);
+        BlockState coral = corals[(int) (vegetationRoll(x + 13, z - 97, seed) * corals.length)];
+        for (int ox = -radius; ox <= radius; ox++) {
+            for (int oz = -radius; oz <= radius; oz++) {
+                if (ox * ox + oz * oz > radius * radius + 1) continue;
+                int px = x + ox;
+                int pz = z + oz;
+                if ((px >> 4) != chunk.getPos().x || (pz >> 4) != chunk.getPos().z) continue;
+                pos.set(px, baseY, pz);
+                if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
+                    chunk.setBlockState(pos, coral, false);
+                }
+            }
+        }
+        if (vegetationRoll(x + 73, z - 31, seed) < 0.45D) {
+            pos.set(x, baseY + 1, z);
+            if (chunk.getBlockState(pos).getBlock() == Blocks.WATER) {
+                chunk.setBlockState(pos, Blocks.SEA_PICKLE.defaultBlockState(), false);
+            }
+        }
+    }
+
+    private static double landmarkChance(String islandId) {
+        return switch (islandId) {
+            case "Jaya", "DrumIsland", "Alabasta", "PunkHazard",
+                    "Skypiea", "EniesLobby", "ThrillerBark", "Sabaody",
+                    "Marineford", "WanoKuni", "Onigashima", "FishManIsland" -> 0.0009D;
+            default -> 0.0D;
+        };
+    }
+
+    private static void placeIslandLandmark(LevelChunk chunk, int x, int y, int z, String islandId, long seed) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        if (x < chunk.getPos().getMinBlockX() + 3 || x > chunk.getPos().getMaxBlockX() - 3
+                || z < chunk.getPos().getMinBlockZ() + 3 || z > chunk.getPos().getMaxBlockZ() - 3) return;
+
+        if (islandId.equals("FishManIsland")) {
+            if (x < chunk.getPos().getMinBlockX() + 5 || x > chunk.getPos().getMaxBlockX() - 5
+                    || z < chunk.getPos().getMinBlockZ() + 5 || z > chunk.getPos().getMaxBlockZ() - 5) return;
+            int radius = 4;
+            for (int ox = -radius; ox <= radius; ox++) {
+                for (int oz = -radius; oz <= radius; oz++) {
+                    for (int oy = 0; oy <= radius; oy++) {
+                        double distanceSquared = ox * ox + oz * oz + oy * oy;
+                        pos.set(x + ox, y + oy, z + oz);
+                        if (distanceSquared >= 11.0D && distanceSquared <= 19.0D) {
+                            chunk.setBlockState(pos, Blocks.GLASS.defaultBlockState(), false);
+                        } else if (distanceSquared < 11.0D) {
+                            chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
+                        }
+                    }
+                    pos.set(x + ox, y - 1, z + oz);
+                    if (ox * ox + oz * oz <= radius * radius)
+                        chunk.setBlockState(pos, Blocks.PRISMARINE_BRICKS.defaultBlockState(), false);
+                }
+            }
+            for (int side : new int[]{-3, 3}) {
+                for (int oy = -1; oy <= 1; oy++) {
+                    pos.set(x + side, y + oy, z);
+                    chunk.setBlockState(pos, Blocks.SEA_LANTERN.defaultBlockState(), false);
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("Alabasta")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (ox * ox + oz * oz > 5) continue;
+                    pos.set(x + ox, y - 1, z + oz);
+                    chunk.setBlockState(pos, Blocks.SANDSTONE.defaultBlockState(), false);
+                    pos.set(x + ox, y, z + oz);
+                    chunk.setBlockState(pos, Blocks.WATER.defaultBlockState(), false);
+                }
+            }
+            pos.set(x, y, z);
+            chunk.setBlockState(pos, Blocks.WATER.defaultBlockState(), false);
+            return;
+        }
+
+        if (islandId.equals("DrumIsland")) {
+            int height = 5 + (int) (vegetationRoll(x + 47, z + 29, seed) * 8.0D);
+            for (int i = 0; i < height; i++) {
+                int width = Math.max(1, 3 - i / 3);
+                for (int ox = -width; ox <= width; ox++) {
+                    for (int oz = -width; oz <= width; oz++) {
+                        if (Math.abs(ox) + Math.abs(oz) > width + 1) continue;
+                        pos.set(x + ox, y + i, z + oz);
+                        if (pos.getY() < chunk.getMaxBuildHeight()) {
+                            chunk.setBlockState(pos, Blocks.PACKED_ICE.defaultBlockState(), false);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("Skypiea")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) + Math.abs(oz) > 3) continue;
+                    pos.set(x + ox, y - 1, z + oz);
+                    chunk.setBlockState(pos, Blocks.QUARTZ_BRICKS.defaultBlockState(), false);
+                }
+            }
+            for (int i = 0; i < 5; i++) {
+                pos.set(x, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.QUARTZ_PILLAR.defaultBlockState(), false);
+            }
+            return;
+        }
+
+        if (islandId.equals("EniesLobby") || islandId.equals("Marineford")) {
+            BlockState fortress = islandId.equals("EniesLobby")
+                    ? Blocks.QUARTZ_BRICKS.defaultBlockState() : Blocks.STONE_BRICKS.defaultBlockState();
+            for (int side : new int[]{-2, 2}) {
+                for (int i = 0; i < 6; i++) {
+                    pos.set(x + side, y + i, z);
+                    if (pos.getY() < chunk.getMaxBuildHeight())
+                        chunk.setBlockState(pos, fortress, false);
+                }
+                pos.set(x + side, y + 6, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), false);
+            }
+            for (int ox = -2; ox <= 2; ox++) {
+                pos.set(x + ox, y + 3, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, fortress, false);
+            }
+            return;
+        }
+
+        if (islandId.equals("ThrillerBark")) {
+            for (int ox = -2; ox <= 2; ox += 2) {
+                for (int oz = -2; oz <= 2; oz += 2) {
+                    int height = 3 + (int) (vegetationRoll(x + ox, z + oz, seed) * 5.0D);
+                    for (int i = 0; i < height; i++) {
+                        pos.set(x + ox, y + i, z + oz);
+                        if (pos.getY() < chunk.getMaxBuildHeight())
+                            chunk.setBlockState(pos, Blocks.DEEPSLATE_BRICKS.defaultBlockState(), false);
+                    }
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("Sabaody")) {
+            int height = 7 + (int) (vegetationRoll(x + 61, z - 17, seed) * 8.0D);
+            for (int i = 0; i < height; i++) {
+                pos.set(x, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.MANGROVE_LOG.defaultBlockState(), false);
+            }
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) + Math.abs(oz) > 3) continue;
+                    pos.set(x + ox, y + height - 1, z + oz);
+                    if (pos.getY() < chunk.getMaxBuildHeight())
+                        chunk.setBlockState(pos, Blocks.MANGROVE_LEAVES.defaultBlockState()
+                                .setValue(LeavesBlock.PERSISTENT, true), false);
+                }
+            }
+            return;
+        }
+
+        if (islandId.equals("WanoKuni") || islandId.equals("Onigashima")) {
+            BlockState castle = islandId.equals("WanoKuni")
+                    ? Blocks.DEEPSLATE_TILES.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (Math.abs(ox) == 2 || Math.abs(oz) == 2) {
+                        for (int i = 0; i < 5; i++) {
+                            pos.set(x + ox, y + i, z + oz);
+                            if (pos.getY() < chunk.getMaxBuildHeight())
+                                chunk.setBlockState(pos, castle, false);
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 3; i++) {
+                pos.set(x, y + 5 + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight())
+                    chunk.setBlockState(pos, Blocks.DARK_OAK_LOG.defaultBlockState(), false);
+            }
+            return;
+        }
+
+        if (islandId.equals("PunkHazard")) {
+            for (int ox = -2; ox <= 2; ox++) {
+                for (int oz = -2; oz <= 2; oz++) {
+                    if (ox * ox + oz * oz > 5) continue;
+                    pos.set(x + ox, y, z + oz);
+                    chunk.setBlockState(pos, Blocks.MAGMA_BLOCK.defaultBlockState(), false);
+                    if (ox == 0 && oz == 0) {
+                        pos.set(x, y + 1, z);
+                        chunk.setBlockState(pos, Blocks.LAVA.defaultBlockState(), false);
+                    }
+                }
+            }
+            return;
+        }
+
+        BlockState ruin = Blocks.MOSSY_STONE_BRICKS.defaultBlockState();
+        for (int pillar = 0; pillar < 3; pillar++) {
+            int px = x + (pillar - 1) * 2;
+            int height = 2 + (int) (vegetationRoll(px, z + pillar, seed) * 3.0D);
+            for (int i = 0; i < height; i++) {
+                pos.set(px, y + i, z);
+                if (pos.getY() < chunk.getMaxBuildHeight()) chunk.setBlockState(pos, ruin, false);
+            }
+        }
+        for (int ox = -2; ox <= 2; ox++) {
+            pos.set(x + ox, y + 3, z);
+            if (pos.getY() < chunk.getMaxBuildHeight()) chunk.setBlockState(pos, ruin, false);
+        }
+    }
+
+    private static void placeRockOutcrop(LevelChunk chunk, int x, int y, int z, String surfaceId, long seed) {
+        BlockState rock = surfaceId.contains("sand") ? Blocks.SANDSTONE.defaultBlockState()
+                : surfaceId.contains("snow") ? Blocks.PACKED_ICE.defaultBlockState()
+                : surfaceId.contains("basalt") || surfaceId.contains("deepslate")
+                ? Blocks.BASALT.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
+        int radius = 1 + (int) (vegetationRoll(x - 13, z + 23, seed) * 2.0D);
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int ox = -radius; ox <= radius; ox++) {
+            for (int oz = -radius; oz <= radius; oz++) {
+                int px = x + ox;
+                int pz = z + oz;
+                if ((px >> 4) != chunk.getPos().x || (pz >> 4) != chunk.getPos().z) continue;
+                double distance = Math.sqrt(ox * ox + oz * oz);
+                if (distance > radius + 0.15D) continue;
+                int height = distance < 0.75D ? 2 : 1;
+                for (int dy = 0; dy < height; dy++) {
+                    pos.set(px, y + dy, pz);
+                    if (pos.getY() >= chunk.getMaxBuildHeight()) continue;
+                    if (chunk.getBlockState(pos).isAir()) {
+                        chunk.setBlockState(pos, rock, false);
+                    }
+                }
+            }
+        }
+    }
+
+    private static double vegetationChance(String type) {
+        return switch (type) {
+            case "none" -> 0.0D;
+            case "cactus", "desert_oasis" -> 0.035D;
+            case "sparse_oak", "mountain_sparse" -> 0.055D;
+            case "cherry_and_bamboo", "dense_jungle", "giant_forest", "giant_ferns" -> 0.19D;
+            default -> 0.12D;
+        };
+    }
+
+    private static double vegetationRoll(int x, int z, long seed) {
+        long value = seed ^ ((long) x * 0x9E3779B97F4A7C15L) ^ ((long) z * 0xC2B2AE3D27D4EB4FL);
+        value ^= value >>> 30;
+        value *= 0xBF58476D1CE4E5B9L;
+        value ^= value >>> 27;
+        value *= 0x94D049BB133111EBL;
+        value ^= value >>> 31;
+        return (value >>> 11) * 0x1.0p-53;
+    }
+
+    private static void placeVegetation(LevelChunk chunk, int x, int y, int z, String type, long seed) {
+        if (y < chunk.getMinBuildHeight() || y + 6 >= chunk.getMaxBuildHeight()) return;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
+        if (!chunk.getBlockState(pos.below()).isSolid()) return;
+        if (!chunk.getBlockState(pos).isAir()) return;
+
+        if (type.equals("cactus")) {
+            int height = 1 + (int) (vegetationRoll(x + 7, z - 3, seed) * 3.0D);
+            for (int i = 0; i < height; i++) {
+                pos.set(x, y + i, z);
+                if (!chunk.getBlockState(pos).isAir()) break;
+                chunk.setBlockState(pos, Blocks.CACTUS.defaultBlockState(), false);
+            }
+            return;
+        }
+
+        if (type.equals("none") || type.equals("canal_city") || type.equals("ocean_restaurant")) return;
+        boolean jungle = type.contains("jungle") || type.contains("palm") || type.contains("fern");
+        boolean spruce = type.contains("spruce") || type.contains("snow");
+        boolean cherry = type.contains("cherry") || type.contains("candy");
+        var log = jungle ? Blocks.JUNGLE_LOG : spruce ? Blocks.SPRUCE_LOG
+                : cherry ? Blocks.CHERRY_LOG : Blocks.OAK_LOG;
+        var leaves = jungle ? Blocks.JUNGLE_LEAVES : spruce ? Blocks.SPRUCE_LEAVES
+                : cherry ? Blocks.CHERRY_LEAVES : Blocks.OAK_LEAVES;
+        int trunkHeight = 3 + (int) (vegetationRoll(x, z + 11, seed) * 3.0D);
+        for (int i = 0; i < trunkHeight; i++) {
+            pos.set(x, y + i, z);
+            if (!chunk.getBlockState(pos).isAir()) return;
+            chunk.setBlockState(pos, log.defaultBlockState(), false);
+        }
+        int crownY = y + trunkHeight - 1;
+        for (int ox = -2; ox <= 2; ox++) {
+            for (int oz = -2; oz <= 2; oz++) {
+                if (Math.abs(ox) == 2 && Math.abs(oz) == 2) continue;
+                pos.set(x + ox, crownY, z + oz);
+                if (pos.getX() >> 4 != chunk.getPos().x || pos.getZ() >> 4 != chunk.getPos().z) continue;
+                if (chunk.getBlockState(pos).isAir()) {
+                    chunk.setBlockState(pos, leaves.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true), false);
+                }
+            }
+        }
+        pos.set(x, crownY + 1, z);
+        if (chunk.getBlockState(pos).isAir()) {
+            chunk.setBlockState(pos, leaves.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true), false);
+        }
+    }
+
+    private static BlockState block(String id, BlockState fallback) {
+        ResourceLocation key = ResourceLocation.tryParse(id);
+        if (key == null) return fallback;
+        var block = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(key);
+        return block == null ? fallback : block.defaultBlockState();
+    }
+}

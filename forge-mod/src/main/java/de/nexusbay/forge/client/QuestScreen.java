@@ -1,0 +1,89 @@
+package de.nexusbay.forge.client;
+
+import de.nexusbay.forge.network.QuestNetwork;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+public final class QuestScreen extends Screen {
+    private final String islandId,islandName,npcName,greeting,activeId;
+    private final int progress;
+    private final String[] ids,titles,descriptions;
+    private final int[] kills;
+    private final long[] beli,xp;
+    private final boolean[] completed;
+    private int scrollOffset;
+    private static final int ROW_HEIGHT = 76;
+    private static final int LIST_TOP = 101;
+    private QuestScreen(String islandId,String islandName,String npcName,String greeting,String activeId,int progress,String[] ids,String[] titles,String[] descriptions,int[] kills,long[] beli,long[] xp,boolean[] completed){
+        super(Component.literal("Questgeber • "+islandName));this.islandId=islandId;this.islandName=islandName;this.npcName=npcName;this.greeting=greeting;this.activeId=activeId;this.progress=progress;this.ids=ids;this.titles=titles;this.descriptions=descriptions;this.kills=kills;this.beli=beli;this.xp=xp;this.completed=completed;
+    }
+    public static void open(String islandId,String islandName,String npcName,String greeting,String activeId,int progress,String[] ids,String[] titles,String[] descriptions,int[] kills,long[] beli,long[] xp,boolean[] completed){
+        net.minecraft.client.Minecraft.getInstance().setScreen(new QuestScreen(islandId,islandName,npcName,greeting,activeId,progress,ids,titles,descriptions,kills,beli,xp,completed));
+    }
+    @Override protected void init(){
+        rebuildQuestButtons();
+    }
+    private void rebuildQuestButtons(){
+        int width=Math.min(380,this.width-24),left=(this.width-width)/2;
+        int listBottom=this.height-44;
+        for(int i=0;i<ids.length;i++){
+            final int index=i;
+            int y=148+i*ROW_HEIGHT-scrollOffset;
+            if(y+20<LIST_TOP||y>listBottom)continue;
+            if(activeId.equals(ids[i])&&progress>=kills[i])
+                addRenderableWidget(Button.builder(Component.literal("Belohnung abholen"),b->QuestNetwork.claim(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
+            else if(activeId.isBlank()&&!completed[i])
+                addRenderableWidget(Button.builder(Component.literal("Quest annehmen"),b->QuestNetwork.accept(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
+        }
+        addRenderableWidget(Button.builder(Component.literal("Schließen"),b->onClose()).bounds(this.width/2-50,this.height-30,100,20).build());
+    }
+    @Override public boolean mouseScrolled(double mouseX,double mouseY,double delta){
+        int visibleHeight=Math.max(0,this.height-44-LIST_TOP);
+        int maxScroll=Math.max(0,ids.length*ROW_HEIGHT-visibleHeight);
+        if(maxScroll==0)return super.mouseScrolled(mouseX,mouseY,delta);
+        int next=(int)Math.max(0,Math.min(maxScroll,scrollOffset-delta*ROW_HEIGHT/2));
+        if(next!=scrollOffset){
+            scrollOffset=next;
+            clearWidgets();
+            rebuildQuestButtons();
+        }
+        return true;
+    }
+    @Override public void render(GuiGraphics g,int mx,int my,float partial){
+        renderBackground(g);int width=Math.min(380,this.width-24),left=(this.width-width)/2;
+        g.fill(left,18,left+width,this.height-18,0xEE101D2B);g.fill(left,18,left+width,52,0xFF263C50);
+        g.drawCenteredString(font,"QUESTGEBER • "+islandName.toUpperCase(),this.width/2,30,0xFFFFD36A);
+        g.drawCenteredString(font,npcName,this.width/2,58,0xFFFFFFFF);
+        String npcResponse = greeting;
+        if (!activeId.isBlank()) {
+            npcResponse = "Du hast noch eine Aufgabe zu erledigen. Kehre danach zu mir zurück.";
+        } else if (completed.length > 0) {
+            boolean allCompleted = true;
+            for (boolean questCompleted : completed) allCompleted &= questCompleted;
+            if (allCompleted) npcResponse = "Du hast alle Aufgaben dieser Insel gemeistert. Du hast unseren Dank!";
+        }
+        g.drawCenteredString(font,Component.literal(font.plainSubstrByWidth(npcResponse, width - 32)),this.width/2,72,0xFFE1EAF2);
+        g.drawCenteredString(font,activeId.isBlank()?"Wähle deine nächste Aufgabe":"Aktive Quest: "+activeId,this.width/2,92,0xFF74D8FF);
+        g.enableScissor(left+8,LIST_TOP,left+width-8,this.height-44);
+        for(int i=0;i<ids.length;i++){int y=106+i*ROW_HEIGHT-scrollOffset;g.fill(left+12,y-5,left+width-12,y+67,0xAA26394B);
+            g.drawString(font,titles[i],left+20,y,0xFFFFD36A,false);g.drawString(font,descriptions[i],left+20,y+13,0xFFE1EAF2,false);
+            boolean active = activeId.equals(ids[i]);
+            int current = active ? Math.min(Math.max(progress, 0), kills[i]) : completed[i] ? kills[i] : 0;
+            String state = completed[i] ? "ABGESCHLOSSEN"
+                    : active ? "FORTSCHRITT " + current + "/" + kills[i] + " • Noch " + Math.max(0, kills[i] - current)
+                    : !activeId.isBlank() ? "GESPERRT – andere Quest aktiv" : "Ziel: " + kills[i] + " Gegner";
+            g.drawString(font,state,left+20,y+27,completed[i]?0xFF83D69A:0xFFB8D5E8,false);
+            int barLeft = left + 20, barRight = left + width - 20, barY = y + 41;
+            g.fill(barLeft,barY,barRight,barY+5,0xFF172431);
+            int barWidth = Math.max(0, barRight - barLeft);
+            int filled = kills[i] <= 0 ? 0 : (int)(barWidth * (current / (double) kills[i]));
+            if (filled > 0) g.fill(barLeft,barY,barLeft+filled,barY+5,completed[i] ? 0xFF65C98A : 0xFF39BDE8);
+            g.drawString(font,"Belohnung: "+beli[i]+" Beli  •  "+xp[i]+" Frucht-XP",left+20,y+52,0xFFD9C48C,false);
+        }
+        g.disableScissor();
+        super.render(g,mx,my,partial);
+    }
+    @Override public boolean isPauseScreen(){return false;}
+}

@@ -1,0 +1,12 @@
+server/
+world/
+world_nether/
+world_the_end/
+logs/
+plugins/
+backups/
+*.jar
+*.log
+*.lck
+eula.txt
+server.properties
