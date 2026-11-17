@@ -1,6 +1,7 @@
 package de.nexusbay.forge.network;
 
 import de.nexusbay.forge.progression.FruitProfileData;
+import de.nexusbay.forge.event.CombatStaminaEvents;
 import de.nexusbay.forge.progression.FruitSkillCatalog;
 import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.core.particles.ParticleTypes;
@@ -42,12 +43,18 @@ public final class FruitSkillCombat {
    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Fähigkeit lädt noch: "+seconds+"s").withStyle(net.minecraft.ChatFormatting.GRAY));
    return;
   }
-  player.getPersistentData().putLong(cooldownKey,now+skill.cooldownTicks());
-  Vec3 look=player.getLookAngle().normalize();
   boolean ultimate=switch(skill.id()){
    case "gear_second","raigo","flame_emperor","azure_dragon","Homies Sturm","Yasakani","Magmaeruption","Eiszeit","Fadenkäfig","ROOM","Drachenbrüllen" -> true;
    default -> false;
   };
+  float staminaCost=ultimate?35.0F:15.0F;
+  if(!CombatStaminaEvents.spend(player,staminaCost)){
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+    "Nicht genug Ausdauer! Benötigt: "+(int)staminaCost).withStyle(net.minecraft.ChatFormatting.RED));
+   return;
+  }
+  player.getPersistentData().putLong(cooldownKey,now+skill.cooldownTicks());
+  Vec3 look=player.getLookAngle().normalize();
   boolean beam=switch(skill.id()){case "pistol","lightning_bolt","fire_fist","dragon_roar","Yasakani","Lichttritt","Eislanze","Magmaschlag" -> true;default -> false;};
   boolean areaBurst=switch(skill.id()){case "gatling","raigo","flame_emperor","azure_dragon","Homies Sturm","Magmaeruption","Eiszeit","Fadenkäfig","Bombenfeld","Körperregen" -> true;default -> false;};
   double reach=beam?18.0D:ultimate?10.0D:6.0D;
