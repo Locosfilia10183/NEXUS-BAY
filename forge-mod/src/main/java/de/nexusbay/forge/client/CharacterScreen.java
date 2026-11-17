@@ -7,32 +7,28 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-/** Compact character sheet with server-authoritative stat allocation buttons. */
+/** Character profile screen; all allocations are validated by the server. */
 public final class CharacterScreen extends Screen {
-    private int level, points, strength, defense, stamina, sword, fruit;
-    private long xp;
+    private final int level, points, strength, defense, stamina, sword, fruit;
+    private final long xp;
 
     private CharacterScreen(int level, long xp, int points, int strength,
                             int defense, int stamina, int sword, int fruit) {
         super(Component.literal("NEXUS-BAY Charakter"));
-        update(level, xp, points, strength, defense, stamina, sword, fruit);
+        this.level = level;
+        this.xp = xp;
+        this.points = points;
+        this.strength = strength;
+        this.defense = defense;
+        this.stamina = stamina;
+        this.sword = sword;
+        this.fruit = fruit;
     }
 
     public static void show(int level, long xp, int points, int strength,
                             int defense, int stamina, int sword, int fruit) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof CharacterScreen screen) {
-            screen.update(level, xp, points, strength, defense, stamina, sword, fruit);
-        } else {
-            mc.setScreen(new CharacterScreen(level, xp, points, strength, defense, stamina, sword, fruit));
-        }
-    }
-
-    private void update(int level, long xp, int points, int strength,
-                        int defense, int stamina, int sword, int fruit) {
-        this.level = level; this.xp = xp; this.points = points;
-        this.strength = strength; this.defense = defense; this.stamina = stamina;
-        this.sword = sword; this.fruit = fruit;
+        Minecraft.getInstance().setScreen(
+                new CharacterScreen(level, xp, points, strength, defense, stamina, sword, fruit));
     }
 
     @Override protected void init() {
@@ -48,8 +44,19 @@ public final class CharacterScreen extends Screen {
     }
 
     private void addStatButton(int x, int y, String name, String id, int value) {
-        addRenderableWidget(Button.builder(Component.literal("+1 " + name + " (" + value + ")"),
-                b -> CharacterNetwork.allocate(id, 1)).bounds(x, y, 112, 20).build());
+        boolean capped = value >= 100;
+        boolean canSpend = points > 0 && !capped;
+        addRenderableWidget(Button.builder(
+                        Component.literal((capped ? "MAX " : "+1 ") + name + " (" + value + ")"),
+                        b -> CharacterNetwork.allocate(id, 1))
+                .bounds(x, y, 112, 20).build());
+        if (!canSpend) {
+            // Disabled state is applied after widget construction so the UI reflects server data.
+            children().stream().filter(w -> w instanceof Button button
+                    && button.getMessage().getString().contains(name))
+                    .filter(w -> w instanceof Button)
+                    .map(w -> (Button) w).findFirst().ifPresent(button -> button.active = false);
+        }
     }
 
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
@@ -63,7 +70,7 @@ public final class CharacterScreen extends Screen {
                 this.width / 2, 68, 0xFFFFFFFF);
         g.drawCenteredString(font, "Freie Stat-Punkte: " + points,
                 this.width / 2, 86, points > 0 ? 0xFF83D69A : 0xFFB8C7D8);
-        g.drawCenteredString(font, "Klicke +1, um einen Punkt serverseitig zu verteilen.",
+        g.drawCenteredString(font, "Deine Werte wirken jetzt direkt im Kampf.",
                 this.width / 2, 108, 0xFFB8C7D8);
         g.drawCenteredString(font, "Stärke " + strength + "  •  Verteidigung " + defense
                 + "  •  Ausdauer " + stamina, this.width / 2, 202, 0xFFE7EDF5);
