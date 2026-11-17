@@ -87,6 +87,18 @@ public class KizaruBossEntity extends IslandBossEntity {
                 for (Vec3 pass : passes) {
                     server.sendParticles(ParticleTypes.FIREWORK, pass.x, pass.y + 1.0D, pass.z, 12, 0.35D, 0.5D, 0.35D, 0.02D);
                     server.sendParticles(ParticleTypes.END_ROD, pass.x, pass.y + 1.0D, pass.z, 18, 0.25D, 0.4D, 0.25D, 0.02D);
+                    server.sendParticles(ParticleTypes.FLASH, pass.x, pass.y + 1.1D, pass.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    // A compact, bright afterimage orb at each light-speed stop.
+                    for (int ring = 0; ring < 3; ring++) {
+                        double radius = 0.35D + ring * 0.22D;
+                        for (int point = 0; point < 12; point++) {
+                            double angle = Math.PI * 2.0D * point / 12.0D;
+                            double x = pass.x + Math.cos(angle) * radius;
+                            double z = pass.z + Math.sin(angle) * radius;
+                            server.sendParticles(ParticleTypes.END_ROD, x, pass.y + 1.0D + ring * 0.12D, z,
+                                    1, 0.015D, 0.02D, 0.015D, 0.0D);
+                        }
+                    }
                 }
             }
             for (Vec3 pass : passes) {
@@ -134,6 +146,17 @@ public class KizaruBossEntity extends IslandBossEntity {
             // Yasakani no Magatama: a radial barrage of light projectiles around the marked target.
             Vec3 center = target.position();
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                // Golden-white light spheres orbit the target before the expanding rings detonate.
+                for (int orb = 0; orb < 8; orb++) {
+                    double angle = Math.PI * 2.0D * orb / 8.0D;
+                    Vec3 orbCenter = center.add(Math.cos(angle) * 5.0D, 2.0D + Math.sin(angle * 2.0D), Math.sin(angle) * 5.0D);
+                    server.sendParticles(ParticleTypes.FLASH, orbCenter.x, orbCenter.y, orbCenter.z,
+                            1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    server.sendParticles(ParticleTypes.END_ROD, orbCenter.x, orbCenter.y, orbCenter.z,
+                            18, 0.12D, 0.12D, 0.12D, 0.035D);
+                    server.sendParticles(ParticleTypes.FIREWORK, orbCenter.x, orbCenter.y, orbCenter.z,
+                            8, 0.08D, 0.08D, 0.08D, 0.01D);
+                }
                 // Three expanding rings announce Kizaru's final light detonation.
                 for (int ring = 1; ring <= 3; ring++) {
                     double radius = ring * 4.5D;
