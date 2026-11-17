@@ -27,10 +27,19 @@ public final class FruitPlayerEvents {
    p.getPersistentData().putInt("NexusFruitFormTicks",formTicks-1);
    if(p.tickCount%5==0){
     String form=p.getPersistentData().getString("NexusFruitForm");
-    var particle="azure_dragon".equals(form)?net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH:net.minecraft.core.particles.ParticleTypes.FLAME;
-    p.serverLevel().sendParticles(particle,p.getX(),p.getY()+1.0D,p.getZ(),8,0.55D,0.65D,0.55D,0.02D);
+    var particle=switch(form){
+     case "azure_dragon" -> net.minecraft.core.particles.ParticleTypes.DRAGON_BREATH;
+     case "gear_third" -> net.minecraft.core.particles.ParticleTypes.CLOUD;
+     default -> net.minecraft.core.particles.ParticleTypes.FLAME;
+    };
+    p.serverLevel().sendParticles(particle,p.getX(),p.getY()+1.0D,p.getZ(),"gear_third".equals(form)?16:8,0.65D,0.8D,0.65D,0.025D);
    }
-   if(formTicks==1){p.getPersistentData().remove("NexusFruitForm");p.sendSystemMessage(Component.literal("Deine Verwandlung ist beendet."));}
+   if(formTicks==1){
+    String endedForm=p.getPersistentData().getString("NexusFruitForm");
+    p.getPersistentData().remove("NexusFruitForm");
+    if("gear_third".equals(endedForm))p.removeEffect(net.minecraft.world.effect.MobEffects.HEALTH_BOOST);
+    p.sendSystemMessage(Component.literal("Deine Verwandlung ist beendet."));
+   }
   }
   if(p.tickCount%10!=0)return;
   FruitProfileData.Profile profile=FruitProfileData.get(p.serverLevel()).get(p.getUUID());if(profile==null)return;
