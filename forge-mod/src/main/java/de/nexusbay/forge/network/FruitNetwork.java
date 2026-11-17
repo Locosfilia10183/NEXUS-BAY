@@ -20,12 +20,13 @@ public final class FruitNetwork {
   CHANNEL.registerMessage(1,UseFruitSkill.class,UseFruitSkill::encode,UseFruitSkill::decode,(m,c)->c.get().enqueueWork(()->{var player=c.get().getSender();if(player!=null)FruitSkillCombat.activate(player);}));
   CHANNEL.registerMessage(2,CycleFruitSkill.class,CycleFruitSkill::encode,CycleFruitSkill::decode,(m,c)->c.get().enqueueWork(()->{var player=c.get().getSender();if(player!=null)FruitSkillCombat.cycle(player);}));
   CHANNEL.registerMessage(3,SyncFruitForm.class,SyncFruitForm::encode,SyncFruitForm::decode,(m,c)->c.get().enqueueWork(()->DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->de.nexusbay.forge.client.FruitFormClientData.set(m.playerId,m.form,m.ticks))));
+  CHANNEL.registerMessage(4,SyncFruitAnimation.class,SyncFruitAnimation::encode,SyncFruitAnimation::decode,(m,c)->c.get().enqueueWork(()->DistExecutor.unsafeRunWhenOn(Dist.CLIENT,()->()->de.nexusbay.forge.client.FruitFormClientData.animate(m.playerId,m.animation,m.duration))));
  }
  public static void sync(net.minecraft.server.level.ServerPlayer player){
   FruitProfileData.Profile p=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new SyncFruit(p==null?"":p.fruitId(),p==null?0:p.level(),p==null?0:p.experience()));
  }
- public static void syncForm(net.minecraft.server.level.ServerPlayer player,String form,int ticks){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitForm(player.getUUID(),form,ticks));}
+ public static void syncForm(net.minecraft.server.level.ServerPlayer player,String form,int ticks){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitForm(player.getUUID(),form,ticks));}\n public static void syncAnimation(net.minecraft.server.level.ServerPlayer player,String animation,int duration){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitAnimation(player.getUUID(),animation,duration));}
  public static void requestSkill(){CHANNEL.sendToServer(new UseFruitSkill());}
  public static void cycleSkill(){CHANNEL.sendToServer(new CycleFruitSkill());}
  private record UseFruitSkill(){
@@ -40,7 +41,7 @@ public final class FruitNetwork {
   static void encode(SyncFruitForm m,FriendlyByteBuf b){b.writeUUID(m.playerId);b.writeUtf(m.form,64);b.writeVarInt(m.ticks);}
   static SyncFruitForm decode(FriendlyByteBuf b){return new SyncFruitForm(b.readUUID(),b.readUtf(64),b.readVarInt());}
  }
- private record SyncFruit(String id,int level,long xp){
+ private record SyncFruitAnimation(java.util.UUID playerId,String animation,int duration){\n  static void encode(SyncFruitAnimation m,FriendlyByteBuf b){b.writeUUID(m.playerId);b.writeUtf(m.animation,64);b.writeVarInt(m.duration);}\n  static SyncFruitAnimation decode(FriendlyByteBuf b){return new SyncFruitAnimation(b.readUUID(),b.readUtf(64),b.readVarInt());}\n }\n private record SyncFruit(String id,int level,long xp){
   static void encode(SyncFruit m,FriendlyByteBuf b){b.writeUtf(m.id,64);b.writeVarInt(m.level);b.writeVarLong(m.xp);}
   static SyncFruit decode(FriendlyByteBuf b){return new SyncFruit(b.readUtf(64),b.readVarInt(),b.readVarLong());}
  }
