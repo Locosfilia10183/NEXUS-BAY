@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -27,6 +28,22 @@ public final class QuestGiverNpcEvents {
 
     private static String IslandQuestCatalogDialogueName(String islandId) {
         return de.nexusbay.forge.progression.QuestDialogueCatalog.find(islandId).name();
+    }
+
+    /** Gives each island's quest giver a fitting vanilla outfit until custom GeoNPC models are ready. */
+    private static VillagerProfession professionForIsland(String islandId) {
+        return switch (islandId) {
+            case "ShellsTown", "EniesLobby", "ImpelDown", "Marineford" -> VillagerProfession.ARMORER;
+            case "Baratie", "WholeCakeIsland" -> VillagerProfession.BUTCHER;
+            case "Water7" -> VillagerProfession.TOOLSMITH;
+            case "Alabasta", "Loguetown", "Sabaody" -> VillagerProfession.CARTOGRAPHER;
+            case "DrumIsland", "FishManIsland", "ReverseMountain" -> VillagerProfession.FISHERMAN;
+            case "WanoKuni", "Onigashima", "AmazonLily" -> VillagerProfession.WEAPONSMITH;
+            case "Skypiea", "PunkHazard", "LittleGarden" -> VillagerProfession.CLERIC;
+            case "SyrupVillage", "FooshaVillage", "OrangeTown", "ArlongPark", "WhiskeyPeak",
+                    "Jaya", "ThrillerBark", "Dressrosa", "Zou" -> VillagerProfession.FLETCHER;
+            default -> VillagerProfession.LIBRARIAN;
+        };
     }
 
     @SubscribeEvent
@@ -45,6 +62,9 @@ public final class QuestGiverNpcEvents {
             Villager npc = EntityType.VILLAGER.create(level);
             if (npc == null) continue;
             npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
+            npc.setVillagerData(npc.getVillagerData()
+                    .setProfession(professionForIsland(islandId))
+                    .setLevel(5));
             npc.setCustomName(Component.literal(IslandQuestCatalogDialogueName(islandId)));
             npc.setCustomNameVisible(true);
             npc.setNoAi(true);
