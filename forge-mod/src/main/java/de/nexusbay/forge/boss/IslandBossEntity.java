@@ -38,6 +38,7 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
     private int specialCooldown = 100;
     private int specialWarningTicks = 0;
     private int phase = 1;
+    private int reactiveDodgeCooldown = 0;
     private final Map<UUID, Float> playerDamage = new HashMap<>();
 
     protected IslandBossEntity(EntityType<? extends Monster> type, Level level, String title, float health,
@@ -106,6 +107,7 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
         }
         bossBar.setProgress(Math.max(0.0F, ratio));
         if (specialCooldown > 0) specialCooldown--;
+        if (reactiveDodgeCooldown > 0) reactiveDodgeCooldown--;
         LivingEntity target = getTarget();
         if (specialWarningTicks > 0) {
             specialWarningTicks--;
@@ -150,11 +152,34 @@ public abstract class IslandBossEntity extends Monster implements GeoEntity, Bos
     @Override public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
         if (hurt && !level().isClientSide) {
-            ServerPlayer attacker = source.getEntity() instanceof ServerPlayer player ? player
-                    : source.getEntity() instanceof net.minecraft.world.entity.projectile.Projectile projectile
+            Entity sourceEntity = source.getEntity();
+            ServerPlayer attacker = sourceEntity instanceof ServerPlayer player ? player
+                    : sourceEntity instanceof net.minecraft.world.entity.projectile.Projectile projectile
                     && projectile.getOwner() instanceof ServerPlayer player ? player : null;
             if (attacker != null) {
                 playerDamage.merge(attacker.getUUID(), amount, Float::sum);
+                // Veteran bosses occasionally evade a committed attack instead of standing still.
+                // The cooldown and phase-scaled chance prevent constant, frustrating dodging.
+                double distance = distanceToSqr(attacker);
+                float dodgeChance = phase == 3 ? 0.28F : phase == 2 ? 0.20F : 0.12F;
+                if (reactiveDodgeCooldown <= 0 && distance >= 9.0D && distance <= 196.0D
+                        && random.nextFloat() < dodgeChance) {
+                    Vec3 away = position().subtract(attacker.position()).multiply(1.0D, 0.0D, 1.0D).normalize();
+                    double direction = random.nextBoolean() ? 1.0D : -1.0D;
+                    Vec3 sidestep = new Vec3(-away.z, 0.0D, away.x).scale(direction * (phase == 3 ? 0.72D : 0.55D));
+                    setDeltaMovement(getDeltaMovement().add(sidestep.x, 0.12D, sidestep.z));
+                    hasImpulse = true;
+                    getNavigation().stop();
+                    reactiveDodgeCooldown = phase == 3 ? 28 : phase == 2 ? 40 : 55;
+                    if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                        server.sendParticles(ParticleTypes.CLOUD, getX(), getY() + getBbHeight() * 0.45D,
+                                getZ(), 12, 0.45D, 0.5D, 0.45D, 0.035D);
+                        server.sendParticles(ParticleTypes.CRIT, getX(), getY() + getBbHeight() * 0.65D,
+                                getZ(), 8, 0.35D, 0.45D, 0.35D, 0.08D);
+                    }
+                    level().playSound(null, blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP,
+                            SoundSource.HOSTILE, 0.75F, 1.25F + phase * 0.12F);
+                }
             }
             triggerAnim("combat", "hit");
             if (tickCount % 5 == 0) {
