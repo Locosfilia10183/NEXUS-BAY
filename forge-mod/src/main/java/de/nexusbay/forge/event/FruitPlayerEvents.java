@@ -2,6 +2,7 @@ package de.nexusbay.forge.event;
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.network.FruitNetwork;
 import de.nexusbay.forge.progression.FruitProfileData;
+import de.nexusbay.forge.progression.CharacterProgressionData;
 import de.nexusbay.forge.progression.FruitSkillCatalog;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -53,6 +54,13 @@ public final class FruitPlayerEvents {
  }
  @SubscribeEvent public static void kill(LivingDeathEvent e){
   if(!(e.getEntity() instanceof Monster monster)||!(e.getSource().getEntity() instanceof ServerPlayer p))return;
+  long characterReward=Math.max(8L,Math.min(80L,8L+(long)(monster.getMaxHealth()/5.0F)));
+  var characterBefore=CharacterProgressionData.get(p.serverLevel()).get(p.getUUID());
+  var characterAfter=CharacterProgressionData.get(p.serverLevel()).addExperience(p.getUUID(),characterReward);
+  p.sendSystemMessage(Component.literal("+"+characterReward+" Charakter-XP").withStyle(ChatFormatting.YELLOW));
+  if(characterAfter.level()>characterBefore.level()){
+   p.sendSystemMessage(Component.literal("Charakter-Level gestiegen: "+characterBefore.level()+" → "+characterAfter.level()+" | +"+((characterAfter.level()-characterBefore.level())*3)+" Stat-Punkte").withStyle(ChatFormatting.GOLD,ChatFormatting.BOLD));
+  }
   FruitProfileData data=FruitProfileData.get(p.serverLevel());
   FruitProfileData.Profile before=data.get(p.getUUID());
   if(before==null)return;
