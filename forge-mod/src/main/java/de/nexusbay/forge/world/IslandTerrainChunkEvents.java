@@ -44,8 +44,39 @@ public final class IslandTerrainChunkEvents {
             if (!level.isLoaded(new BlockPos(chunkPos.getMinBlockX(), level.getMinBuildHeight(), chunkPos.getMinBlockZ()))) return;
             LevelChunk loaded = level.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
             if (loaded == null || loaded != chunk) return;
-            applyIslandTerrain(level, loaded);
+            applyFullOceanChunk(level, loaded);
         });
+    }
+
+    /**
+     * First phase of the new-world reset: generate a continuous ocean in every
+     * newly generated overworld chunk. Islands will be added deliberately later.
+     */
+    private static void applyFullOceanChunk(ServerLevel level, LevelChunk chunk) {
+        ChunkPos chunkPos = chunk.getPos();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        final int seaLevel = IslandCatalog.SEA_LEVEL;
+        final int oceanFloor = -32;
+
+        for (int dx = 0; dx < 16; dx++) {
+            for (int dz = 0; dz < 16; dz++) {
+                int x = chunkPos.getMinBlockX() + dx;
+                int z = chunkPos.getMinBlockZ() + dz;
+                for (int y = level.getMinBuildHeight(); y <= seaLevel; y++) {
+                    pos.set(x, y, z);
+                    BlockState state;
+                    if (y < oceanFloor - 4) {
+                        state = Blocks.STONE.defaultBlockState();
+                    } else if (y <= oceanFloor) {
+                        state = Blocks.GRAVEL.defaultBlockState();
+                    } else {
+                        state = Blocks.WATER.defaultBlockState();
+                    }
+                    chunk.setBlockState(pos, state, false);
+                }
+            }
+        }
+        chunk.setUnsaved(true);
     }
 
     private static void applyIslandTerrain(ServerLevel level, LevelChunk chunk) {
