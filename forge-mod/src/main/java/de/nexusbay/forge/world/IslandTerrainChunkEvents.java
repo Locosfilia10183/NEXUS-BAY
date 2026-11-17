@@ -31,10 +31,19 @@ public final class IslandTerrainChunkEvents {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         if (!level.dimension().equals(ServerLevel.OVERWORLD)) return;
         if (!(event.getChunk() instanceof LevelChunk chunk)) return;
-        if (chunk.getStatus().getChunkType() != net.minecraft.world.level.chunk.ChunkStatus.ChunkType.LEVELCHUNK) return;
-        CompoundTag chunkData = chunk.getPersistentData();
-        if (chunkData.getBoolean(GENERATED_KEY)) return;
 
+        // Queue edits after the load event returns. Editing blocks inside the
+        // ChunkData/Chunk load callback recursively re-enters chunk loading.
+        ChunkPos chunkPos = chunk.getPos();
+        level.getServer().execute(() -> {
+            if (!level.isLoaded(new BlockPos(chunkPos.getMinBlockX(), level.getMinBuildHeight(), chunkPos.getMinBlockZ()))) return;
+            LevelChunk loaded = level.getChunkSource().getChunkNow(chunkPos.x, chunkPos.z);
+            if (loaded == null || loaded != chunk) return;
+            applyIslandTerrain(level, loaded);
+        });
+    }
+
+    private static void applyIslandTerrain(ServerLevel level, LevelChunk chunk) {
         ChunkPos chunkPos = chunk.getPos();
         long seed = level.getSeed();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -89,10 +98,8 @@ public final class IslandTerrainChunkEvents {
         }
 
         placeSettlementBuilding(chunk, chunkPos, seed);
-        chunkData.putBoolean(GENERATED_KEY, true);
         if (touched) chunk.setUnsaved(true);
     }
-
 
 
 
