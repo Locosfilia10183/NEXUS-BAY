@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.npc.Villager;
 import de.nexusbay.forge.entity.QuestGiverEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
@@ -40,6 +40,11 @@ public final class QuestGiverNpcEvents {
             level.getChunkAt(pos);
             String tag = TAG_PREFIX + islandId;
             AABB search = new AABB(pos).inflate(12.0D, 8.0D, 12.0D);
+            // Replace quest givers created by older mod versions instead of leaving duplicates behind.
+            for (Villager legacyNpc : level.getEntitiesOfClass(Villager.class, search,
+                    e -> e.getTags().contains(tag))) {
+                legacyNpc.discard();
+            }
             if (!level.getEntitiesOfClass(QuestGiverEntity.class, search, e -> e.getTags().contains(tag)).isEmpty()) continue;
             QuestGiverEntity npc = de.nexusbay.forge.registry.ModEntities.QUEST_GIVER.get().create(level);
             if (npc == null) continue;
