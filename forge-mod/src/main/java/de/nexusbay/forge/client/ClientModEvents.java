@@ -12,6 +12,7 @@ public final class ClientModEvents {
     private ClientModEvents() {}
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.QUEST_GIVER.get(), QuestGiverRenderer::new);
         event.registerEntityRenderer(ModEntities.KAIDO.get(), KaidoRenderer::new);
         event.registerEntityRenderer(ModEntities.CROCODILE.get(), CrocodileRenderer::new);
         event.registerEntityRenderer(ModEntities.ENEL.get(), EnelRenderer::new);

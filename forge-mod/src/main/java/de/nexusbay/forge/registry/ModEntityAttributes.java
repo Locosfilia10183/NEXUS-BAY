@@ -5,6 +5,8 @@ import de.nexusbay.forge.boss.KaidoBossEntity;
 import de.nexusbay.forge.boss.CrocodileBossEntity;
 import de.nexusbay.forge.boss.EnelBossEntity;
 import de.nexusbay.forge.boss.RobLucciBossEntity;
+import de.nexusbay.forge.entity.QuestGiverEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,5 +20,6 @@ public final class ModEntityAttributes {
         event.put(ModEntities.CROCODILE.get(), CrocodileBossEntity.createAttributes().build());
         event.put(ModEntities.ENEL.get(), EnelBossEntity.createAttributes().build());
         event.put(ModEntities.ROB_LUCCI.get(), RobLucciBossEntity.createAttributes().build());
+        event.put(ModEntities.QUEST_GIVER.get(), QuestGiverEntity.createAttributes().build());
     }
 }

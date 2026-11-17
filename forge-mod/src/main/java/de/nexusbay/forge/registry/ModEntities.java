@@ -42,6 +42,12 @@ public final class ModEntities {
                     .of(KizaruBossEntity::new, MobCategory.MONSTER).sized(1.25F, 3.15F)
                     .clientTrackingRange(14).build("kizaru"));
 
+
+    public static final RegistryObject<EntityType<de.nexusbay.forge.entity.QuestGiverEntity>> QUEST_GIVER =
+            ENTITY_TYPES.register("quest_giver", () -> EntityType.Builder
+                    .of(de.nexusbay.forge.entity.QuestGiverEntity::new, MobCategory.CREATURE)
+                    .sized(0.72F, 1.95F).clientTrackingRange(10).build("quest_giver"));
+
     private ModEntities() {}
     public static void register(IEventBus modBus) { ENTITY_TYPES.register(modBus); }
 }
