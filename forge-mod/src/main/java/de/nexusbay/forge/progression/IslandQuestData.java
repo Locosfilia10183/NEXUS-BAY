@@ -37,17 +37,41 @@ public final class IslandQuestData extends SavedData {
     }
     public String active(UUID id) { return active.getOrDefault(id, ""); }
     public int progress(UUID id) { return progress.getOrDefault(id, 0); }
-    public boolean completed(UUID id, String quest) { return completed.getOrDefault(id, Set.of()).contains(quest); }
+    public boolean completed(UUID id, String quest) {
+        return id != null && quest != null && !quest.isBlank()
+                && completed.getOrDefault(id, Set.of()).contains(quest.trim());
+    }
+
     public boolean accept(UUID id, String quest) {
-        if (!active(id).isBlank() || completed(id, quest)) return false;
-        active.put(id, quest); progress.put(id, 0); setDirty(); return true;
+        if (id == null || quest == null || quest.isBlank()) return false;
+        String questId = quest.trim();
+        if (!active(id).isBlank() || completed(id, questId)) return false;
+        active.put(id, questId);
+        progress.put(id, 0);
+        setDirty();
+        return true;
     }
+
     public int addKill(UUID id) {
-        if (active(id).isBlank()) return 0;
-        int value = progress(id) + 1; progress.put(id, value); setDirty(); return value;
+        if (id == null || active(id).isBlank()) return 0;
+        // Saturate instead of wrapping to a negative value after integer overflow.
+        int current = progress(id);
+        int value = current == Integer.MAX_VALUE ? Integer.MAX_VALUE : current + 1;
+        if (value != current) {
+            progress.put(id, value);
+            setDirty();
+        }
+        return value;
     }
+
     public boolean claim(UUID id, String quest) {
-        if (!active(id).equals(quest)) return false;
-        active.remove(id); progress.remove(id); completed.computeIfAbsent(id, ignored -> new HashSet<>()).add(quest); setDirty(); return true;
+        if (id == null || quest == null || quest.isBlank()) return false;
+        String questId = quest.trim();
+        if (!active(id).equals(questId)) return false;
+        active.remove(id);
+        progress.remove(id);
+        completed.computeIfAbsent(id, ignored -> new HashSet<>()).add(questId);
+        setDirty();
+        return true;
     }
 }
