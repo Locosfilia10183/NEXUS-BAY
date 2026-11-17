@@ -25,6 +25,10 @@ public final class QuestGiverNpcEvents {
     private static final String TAG_PREFIX = "nexusbay_questgiver_";
     private QuestGiverNpcEvents() {}
 
+    private static String IslandQuestCatalogDialogueName(String islandId) {
+        return de.nexusbay.forge.progression.QuestDialogueCatalog.find(islandId).name();
+    }
+
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
@@ -41,7 +45,7 @@ public final class QuestGiverNpcEvents {
             Villager npc = EntityType.VILLAGER.create(level);
             if (npc == null) continue;
             npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
-            npc.setCustomName(Component.literal("Questgeber von " + island.displayName()));
+            npc.setCustomName(Component.literal(IslandQuestCatalogDialogueName(islandId)));
             npc.setCustomNameVisible(true);
             npc.setNoAi(true);
             npc.setInvulnerable(true);
