@@ -72,7 +72,13 @@ public final class IslandTerrainChunkEvents {
                     } else {
                         state = Blocks.WATER.defaultBlockState();
                     }
-                    chunk.setBlockState(pos, state, false);
+                    // Write directly into the chunk section. LevelChunk#setBlockState
+                    // performs fluid interaction checks which can synchronously request
+                    // neighboring chunks; during chunk-load generation this deadlocks.
+                    int sectionIndex = chunk.getSectionIndex(y);
+                    if (sectionIndex >= 0 && sectionIndex < chunk.getSections().length) {
+                        chunk.getSection(sectionIndex).setBlockState(dx, y & 15, dz, state, false);
+                    }
                 }
             }
         }
