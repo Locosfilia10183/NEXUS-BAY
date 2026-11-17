@@ -144,6 +144,35 @@ public final class FruitSkillCombat {
    double side=offset.subtract(look.scale(along)).length();
    if(side>radius||(!beam&&!areaBurst&&side>2.0D))continue;
    target.hurt(player.damageSources().playerAttack(player),damage);
+   if(profile.fruitId().equals("gomu_gomu")){
+    String impact=skill.id();
+    if(impact.equals("gear_second")){
+     target.knockback(1.15D,player.getX()-target.getX(),player.getZ()-target.getZ());
+     player.serverLevel().sendParticles(ParticleTypes.CRIT,target.getX(),target.getY()+target.getBbHeight()*0.55D,target.getZ(),18,0.35D,0.35D,0.35D,0.18D);
+    }else if(impact.equals("gear_third")){
+     target.knockback(1.65D,player.getX()-target.getX(),player.getZ()-target.getZ());
+     target.setDeltaMovement(target.getDeltaMovement().add(0.0D,0.62D,0.0D));
+     target.hurtMarked=true;
+     player.serverLevel().sendParticles(ParticleTypes.CLOUD,target.getX(),target.getY()+0.35D,target.getZ(),30,0.7D,0.25D,0.7D,0.08D);
+     player.serverLevel().sendParticles(ParticleTypes.CRIT,target.getX(),target.getY()+target.getBbHeight()*0.65D,target.getZ(),14,0.4D,0.5D,0.4D,0.12D);
+    }else if(impact.equals("gear_fourth_boundman")){
+     target.knockback(2.25D,player.getX()-target.getX(),player.getZ()-target.getZ());
+     target.setDeltaMovement(target.getDeltaMovement().add(0.0D,0.24D,0.0D));
+     target.hurtMarked=true;
+     player.serverLevel().sendParticles(ParticleTypes.EXPLOSION,target.getX(),target.getY()+target.getBbHeight()*0.5D,target.getZ(),2,0.3D,0.3D,0.3D,0.0D);
+     player.serverLevel().sendParticles(ParticleTypes.CRIT,target.getX(),target.getY()+target.getBbHeight()*0.6D,target.getZ(),28,0.55D,0.55D,0.55D,0.2D);
+    }else if(impact.equals("gear_fourth_snake_man")){
+     target.knockback(0.48D,player.getX()-target.getX(),player.getZ()-target.getZ());
+     player.serverLevel().sendParticles(ParticleTypes.SWEEP_ATTACK,target.getX(),target.getY()+target.getBbHeight()*0.6D,target.getZ(),5,0.45D,0.35D,0.45D,0.0D);
+     player.serverLevel().sendParticles(ParticleTypes.CRIT,target.getX(),target.getY()+target.getBbHeight()*0.6D,target.getZ(),22,0.35D,0.45D,0.35D,0.16D);
+    }else if(impact.equals("gear_fourth_tankman")){
+     target.knockback(2.7D,player.getX()-target.getX(),player.getZ()-target.getZ());
+     target.setDeltaMovement(target.getDeltaMovement().add(0.0D,0.48D,0.0D));
+     target.hurtMarked=true;
+     player.serverLevel().sendParticles(ParticleTypes.CLOUD,target.getX(),target.getY()+0.2D,target.getZ(),42,0.9D,0.3D,0.9D,0.1D);
+     player.serverLevel().sendParticles(ParticleTypes.EXPLOSION,target.getX(),target.getY()+0.5D,target.getZ(),3,0.45D,0.35D,0.45D,0.0D);
+    }
+   }
    switch(profile.fruitId()){
     case "mera_mera","magu_magu","uo_uo_seiryu" -> target.setSecondsOnFire(ultimate?8:4);
     case "goro_goro","pika_pika" -> {target.knockback(ultimate?1.8D:1.2D,player.getX()-target.getX(),player.getZ()-target.getZ());target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,80,1));}
