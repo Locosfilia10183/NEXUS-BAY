@@ -12,6 +12,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.phys.AABB;
@@ -46,6 +49,22 @@ public final class QuestGiverNpcEvents {
         };
     }
 
+    /** Gives each quest giver a recognizable prop while dedicated GeoNPC models are being built. */
+    private static ItemStack heldItemForIsland(String islandId) {
+        return switch (islandId) {
+            case "ShellsTown", "EniesLobby", "ImpelDown", "Marineford" -> new ItemStack(Items.IRON_SWORD);
+            case "Baratie", "WholeCakeIsland" -> new ItemStack(Items.COOKED_BEEF);
+            case "Water7" -> new ItemStack(Items.IRON_AXE);
+            case "Alabasta", "Loguetown", "Sabaody" -> new ItemStack(Items.FILLED_MAP);
+            case "DrumIsland", "FishManIsland", "ReverseMountain" -> new ItemStack(Items.FISHING_ROD);
+            case "WanoKuni", "Onigashima", "AmazonLily" -> new ItemStack(Items.KATANA);
+            case "Skypiea", "PunkHazard", "LittleGarden" -> new ItemStack(Items.BLAZE_ROD);
+            case "SyrupVillage", "FooshaVillage", "OrangeTown", "ArlongPark", "WhiskeyPeak",
+                    "Jaya", "ThrillerBark", "Dressrosa", "Zou" -> new ItemStack(Items.BOW);
+            default -> new ItemStack(Items.WRITABLE_BOOK);
+        };
+    }
+
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
@@ -65,6 +84,8 @@ public final class QuestGiverNpcEvents {
             npc.setVillagerData(npc.getVillagerData()
                     .setProfession(professionForIsland(islandId))
                     .setLevel(5));
+            npc.setItemSlot(EquipmentSlot.MAINHAND, heldItemForIsland(islandId));
+            npc.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
             npc.setCustomName(Component.literal(IslandQuestCatalogDialogueName(islandId)));
             npc.setCustomNameVisible(true);
             npc.setNoAi(true);
