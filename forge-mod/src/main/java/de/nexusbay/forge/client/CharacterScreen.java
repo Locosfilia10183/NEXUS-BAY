@@ -37,7 +37,7 @@ public final class CharacterScreen extends Screen {
 
     @Override protected void init() {
         int left = this.width / 2 - 112;
-        int top = 112;
+        int top = 128;
         addStatButton(left, top, "Stärke", "strength", strength);
         addStatButton(left, top + 28, "Verteidigung", "defense", defense);
         addStatButton(left, top + 56, "Ausdauer", "stamina", stamina);
@@ -63,14 +63,12 @@ public final class CharacterScreen extends Screen {
                 this.width / 2, 68, 0xFFFFFFFF);
         g.drawCenteredString(font, "Freie Stat-Punkte: " + points,
                 this.width / 2, 86, points > 0 ? 0xFF83D69A : 0xFFB8C7D8);
-        g.drawCenteredString(font, "Verteile Punkte – jeder Wert ist serverseitig begrenzt.",
-                this.width / 2, 101, 0xFFB8C7D8);
-        g.drawString(font, "KAMPFWERTE", left + 12, 144, 0xFFFFD36A);
-        g.drawString(font, "Stärke: " + strength, left + 12, 174, 0xFFE7EDF5, false);
-        g.drawString(font, "Verteidigung: " + defense, left + 12, 190, 0xFFE7EDF5, false);
-        g.drawString(font, "Ausdauer: " + stamina, left + 12, 206, 0xFFE7EDF5, false);
-        g.drawString(font, "Schwert: " + sword, left + 136, 174, 0xFFE7EDF5, false);
-        g.drawString(font, "Frucht: " + fruit, left + 136, 190, 0xFFE7EDF5, false);
+        g.drawCenteredString(font, "Klicke +1, um einen Punkt serverseitig zu verteilen.",
+                this.width / 2, 108, 0xFFB8C7D8);
+        g.drawCenteredString(font, "Stärke " + strength + "  •  Verteidigung " + defense
+                + "  •  Ausdauer " + stamina, this.width / 2, 202, 0xFFE7EDF5);
+        g.drawCenteredString(font, "Schwert " + sword + "  •  Teufelsfrucht " + fruit,
+                this.width / 2, 216, 0xFFE7EDF5);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
