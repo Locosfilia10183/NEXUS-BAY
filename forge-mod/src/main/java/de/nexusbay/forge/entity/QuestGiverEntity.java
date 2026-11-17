@@ -49,13 +49,13 @@ public final class QuestGiverEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("NexusBayQuestGiverVariant", getVariant());
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setVariant(tag.getInt("NexusBayQuestGiverVariant"));
     }
