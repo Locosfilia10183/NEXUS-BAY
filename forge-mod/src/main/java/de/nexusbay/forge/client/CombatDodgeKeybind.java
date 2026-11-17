@@ -11,18 +11,23 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-/** Client input for the server-authoritative combat dodge. */
+/** R dodges; V toggles a server-validated frontal guard. */
 @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class CombatDodgeKeybind {
     public static final KeyMapping DODGE = new KeyMapping(
             "key.nexusbay.dodge", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R,
             "key.categories.nexusbay");
+    public static final KeyMapping BLOCK = new KeyMapping(
+            "key.nexusbay.block", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V,
+            "key.categories.nexusbay");
+    private static boolean blocking;
 
     private CombatDodgeKeybind() {}
 
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(DODGE);
+        event.register(BLOCK);
     }
 
     @Mod.EventBusSubscriber(modid = NexusBayForge.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -32,8 +37,14 @@ public final class CombatDodgeKeybind {
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
             if (event.phase != TickEvent.Phase.END) return;
-            while (DODGE.consumeClick()) {
-                CombatNetwork.requestDodge();
+            while (DODGE.consumeClick()) CombatNetwork.requestDodge();
+            while (BLOCK.consumeClick()) {
+                blocking = !blocking;
+                CombatNetwork.setBlocking(blocking);
+            }
+            if (net.minecraft.client.Minecraft.getInstance().player == null && blocking) {
+                blocking = false;
+                CombatNetwork.setBlocking(false);
             }
         }
     }
