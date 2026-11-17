@@ -1,6 +1,7 @@
 package de.nexusbay.forge.network;
 
 import de.nexusbay.forge.NexusBayForge;
+import de.nexusbay.forge.event.CombatStaminaEvents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,12 +30,18 @@ public final class CombatNetwork {
                     ServerPlayer player = context.get().getSender();
                     if (player == null || !player.isAlive() || player.isPassenger()
                             || player.isFallFlying() || player.isInWater()
-                            || player.getPersistentData().getBoolean(BLOCKING)) return;
+                            || isBlocking(player) || !CombatStaminaEvents.spend(player, 20.0F)) return;
                     long now = player.serverLevel().getGameTime();
-                    if (now < player.getPersistentData().getLong(DODGE_COOLDOWN)) return;
+                    if (now < player.getPersistentData().getLong(DODGE_COOLDOWN)) {
+                        CombatStaminaEvents.restore(player, 20.0F);
+                        return;
+                    }
                     Vec3 look = player.getLookAngle();
                     Vec3 direction = new Vec3(look.x, 0.0D, look.z);
-                    if (direction.lengthSqr() < 1.0E-4D) return;
+                    if (direction.lengthSqr() < 1.0E-4D) {
+                        CombatStaminaEvents.restore(player, 20.0F);
+                        return;
+                    }
                     direction = direction.normalize();
                     Vec3 current = player.getDeltaMovement();
                     player.setDeltaMovement(direction.x * 1.15D,
@@ -50,7 +57,8 @@ public final class CombatNetwork {
                     ServerPlayer player = context.get().getSender();
                     if (player == null) return;
                     boolean enabled = message.enabled && player.isAlive()
-                            && !player.isPassenger() && !player.isFallFlying() && !player.isSwimming();
+                            && !player.isPassenger() && !player.isFallFlying() && !player.isSwimming()
+                            && CombatStaminaEvents.current(player) > 0.0F;
                     player.getPersistentData().putBoolean(BLOCKING, enabled);
                     if (enabled) {
                         player.level().playSound(null, player.blockPosition(), SoundEvents.SHIELD_BLOCK,
@@ -61,7 +69,6 @@ public final class CombatNetwork {
 
     public static void requestDodge() { CHANNEL.sendToServer(new DodgeRequest()); }
     public static void setBlocking(boolean enabled) { CHANNEL.sendToServer(new BlockRequest(enabled)); }
-
     public static boolean isBlocking(ServerPlayer player) {
         return player.getPersistentData().getBoolean(BLOCKING);
     }
@@ -70,7 +77,6 @@ public final class CombatNetwork {
         static void encode(DodgeRequest message, FriendlyByteBuf buffer) {}
         static DodgeRequest decode(FriendlyByteBuf buffer) { return new DodgeRequest(); }
     }
-
     private record BlockRequest(boolean enabled) {
         static void encode(BlockRequest message, FriendlyByteBuf buffer) { buffer.writeBoolean(message.enabled); }
         static BlockRequest decode(FriendlyByteBuf buffer) { return new BlockRequest(buffer.readBoolean()); }
