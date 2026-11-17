@@ -32,6 +32,11 @@ public final class IslandTerrainChunkEvents {
         if (!level.dimension().equals(ServerLevel.OVERWORLD)) return;
         if (!(event.getChunk() instanceof LevelChunk chunk)) return;
 
+        // Existing chunks are already part of the saved world. Rewriting all 256
+        // columns on every load stalls startup and can overwrite player edits.
+        // Only apply the island sampler once, when Minecraft first generates a chunk.
+        if (!event.isNewChunk()) return;
+
         // Queue edits after the load event returns. Editing blocks inside the
         // ChunkData/Chunk load callback recursively re-enters chunk loading.
         ChunkPos chunkPos = chunk.getPos();
