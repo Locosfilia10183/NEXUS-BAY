@@ -38,6 +38,7 @@ public final class FruitPlayerEvents {
    if(formTicks==1){
     String endedForm=p.getPersistentData().getString("NexusFruitForm");
     p.getPersistentData().remove("NexusFruitForm");
+    de.nexusbay.forge.network.FruitNetwork.syncForm(p,"",0);
     if("gear_third".equals(endedForm)||"gear_fourth_tankman".equals(endedForm))p.removeEffect(net.minecraft.world.effect.MobEffects.HEALTH_BOOST);
     p.sendSystemMessage(Component.literal("Deine Verwandlung ist beendet."));
    }
