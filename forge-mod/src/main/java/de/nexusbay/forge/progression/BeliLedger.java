@@ -51,24 +51,27 @@ public final class BeliLedger extends SavedData {
     }
 
     public long balance(UUID playerId) {
-        return balances.getOrDefault(playerId, 0L);
+        return playerId == null ? 0L : balances.getOrDefault(playerId, 0L);
     }
 
     public long balance(ServerPlayer player) {
-        return balance(player.getUUID());
+        return player == null ? 0L : balance(player.getUUID());
     }
 
     public long deposit(UUID playerId, long amount) {
-        if (amount <= 0L) return balance(playerId);
+        if (playerId == null || amount <= 0L) return balance(playerId);
         long current = balance(playerId);
         long updated = current > Long.MAX_VALUE - amount ? Long.MAX_VALUE : current + amount;
-        balances.put(playerId, updated);
-        setDirty();
+        if (updated != current) {
+            balances.put(playerId, updated);
+            setDirty();
+        }
         return updated;
     }
 
     public boolean withdraw(UUID playerId, long amount) {
-        if (amount < 0L) return false;
+        if (playerId == null || amount < 0L) return false;
+        if (amount == 0L) return true;
         long current = balance(playerId);
         if (current < amount) return false;
         balances.put(playerId, current - amount);
@@ -77,7 +80,8 @@ public final class BeliLedger extends SavedData {
     }
 
     public boolean transfer(UUID from, UUID to, long amount) {
-        if (amount <= 0L || from.equals(to) || balance(from) < amount) return false;
+        if (from == null || to == null || amount <= 0L || from.equals(to)
+                || balance(from) < amount) return false;
         long recipient = balance(to);
         if (recipient > Long.MAX_VALUE - amount) return false;
         balances.put(from, balance(from) - amount);
@@ -85,4 +89,5 @@ public final class BeliLedger extends SavedData {
         setDirty();
         return true;
     }
+}
 }
