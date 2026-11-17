@@ -63,8 +63,18 @@ public final class IslandTeleportCommands {
 
     private static int teleportTo(ServerPlayer player, int x, int z, int plannedY, String label) {
         Level level = player.level();
+        BlockPos plannedPosition = new BlockPos(x, plannedY, z);
+        if (!level.getWorldBorder().isWithinBounds(plannedPosition)) {
+            player.sendSystemMessage(Component.literal(
+                    "Teleport abgebrochen: " + label + " liegt außerhalb der Weltgrenze."));
+            return 0;
+        }
+
+        int minY = level.getMinBuildHeight() + 1;
+        int maxY = level.getMaxBuildHeight() - 2;
         int surfaceY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        int y = Math.max(plannedY, surfaceY + 2);
+        int y = Math.max(minY, Math.min(maxY, Math.max(plannedY, surfaceY + 2)));
+
         player.teleportTo(x + 0.5D, y, z + 0.5D);
         player.sendSystemMessage(Component.literal("Teleportiert zu " + label
                 + " bei X " + x + " / Y " + y + " / Z " + z
