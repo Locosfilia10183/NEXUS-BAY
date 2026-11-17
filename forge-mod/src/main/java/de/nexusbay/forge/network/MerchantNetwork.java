@@ -2,23 +2,30 @@ package de.nexusbay.forge.network;
 
 import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.progression.BeliLedger;
+import de.nexusbay.forge.world.IslandCatalog;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
 public final class MerchantNetwork {
+    private static final String MERCHANT_TAG_PREFIX = "nexusbay_merchant_";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(NexusBayForge.MOD_ID, "merchant"), () -> "1", "1"::equals, "1"::equals);
     private static boolean registered;
     private MerchantNetwork() {}
+
     public static void register() {
         if (registered) return;
         registered = true;
@@ -28,24 +35,57 @@ public final class MerchantNetwork {
         CHANNEL.registerMessage(1, BuyPacket.class, BuyPacket::encode, BuyPacket::decode,
                 (m,c)->c.get().enqueueWork(()->{ServerPlayer p=c.get().getSender();if(p!=null)buy(p,m.island,m.itemId);}));
     }
-    public static void open(ServerPlayer p,String island,String name) {
+
+    public static void open(ServerPlayer player,String island,String name) {
+        if (!nearMerchant(player, island)) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Du musst beim Händler stehen."));
+            return;
+        }
         List<Offer> offers=offers(island);
         String[] ids=new String[offers.size()],names=new String[offers.size()];long[] prices=new long[offers.size()];
         for(int i=0;i<offers.size();i++){Offer o=offers.get(i);ids[i]=o.id;names[i]=o.name;prices[i]=o.price;}
-        CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new OpenPacket(island,name,BeliLedger.get(p.serverLevel()).balance(p),ids,names,prices));
+        CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new OpenPacket(island,name,
+                BeliLedger.get(player.serverLevel()).balance(player),ids,names,prices));
     }
-    private static void buy(ServerPlayer p,String island,String itemId) {
+
+    private static void buy(ServerPlayer player,String island,String itemId) {
+        if (!nearMerchant(player, island)) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Kaufen ist nur direkt beim Händler möglich.")
+                    .withStyle(net.minecraft.ChatFormatting.RED));
+            return;
+        }
         Offer offer=offers(island).stream().filter(o->o.id.equals(itemId)).findFirst().orElse(null);
-        if(offer==null)return;
-        var ledger=BeliLedger.get(p.serverLevel());
-        if(!ledger.withdraw(p.getUUID(),offer.price)){p.sendSystemMessage(net.minecraft.network.chat.Component.literal("Nicht genug Beli!"));open(p,island,merchantName(island));return;}
-        var item=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new ResourceLocation(NexusBayForge.MOD_ID,itemId));
-        if(item==null||item==net.minecraft.world.item.Items.AIR){ledger.deposit(p.getUUID(),offer.price);return;}
+        if(offer==null || offer.price<=0L) return;
+        Item item=ForgeRegistries.ITEMS.getValue(new ResourceLocation(NexusBayForge.MOD_ID,itemId));
+        if(item==null || item==net.minecraft.world.item.Items.AIR) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Dieser Artikel ist derzeit nicht verfügbar.")
+                    .withStyle(net.minecraft.ChatFormatting.RED));
+            return;
+        }
+        var ledger=BeliLedger.get(player.serverLevel());
+        if(!ledger.withdraw(player.getUUID(),offer.price)) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Nicht genug Beli!"));
+            open(player,island,merchantName(island));
+            return;
+        }
         ItemStack stack=new ItemStack(item,1);
-        if(!p.getInventory().add(stack))p.drop(stack,false);
-        p.sendSystemMessage(net.minecraft.network.chat.Component.literal("Gekauft: "+offer.name+" für "+offer.price+" Beli."));
-        open(p,island,merchantName(island));
+        if(!player.getInventory().add(stack)) player.drop(stack,false);
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal("Gekauft: "+offer.name+" für "+offer.price+" Beli."));
+        open(player,island,merchantName(island));
     }
+
+    private static boolean nearMerchant(ServerPlayer player,String islandId) {
+        var island=IslandCatalog.find(islandId).orElse(null);
+        if(island==null || player.level().dimension()!=net.minecraft.world.level.Level.OVERWORLD
+                || player.distanceToSqr(island.x()+.5D,player.getY(),island.z()+.5D)>96.0D*96.0D) return false;
+        BlockPos center=new BlockPos(island.x()+4,island.safeY(),island.z()+4);
+        var area=new net.minecraft.world.phys.AABB(center).inflate(12.0D,8.0D,12.0D);
+        String tag=MERCHANT_TAG_PREFIX+islandId;
+        return !player.serverLevel().getEntitiesOfClass(Villager.class,area,
+                villager->villager.isAlive() && villager.getTags().contains(tag)
+                        && player.distanceToSqr(villager)<=64.0D).isEmpty();
+    }
+
     private static String merchantName(String id){return switch(id){case "FooshaVillage"->"Makinos Markt";case "Loguetown"->"Loguetown-Waffenhändler";case "Alabasta"->"Wüstenbasar";case "Skypiea"->"Himmelswaren";case "FishManIsland"->"Händler der Fischmenschen";case "WanoKuni","Onigashima"->"Wano-Waffenschmied";case "PunkHazard"->"Labor-Ausrüster";default->"Händler von "+id;};}
     private static List<Offer> offers(String island) {
         return switch(island) {
