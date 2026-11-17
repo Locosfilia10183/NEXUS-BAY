@@ -1,5 +1,6 @@
 package de.nexusbay.forge.entity;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -16,10 +17,12 @@ import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-/** First dedicated GeckoLib character used by all island quest-giver stations. */
+/** Dedicated GeckoLib character used by island quest-giver stations. */
 public final class QuestGiverEntity extends PathfinderMob implements GeoEntity {
     private static final EntityDataAccessor<Boolean> TALKING =
             SynchedEntityData.defineId(QuestGiverEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> VARIANT =
+            SynchedEntityData.defineId(QuestGiverEntity.class, EntityDataSerializers.INT);
     private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.quest_giver.idle");
     private static final RawAnimation WALK = RawAnimation.begin().thenLoop("animation.quest_giver.walk");
     private static final RawAnimation TALK = RawAnimation.begin().thenPlay("animation.quest_giver.talk");
@@ -42,6 +45,19 @@ public final class QuestGiverEntity extends PathfinderMob implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(TALKING, false);
+        this.entityData.define(VARIANT, 0);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("NexusBayQuestGiverVariant", getVariant());
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        setVariant(tag.getInt("NexusBayQuestGiverVariant"));
     }
 
     @Override
@@ -50,6 +66,14 @@ public final class QuestGiverEntity extends PathfinderMob implements GeoEntity {
         if (!this.level().isClientSide && this.talkingTicks > 0 && --this.talkingTicks == 0) {
             this.entityData.set(TALKING, false);
         }
+    }
+
+    public void setVariant(int variant) {
+        this.entityData.set(VARIANT, Math.floorMod(variant, 4));
+    }
+
+    public int getVariant() {
+        return this.entityData.get(VARIANT);
     }
 
     /** Starts a short, client-synchronised greeting/interaction gesture. */

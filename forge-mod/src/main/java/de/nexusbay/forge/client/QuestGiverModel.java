@@ -10,10 +10,14 @@ public final class QuestGiverModel extends GeoModel<QuestGiverEntity> {
             "geckolib/models/entity/quest_giver.geo.json");
     private static final ResourceLocation ANIMATION = new ResourceLocation(NexusBayForge.MOD_ID,
             "geckolib/animations/entity/quest_giver.animation.json");
-    private static final ResourceLocation TEXTURE = new ResourceLocation(NexusBayForge.MOD_ID,
-            "textures/entity/quest_giver.png");
 
     @Override public ResourceLocation getModelResource(QuestGiverEntity entity) { return MODEL; }
-    @Override public ResourceLocation getTextureResource(QuestGiverEntity entity) { return TEXTURE; }
+
+    @Override
+    public ResourceLocation getTextureResource(QuestGiverEntity entity) {
+        return new ResourceLocation(NexusBayForge.MOD_ID,
+                "textures/entity/quest_giver_" + entity.getVariant() + ".png");
+    }
+
     @Override public ResourceLocation getAnimationResource(QuestGiverEntity entity) { return ANIMATION; }
 }

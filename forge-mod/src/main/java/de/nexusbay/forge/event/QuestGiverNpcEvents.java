@@ -49,6 +49,7 @@ public final class QuestGiverNpcEvents {
             QuestGiverEntity npc = de.nexusbay.forge.registry.ModEntities.QUEST_GIVER.get().create(level);
             if (npc == null) continue;
             npc.moveTo(island.x() + 0.5D, island.safeY(), island.z() + 0.5D, 180.0F, 0.0F);
+            npc.setVariant(Math.floorMod(islandId.hashCode(), 4));
             npc.setCustomName(Component.literal(IslandQuestCatalogDialogueName(islandId)));
             npc.setCustomNameVisible(true);
             npc.setNoAi(true);
