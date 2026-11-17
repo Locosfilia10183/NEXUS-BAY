@@ -44,7 +44,7 @@ public final class FruitSkillCombat {
    return;
   }
   boolean ultimate=switch(skill.id()){
-   case "gear_second","gear_third","raigo","flame_emperor","azure_dragon","Homies Sturm","Yasakani","Magmaeruption","Eiszeit","Fadenkäfig","ROOM","Drachenbrüllen" -> true;
+   case "gear_second","gear_third","gear_fourth_boundman","gear_fourth_snake_man","gear_fourth_tankman","raigo","flame_emperor","azure_dragon","Homies Sturm","Yasakani","Magmaeruption","Eiszeit","Fadenkäfig","ROOM","Drachenbrüllen" -> true;
    default -> false;
   };
   float staminaCost=ultimate?35.0F:15.0F;
@@ -75,6 +75,30 @@ public final class FruitSkillCombat {
    player.getPersistentData().putInt("NexusFruitFormTicks",300);
    player.getPersistentData().putString("NexusFruitForm","gear_third");
    player.sendSystemMessage(net.minecraft.network.chat.Component.literal("GEAR THIRD – RIESENFORM!").withStyle(net.minecraft.ChatFormatting.GOLD,net.minecraft.ChatFormatting.BOLD));
+  }
+  if(skill.id().equals("gear_fourth_boundman")){
+   player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,360,2));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,360,3));
+   player.addEffect(new MobEffectInstance(MobEffects.JUMP,360,1));
+   player.getPersistentData().putInt("NexusFruitFormTicks",360);
+   player.getPersistentData().putString("NexusFruitForm","gear_fourth_boundman");
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("GEAR FOURTH: BOUNDMAN!").withStyle(net.minecraft.ChatFormatting.RED,net.minecraft.ChatFormatting.BOLD));
+  }
+  if(skill.id().equals("gear_fourth_snake_man")){
+   player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,300,4));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,300,2));
+   player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED,300,1));
+   player.getPersistentData().putInt("NexusFruitFormTicks",300);
+   player.getPersistentData().putString("NexusFruitForm","gear_fourth_snake_man");
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("GEAR FOURTH: SNAKEMAN!").withStyle(net.minecraft.ChatFormatting.LIGHT_PURPLE,net.minecraft.ChatFormatting.BOLD));
+  }
+  if(skill.id().equals("gear_fourth_tankman")){
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST,400,3));
+   player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,400,3));
+   player.addEffect(new MobEffectInstance(MobEffects.HEALTH_BOOST,400,3));
+   player.getPersistentData().putInt("NexusFruitFormTicks",400);
+   player.getPersistentData().putString("NexusFruitForm","gear_fourth_tankman");
+   player.sendSystemMessage(net.minecraft.network.chat.Component.literal("GEAR FOURTH: TANKMAN!").withStyle(net.minecraft.ChatFormatting.GOLD,net.minecraft.ChatFormatting.BOLD));
   }
   if(skill.id().equals("azure_dragon")){
    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED,400,1));
