@@ -32,7 +32,15 @@ public final class QuestScreen extends Screen {
         g.fill(left,18,left+width,this.height-18,0xEE101D2B);g.fill(left,18,left+width,52,0xFF263C50);
         g.drawCenteredString(font,"QUESTGEBER • "+islandName.toUpperCase(),this.width/2,30,0xFFFFD36A);
         g.drawCenteredString(font,npcName,this.width/2,58,0xFFFFFFFF);
-        g.drawCenteredString(font,greeting,this.width/2,72,0xFFE1EAF2);
+        String npcResponse = greeting;
+        if (!activeId.isBlank()) {
+            npcResponse = "Du hast noch eine Aufgabe zu erledigen. Kehre danach zu mir zurück.";
+        } else if (completed.length > 0) {
+            boolean allCompleted = true;
+            for (boolean questCompleted : completed) allCompleted &= questCompleted;
+            if (allCompleted) npcResponse = "Du hast alle Aufgaben dieser Insel gemeistert. Du hast unseren Dank!";
+        }
+        g.drawCenteredString(font,font.substr(Component.literal(npcResponse), 0, 54),this.width/2,72,0xFFE1EAF2);
         g.drawCenteredString(font,activeId.isBlank()?"Wähle deine nächste Aufgabe":"Aktive Quest: "+activeId,this.width/2,92,0xFF74D8FF);
         for(int i=0;i<ids.length;i++){int y=106+i*76;g.fill(left+12,y-5,left+width-12,y+67,0xAA26394B);
             g.drawString(font,titles[i],left+20,y,0xFFFFD36A,false);g.drawString(font,descriptions[i],left+20,y+13,0xFFE1EAF2,false);
