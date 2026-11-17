@@ -80,6 +80,7 @@ public final class QuestGiverNpcEvents {
         long nextUse = player.getPersistentData().getLong("NexusBayQuestNpcNextUse");
         if (now < nextUse) return;
         player.getPersistentData().putLong("NexusBayQuestNpcNextUse", now + 10L);
+        npc.startTalking();
         de.nexusbay.forge.network.QuestNetwork.open(player, islandId);
     }
 }
