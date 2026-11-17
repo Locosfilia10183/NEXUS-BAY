@@ -44,9 +44,18 @@ public final class QuestScreen extends Screen {
         g.drawCenteredString(font,activeId.isBlank()?"Wähle deine nächste Aufgabe":"Aktive Quest: "+activeId,this.width/2,92,0xFF74D8FF);
         for(int i=0;i<ids.length;i++){int y=106+i*76;g.fill(left+12,y-5,left+width-12,y+67,0xAA26394B);
             g.drawString(font,titles[i],left+20,y,0xFFFFD36A,false);g.drawString(font,descriptions[i],left+20,y+13,0xFFE1EAF2,false);
-            String state=completed[i]?"ABGESCHLOSSEN":activeId.equals(ids[i])?"FORTSCHRITT "+Math.min(progress,kills[i])+"/"+kills[i]:!activeId.isBlank()?"GESPERRT – andere Quest aktiv":"Ziel: "+kills[i]+" Gegner";
+            boolean active = activeId.equals(ids[i]);
+            int current = active ? Math.min(Math.max(progress, 0), kills[i]) : completed[i] ? kills[i] : 0;
+            String state = completed[i] ? "ABGESCHLOSSEN"
+                    : active ? "FORTSCHRITT " + current + "/" + kills[i] + " • Noch " + Math.max(0, kills[i] - current)
+                    : !activeId.isBlank() ? "GESPERRT – andere Quest aktiv" : "Ziel: " + kills[i] + " Gegner";
             g.drawString(font,state,left+20,y+27,completed[i]?0xFF83D69A:0xFFB8D5E8,false);
-            g.drawString(font,"Belohnung: "+beli[i]+" Beli  •  "+xp[i]+" Frucht-XP",left+20,y+41,0xFFD9C48C,false);
+            int barLeft = left + 20, barRight = left + width - 20, barY = y + 41;
+            g.fill(barLeft,barY,barRight,barY+5,0xFF172431);
+            int barWidth = Math.max(0, barRight - barLeft);
+            int filled = kills[i] <= 0 ? 0 : (int)(barWidth * (current / (double) kills[i]));
+            if (filled > 0) g.fill(barLeft,barY,barLeft+filled,barY+5,completed[i] ? 0xFF65C98A : 0xFF39BDE8);
+            g.drawString(font,"Belohnung: "+beli[i]+" Beli  •  "+xp[i]+" Frucht-XP",left+20,y+52,0xFFD9C48C,false);
         }super.render(g,mx,my,partial);
     }
     @Override public boolean isPauseScreen(){return false;}
