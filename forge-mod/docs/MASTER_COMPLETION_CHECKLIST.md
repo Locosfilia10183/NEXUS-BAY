@@ -191,7 +191,7 @@ Status source of truth for the private NEXUS-BAY One Piece RPG project.
 - [ ] Finish unique idle, walk, attack, special, hit, transformation and death animations for each major character.
 - [ ] Add readable telegraphs and effect intensity settings.
 - [ ] Add options to reduce particles/shake/flash for performance and comfort.
-- [ ] Review German and English localization; no missing translation keys or raw registry IDs.
+- [~] German and English names added for all currently registered items and all 19 registered fruits; remaining NPC/UI/quest text and missing-key audit still open.
 
 ## 14. Private server and multiplayer reliability
 
@@ -236,7 +236,7 @@ Status source of truth for the private NEXUS-BAY One Piece RPG project.
 ## Recommended build order — easy first, difficult last
 
 ### Batch 1 — Quick completion and cleanup
-1. Finish localization, item names/descriptions and missing icons/models.
+1. [~] Add localization for registered items/fruits (done); finish descriptions, NPC/UI/quest strings and missing icons/models.
 2. Audit item/fruit registry and remove or label placeholders.
 3. Finish quest/merchant feedback and inventory-full handling.
 4. Add basic character profile display and sync.
