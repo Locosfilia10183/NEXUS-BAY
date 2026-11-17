@@ -90,4 +90,3 @@ public final class BeliLedger extends SavedData {
         return true;
     }
 }
-}

@@ -4,6 +4,8 @@ import de.nexusbay.forge.NexusBayForge;
 import de.nexusbay.forge.registry.ModItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -19,7 +21,21 @@ public final class StarterIslandKit {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (player.getPersistentData().getBoolean(GRANTED_KEY)) return;
+        // PlayerPersisted survives player recreation on death and prevents
+        // a second kit after respawn or reconnect.
+        CompoundTag persistent = player.getPersistentData();
+        CompoundTag saved = persistent.getCompound(Player.PERSISTED_NBT_TAG);
+        if (saved.getBoolean(GRANTED_KEY)) return;
+        // Migrate the legacy flag for players who already received a kit.
+        if (persistent.getBoolean(GRANTED_KEY)) {
+            saved.putBoolean(GRANTED_KEY, true);
+            persistent.put(Player.PERSISTED_NBT_TAG, saved);
+            return;
+        }
+
+        // Record the grant before inserting items to avoid repeated grants.
+        saved.putBoolean(GRANTED_KEY, true);
+        persistent.put(Player.PERSISTED_NBT_TAG, saved);
 
         give(player, new ItemStack(ModItems.THREE_SWORD_STYLE_KIT.get()));
         give(player, new ItemStack(ModItems.WADO_ICHIMONJI.get()));
@@ -27,7 +43,6 @@ public final class StarterIslandKit {
         give(player, new ItemStack(ModItems.YUBASHIRI.get()));
         give(player, new ItemStack(ModItems.DEVIL_FRUIT_CASE.get()));
 
-        player.getPersistentData().putBoolean(GRANTED_KEY, true);
         player.sendSystemMessage(Component.literal(
                 "Willkommen in NEXUS-BAY! Dein Starterpaket mit drei Schwertern und einer Teufelsfrucht-Kiste wartet auf dich."));
     }
