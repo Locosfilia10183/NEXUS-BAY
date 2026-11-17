@@ -497,25 +497,70 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
         LivingEntity target = getTarget();
         if (target == null || !target.isAlive()) return;
 
-        // Keep the boss facing its opponent before choosing a directional attack.
         getLookControl().setLookAt(target, 30.0F, 30.0F);
         double distanceSqr = distanceToSqr(target);
 
-        // Kaido unleashes Conqueror's Haki as a close-to-mid range pressure burst.
-        // The cooldown prevents the aura attack from crowding out his signature moves.
-        if (currentPhase >= 2 && distanceSqr >= 16.0D && distanceSqr <= 196.0D
-                && conquerorsHakiCooldown <= 0) {
-            startConquerorsHakiBurst();
-            conquerorsHakiCooldown = currentPhase == 3 ? 420 : 360;
+        // HUMAN FORM: Kaido closes the gap and relies on his kanabo.
+        // The breath attack is a punish for opponents who keep their distance.
+        if (currentPhase == 1) {
+            if (distanceSqr >= 100.0D && distanceSqr <= 576.0D && breathCooldown <= 0) {
+                startBreathAttack();
+                breathCooldown = 120;
+                return;
+            }
+            if (distanceSqr <= 100.0D && slamCooldown <= 0) {
+                startSlamAttack();
+                slamCooldown = 95;
+            }
             return;
         }
 
-        // In dragon form Kaido alternates his aerial finishers instead of
-        // repeatedly choosing the first available move in the same order.
-        if (currentPhase == 3 && isDragonFlying()
-                && distanceSqr >= 49.0D && distanceSqr <= 256.0D) {
-            boolean preferTwister = aerialComboStep % 2 == 0;
-            if ((preferTwister && dragonTwisterCooldown <= 0) || skyfallCooldown > 0) {
+        // HYBRID FORM: alternate heavy club finishers with fast Thunder Bagua.
+        // Ragnarok is reserved for close-to-mid range so it remains avoidable.
+        if (currentPhase == 2) {
+            if (distanceSqr >= 16.0D && distanceSqr <= 121.0D
+                    && ragnarokCooldown <= 0 && random.nextInt(3) != 0) {
+                startRagnarokAttack();
+                ragnarokCooldown = 260;
+                return;
+            }
+            if (distanceSqr >= 25.0D && distanceSqr <= 225.0D
+                    && thunderBaguaCooldown <= 0) {
+                startThunderBaguaAttack();
+                thunderBaguaCooldown = 320;
+                return;
+            }
+            if (distanceSqr >= 36.0D && distanceSqr <= 196.0D && breathCooldown <= 0
+                    && random.nextInt(4) == 0) {
+                startBreathAttack();
+                breathCooldown = 110;
+                return;
+            }
+            if (distanceSqr <= 100.0D && slamCooldown <= 0) {
+                startSlamAttack();
+                slamCooldown = 85;
+            }
+            return;
+        }
+
+        // DRAGON FORM: aerial control and ranged flame attacks take priority.
+        // Conqueror's Haki is deliberately occasional so it cannot starve the
+        // dragon's signature aerial and fire moves of their opportunities.
+        if (currentPhase == 3) {
+            if (isDragonFlying() && distanceSqr >= 49.0D && distanceSqr <= 256.0D) {
+                boolean preferTwister = aerialComboStep % 2 == 0;
+                if (preferTwister && dragonTwisterCooldown <= 0) {
+                    startDragonTwisterAttack();
+                    dragonTwisterCooldown = 420;
+                    aerialComboStep++;
+                    return;
+                }
+                if (skyfallCooldown <= 0) {
+                    startDragonSkyfallAttack(target);
+                    skyfallCooldown = 360;
+                    aerialComboStep++;
+                    return;
+                }
                 if (dragonTwisterCooldown <= 0) {
                     startDragonTwisterAttack();
                     dragonTwisterCooldown = 420;
@@ -523,52 +568,35 @@ public class KaidoBossEntity extends Monster implements GeoEntity, BossMob {
                     return;
                 }
             }
-            if (skyfallCooldown <= 0) {
-                startDragonSkyfallAttack(target);
-                skyfallCooldown = 360;
-                aerialComboStep++;
-                return;
-            }
-            if (dragonTwisterCooldown <= 0) {
-                startDragonTwisterAttack();
-                dragonTwisterCooldown = 420;
-                aerialComboStep++;
-                return;
-            }
-        }
-        if (currentPhase == 3 && distanceSqr >= 100.0D && distanceSqr <= 625.0D
-                && dragonFlameBurstCooldown <= 0) {
-            startDragonFlameBurstAttack();
-            dragonFlameBurstCooldown = 520;
-            return;
-        }
-        if (currentPhase == 3 && distanceSqr >= 400.0D && distanceSqr <= 1600.0D
-                && blastBreathCooldown <= 0) {
-            startBlastBreathAttack();
-            blastBreathCooldown = 400;
-            return;
-        }
-        if (currentPhase >= 2 && distanceSqr >= 25.0D && distanceSqr <= 225.0D
-                && thunderBaguaCooldown <= 0) {
-            startThunderBaguaAttack();
-            thunderBaguaCooldown = 300;
-            return;
-        }
-        if (currentPhase == 2 && distanceSqr >= 16.0D && distanceSqr <= 100.0D
-                && ragnarokCooldown <= 0) {
-            startRagnarokAttack();
-            ragnarokCooldown = 240;
-            return;
-        }
-        if (distanceSqr >= 36.0D && distanceSqr <= 576.0D && breathCooldown <= 0) {
-            startBreathAttack();
-            breathCooldown = currentPhase == 3 ? 65 : 100;
-            return;
-        }
 
-        if (distanceSqr <= 64.0D && slamCooldown <= 0) {
-            startSlamAttack();
-            slamCooldown = currentPhase == 3 ? 75 : 110;
+            if (distanceSqr >= 100.0D && distanceSqr <= 625.0D
+                    && dragonFlameBurstCooldown <= 0) {
+                startDragonFlameBurstAttack();
+                dragonFlameBurstCooldown = 520;
+                return;
+            }
+            if (distanceSqr >= 400.0D && distanceSqr <= 1600.0D
+                    && blastBreathCooldown <= 0) {
+                startBlastBreathAttack();
+                blastBreathCooldown = 400;
+                return;
+            }
+            if (distanceSqr >= 25.0D && distanceSqr <= 225.0D
+                    && thunderBaguaCooldown <= 0 && random.nextInt(3) == 0) {
+                startThunderBaguaAttack();
+                thunderBaguaCooldown = 340;
+                return;
+            }
+            if (distanceSqr >= 16.0D && distanceSqr <= 196.0D
+                    && conquerorsHakiCooldown <= 0 && random.nextInt(4) == 0) {
+                startConquerorsHakiBurst();
+                conquerorsHakiCooldown = 460;
+                return;
+            }
+            if (distanceSqr <= 81.0D && slamCooldown <= 0) {
+                startSlamAttack();
+                slamCooldown = 100;
+            }
         }
     }
 
