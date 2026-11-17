@@ -57,7 +57,7 @@ public final class QuestGiverNpcEvents {
             case "Water7" -> new ItemStack(Items.IRON_AXE);
             case "Alabasta", "Loguetown", "Sabaody" -> new ItemStack(Items.FILLED_MAP);
             case "DrumIsland", "FishManIsland", "ReverseMountain" -> new ItemStack(Items.FISHING_ROD);
-            case "WanoKuni", "Onigashima", "AmazonLily" -> new ItemStack(Items.KATANA);
+            case "WanoKuni", "Onigashima", "AmazonLily" -> new ItemStack(Items.DIAMOND_SWORD);
             case "Skypiea", "PunkHazard", "LittleGarden" -> new ItemStack(Items.BLAZE_ROD);
             case "SyrupVillage", "FooshaVillage", "OrangeTown", "ArlongPark", "WhiskeyPeak",
                     "Jaya", "ThrillerBark", "Dressrosa", "Zou" -> new ItemStack(Items.BOW);
