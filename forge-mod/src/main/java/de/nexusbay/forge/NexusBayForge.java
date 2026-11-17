@@ -6,6 +6,7 @@ import de.nexusbay.forge.network.FruitNetwork;
 import de.nexusbay.forge.network.QuestNetwork;
 import de.nexusbay.forge.network.MerchantNetwork;
 import de.nexusbay.forge.network.CharacterNetwork;
+import de.nexusbay.forge.network.CombatNetwork;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -20,5 +21,6 @@ public final class NexusBayForge {
         QuestNetwork.register();
         MerchantNetwork.register();
         CharacterNetwork.register();
+        CombatNetwork.register();
     }
 }
