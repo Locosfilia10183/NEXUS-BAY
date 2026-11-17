@@ -13,6 +13,9 @@ public final class QuestScreen extends Screen {
     private final int[] kills;
     private final long[] beli,xp;
     private final boolean[] completed;
+    private int scrollOffset;
+    private static final int ROW_HEIGHT = 76;
+    private static final int LIST_TOP = 101;
     private QuestScreen(String islandId,String islandName,String npcName,String greeting,String activeId,int progress,String[] ids,String[] titles,String[] descriptions,int[] kills,long[] beli,long[] xp,boolean[] completed){
         super(Component.literal("Questgeber • "+islandName));this.islandId=islandId;this.islandName=islandName;this.npcName=npcName;this.greeting=greeting;this.activeId=activeId;this.progress=progress;this.ids=ids;this.titles=titles;this.descriptions=descriptions;this.kills=kills;this.beli=beli;this.xp=xp;this.completed=completed;
     }
@@ -20,12 +23,33 @@ public final class QuestScreen extends Screen {
         net.minecraft.client.Minecraft.getInstance().setScreen(new QuestScreen(islandId,islandName,npcName,greeting,activeId,progress,ids,titles,descriptions,kills,beli,xp,completed));
     }
     @Override protected void init(){
+        rebuildQuestButtons();
+    }
+    private void rebuildQuestButtons(){
         int width=Math.min(380,this.width-24),left=(this.width-width)/2;
-        for(int i=0;i<ids.length;i++){final int index=i;int y=148+i*76;
-            if(activeId.equals(ids[i])&&progress>=kills[i])addRenderableWidget(Button.builder(Component.literal("Belohnung abholen"),b->QuestNetwork.claim(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
-            else if(activeId.isBlank()&&!completed[i])addRenderableWidget(Button.builder(Component.literal("Quest annehmen"),b->QuestNetwork.accept(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
+        int listBottom=this.height-44;
+        for(int i=0;i<ids.length;i++){
+            final int index=i;
+            int y=148+i*ROW_HEIGHT-scrollOffset;
+            if(y+20<LIST_TOP||y>listBottom)continue;
+            if(activeId.equals(ids[i])&&progress>=kills[i])
+                addRenderableWidget(Button.builder(Component.literal("Belohnung abholen"),b->QuestNetwork.claim(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
+            else if(activeId.isBlank()&&!completed[i])
+                addRenderableWidget(Button.builder(Component.literal("Quest annehmen"),b->QuestNetwork.accept(islandId,ids[index])).bounds(left+width-146,y,136,20).build());
         }
         addRenderableWidget(Button.builder(Component.literal("Schließen"),b->onClose()).bounds(this.width/2-50,this.height-30,100,20).build());
+    }
+    @Override public boolean mouseScrolled(double mouseX,double mouseY,double delta){
+        int visibleHeight=Math.max(0,this.height-44-LIST_TOP);
+        int maxScroll=Math.max(0,ids.length*ROW_HEIGHT-visibleHeight);
+        if(maxScroll==0)return super.mouseScrolled(mouseX,mouseY,delta);
+        int next=(int)Math.max(0,Math.min(maxScroll,scrollOffset-delta*ROW_HEIGHT/2));
+        if(next!=scrollOffset){
+            scrollOffset=next;
+            clearWidgets();
+            rebuildQuestButtons();
+        }
+        return true;
     }
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
         renderBackground(g);int width=Math.min(380,this.width-24),left=(this.width-width)/2;
@@ -42,7 +66,8 @@ public final class QuestScreen extends Screen {
         }
         g.drawCenteredString(font,Component.literal(font.plainSubstrByWidth(npcResponse, width - 32)),this.width/2,72,0xFFE1EAF2);
         g.drawCenteredString(font,activeId.isBlank()?"Wähle deine nächste Aufgabe":"Aktive Quest: "+activeId,this.width/2,92,0xFF74D8FF);
-        for(int i=0;i<ids.length;i++){int y=106+i*76;g.fill(left+12,y-5,left+width-12,y+67,0xAA26394B);
+        g.enableScissor(left+8,LIST_TOP,left+width-8,this.height-44);
+        for(int i=0;i<ids.length;i++){int y=106+i*ROW_HEIGHT-scrollOffset;g.fill(left+12,y-5,left+width-12,y+67,0xAA26394B);
             g.drawString(font,titles[i],left+20,y,0xFFFFD36A,false);g.drawString(font,descriptions[i],left+20,y+13,0xFFE1EAF2,false);
             boolean active = activeId.equals(ids[i]);
             int current = active ? Math.min(Math.max(progress, 0), kills[i]) : completed[i] ? kills[i] : 0;
@@ -56,7 +81,9 @@ public final class QuestScreen extends Screen {
             int filled = kills[i] <= 0 ? 0 : (int)(barWidth * (current / (double) kills[i]));
             if (filled > 0) g.fill(barLeft,barY,barLeft+filled,barY+5,completed[i] ? 0xFF65C98A : 0xFF39BDE8);
             g.drawString(font,"Belohnung: "+beli[i]+" Beli  •  "+xp[i]+" Frucht-XP",left+20,y+52,0xFFD9C48C,false);
-        }super.render(g,mx,my,partial);
+        }
+        g.disableScissor();
+        super.render(g,mx,my,partial);
     }
     @Override public boolean isPauseScreen(){return false;}
 }
