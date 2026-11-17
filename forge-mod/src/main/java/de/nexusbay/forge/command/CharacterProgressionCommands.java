@@ -1,6 +1,7 @@
 package de.nexusbay.forge.command;
 
 import de.nexusbay.forge.NexusBayForge;
+import de.nexusbay.forge.network.CharacterNetwork;
 import de.nexusbay.forge.progression.CharacterProgressionData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
@@ -21,18 +22,7 @@ public final class CharacterProgressionCommands {
         event.getDispatcher().register(Commands.literal("nexus")
             .then(Commands.literal("character")
                 .then(Commands.literal("info").executes(context -> {
-                    var player = context.getSource().getPlayerOrException();
-                    var p = CharacterProgressionData.get(player.serverLevel()).get(player.getUUID());
-                    player.sendSystemMessage(Component.literal("=== NEXUS-BAY CHARACTER ===")
-                            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-                    player.sendSystemMessage(Component.literal("Level " + p.level() + " | XP " + p.experience()
-                            + " | freie Stat-Punkte " + p.unspentPoints()).withStyle(ChatFormatting.YELLOW));
-                    player.sendSystemMessage(Component.literal("Stärke " + p.strength() + " | Verteidigung "
-                            + p.defense() + " | Ausdauer " + p.stamina()).withStyle(ChatFormatting.GREEN));
-                    player.sendSystemMessage(Component.literal("Schwert " + p.sword() + " | Teufelsfrucht "
-                            + p.fruit()).withStyle(ChatFormatting.AQUA));
-                    player.sendSystemMessage(Component.literal("Punkte verteilen: /nexus character allocate <strength|defense|stamina|sword|fruit> <1-100>")
-                            .withStyle(ChatFormatting.GRAY));
+                    CharacterNetwork.open(context.getSource().getPlayerOrException());
                     return 1;
                 }))
                 .then(Commands.literal("allocate")
@@ -45,7 +35,8 @@ public final class CharacterProgressionCommands {
                                 var data = CharacterProgressionData.get(player.serverLevel());
                                 var updated = data.allocate(player.getUUID(), stat, points);
                                 if (updated == null) {
-                                    player.sendSystemMessage(Component.literal("Ungültiger Wert, Stat-Limit 100 oder nicht genug freie Punkte.")
+                                    player.sendSystemMessage(Component.literal(
+                                            "Ungültiger Wert, Stat-Limit 100 oder nicht genug freie Punkte.")
                                             .withStyle(ChatFormatting.RED));
                                     return 0;
                                 }
