@@ -45,8 +45,8 @@ public final class CombatStyleEvents {
     @SubscribeEvent
     public static void onPlayerDamage(LivingHurtEvent event) {
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)
-                || !(event.getEntity() instanceof LivingEntity target)
-                || target == player || !target.isAlive()) return;
+                || event.getEntity() == player || !event.getEntity().isAlive()) return;
+        LivingEntity target = event.getEntity();
 
         Style style = getStyle(player);
         boolean swordEquipped = player.getMainHandItem().getItem() instanceof SwordItem;
