@@ -18,6 +18,19 @@ public final class StarterIslandKit {
 
     private StarterIslandKit() {}
 
+    /**
+     * Keep the one-time grant flag when Forge creates a replacement player
+     * entity after death. This prevents players receiving the kit again
+     * simply by respawning.
+     */
+    @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        if (!event.isWasDeath()) return;
+        if (event.getOriginal().getPersistentData().getBoolean(GRANTED_KEY)) {
+            event.getEntity().getPersistentData().putBoolean(GRANTED_KEY, true);
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
