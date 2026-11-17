@@ -63,6 +63,15 @@ public final class QuestGiverNpcEvents {
         if (islandId.isBlank()) return;
         event.setCanceled(true);
         event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+        if (!npc.isAlive() || npc.level() != player.level()
+                || player.distanceToSqr(npc) > 36.0D) {
+            player.displayClientMessage(Component.literal("Du bist zu weit vom Questgeber entfernt."), true);
+            return;
+        }
+        long now = player.serverLevel().getGameTime();
+        long nextUse = player.getPersistentData().getLong("NexusBayQuestNpcNextUse");
+        if (now < nextUse) return;
+        player.getPersistentData().putLong("NexusBayQuestNpcNextUse", now + 10L);
         de.nexusbay.forge.network.QuestNetwork.open(player, islandId);
     }
 }
