@@ -21,10 +21,18 @@ public final class IslandQuestEvents {
         String id = data.active(player.getUUID());
         var quest = IslandQuestCatalog.find(id).orElse(null);
         if (quest == null) return;
-        String factionIsland = event.getEntity().getPersistentData().getString("nexusbay_faction_island");
-        if (!quest.islandId().equals(factionIsland)) return;
         var island = IslandCatalog.find(quest.islandId()).orElse(null);
-        if (island == null || player.distanceToSqr(island.x() + 0.5D, player.getY(), island.z() + 0.5D) > 180.0D * 180.0D) return;
+        if (island == null) return;
+
+        // A faction-tagged enemy must belong to this island. Untagged hostile
+        // mobs can still count, but only when they are physically on the island.
+        String factionIsland = event.getEntity().getPersistentData().getString("nexusbay_faction_island");
+        if (!factionIsland.isBlank() && !quest.islandId().equals(factionIsland)) return;
+        double islandX = island.x() + 0.5D;
+        double islandZ = island.z() + 0.5D;
+        double islandRadiusSq = (double) IslandCatalog.ISLAND_RADIUS * IslandCatalog.ISLAND_RADIUS;
+        if (event.getEntity().distanceToSqr(islandX, event.getEntity().getY(), islandZ) > islandRadiusSq) return;
+        if (player.distanceToSqr(islandX, player.getY(), islandZ) > 180.0D * 180.0D) return;
         int count = data.addKill(player.getUUID());
         player.displayClientMessage(Component.literal("Quest: " + quest.title() + " — " + Math.min(count, quest.requiredKills()) + "/" + quest.requiredKills()), true);
         if (count == quest.requiredKills()) player.sendSystemMessage(Component.literal("Questziel erreicht! Kehre zum Questgeber auf dieser Insel zurück."));
