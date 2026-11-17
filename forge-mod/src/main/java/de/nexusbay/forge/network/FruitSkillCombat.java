@@ -53,7 +53,16 @@ public final class FruitSkillCombat {
     "Nicht genug Ausdauer! Benötigt: "+(int)staminaCost).withStyle(net.minecraft.ChatFormatting.RED));
    return;
   }
-  player.getPersistentData().putLong(cooldownKey,now+skill.cooldownTicks());\n  FruitNetwork.syncAnimation(player, switch(skill.id()){\n   case "gear_second" -> "gear_second_punch";\n   case "gear_third" -> "gear_third_slam";\n   case "gear_fourth_boundman" -> "boundman_slam";\n   case "gear_fourth_snake_man" -> "snakeman_combo";\n   case "gear_fourth_tankman" -> "tankman_bounce";\n   default -> "";\n  },14);\n
+  player.getPersistentData().putLong(cooldownKey,now+skill.cooldownTicks());
+  FruitNetwork.syncAnimation(player, switch(skill.id()){
+   case "gear_second" -> "gear_second_punch";
+   case "gear_third" -> "gear_third_slam";
+   case "gear_fourth_boundman" -> "boundman_slam";
+   case "gear_fourth_snake_man" -> "snakeman_combo";
+   case "gear_fourth_tankman" -> "tankman_bounce";
+   default -> "";
+  },14);
+
   Vec3 look=player.getLookAngle().normalize();
   boolean beam=switch(skill.id()){case "pistol","lightning_bolt","fire_fist","dragon_roar","Yasakani","Lichttritt","Eislanze","Magmaschlag" -> true;default -> false;};
   boolean areaBurst=switch(skill.id()){case "gatling","raigo","flame_emperor","azure_dragon","Homies Sturm","Magmaeruption","Eiszeit","Fadenkäfig","Bombenfeld","Körperregen" -> true;default -> false;};

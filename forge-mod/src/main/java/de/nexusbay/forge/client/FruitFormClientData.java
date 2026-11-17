@@ -70,7 +70,7 @@ public final class FruitFormClientData {
   PlayerModel<?> model=event.getRenderer().getModel();
   model.rightArm.xRot=pose[0];model.rightArm.yRot=pose[1];model.rightArm.zRot=pose[2];
   model.leftArm.xRot=pose[3];model.leftArm.yRot=pose[4];model.leftArm.zRot=pose[5];
-  model.body.xRot=pose[6];
+  model.body.xRot=pose[6];model.body.yRot=pose[7];
   ORIGINAL_POSE.remove();
  }
 }

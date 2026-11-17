@@ -26,7 +26,8 @@ public final class FruitNetwork {
   FruitProfileData.Profile p=FruitProfileData.get(player.serverLevel()).get(player.getUUID());
   CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new SyncFruit(p==null?"":p.fruitId(),p==null?0:p.level(),p==null?0:p.experience()));
  }
- public static void syncForm(net.minecraft.server.level.ServerPlayer player,String form,int ticks){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitForm(player.getUUID(),form,ticks));}\n public static void syncAnimation(net.minecraft.server.level.ServerPlayer player,String animation,int duration){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitAnimation(player.getUUID(),animation,duration));}
+ public static void syncForm(net.minecraft.server.level.ServerPlayer player,String form,int ticks){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitForm(player.getUUID(),form,ticks));}
+ public static void syncAnimation(net.minecraft.server.level.ServerPlayer player,String animation,int duration){CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(()->player),new SyncFruitAnimation(player.getUUID(),animation,duration));}
  public static void requestSkill(){CHANNEL.sendToServer(new UseFruitSkill());}
  public static void cycleSkill(){CHANNEL.sendToServer(new CycleFruitSkill());}
  private record UseFruitSkill(){
@@ -41,7 +42,11 @@ public final class FruitNetwork {
   static void encode(SyncFruitForm m,FriendlyByteBuf b){b.writeUUID(m.playerId);b.writeUtf(m.form,64);b.writeVarInt(m.ticks);}
   static SyncFruitForm decode(FriendlyByteBuf b){return new SyncFruitForm(b.readUUID(),b.readUtf(64),b.readVarInt());}
  }
- private record SyncFruitAnimation(java.util.UUID playerId,String animation,int duration){\n  static void encode(SyncFruitAnimation m,FriendlyByteBuf b){b.writeUUID(m.playerId);b.writeUtf(m.animation,64);b.writeVarInt(m.duration);}\n  static SyncFruitAnimation decode(FriendlyByteBuf b){return new SyncFruitAnimation(b.readUUID(),b.readUtf(64),b.readVarInt());}\n }\n private record SyncFruit(String id,int level,long xp){
+ private record SyncFruitAnimation(java.util.UUID playerId,String animation,int duration){
+  static void encode(SyncFruitAnimation m,FriendlyByteBuf b){b.writeUUID(m.playerId);b.writeUtf(m.animation,64);b.writeVarInt(m.duration);}
+  static SyncFruitAnimation decode(FriendlyByteBuf b){return new SyncFruitAnimation(b.readUUID(),b.readUtf(64),b.readVarInt());}
+ }
+ private record SyncFruit(String id,int level,long xp){
   static void encode(SyncFruit m,FriendlyByteBuf b){b.writeUtf(m.id,64);b.writeVarInt(m.level);b.writeVarLong(m.xp);}
   static SyncFruit decode(FriendlyByteBuf b){return new SyncFruit(b.readUtf(64),b.readVarInt(),b.readVarLong());}
  }
